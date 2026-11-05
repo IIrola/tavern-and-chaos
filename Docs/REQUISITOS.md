@@ -156,4 +156,3 @@
 | Q10 | Pruebas reglas/propiedades/contabilidad/privacidad/red/física/accesibilidad y sesiones sin guía con nuevas personas. | Parcial |
 | Q11 | Medir objetivo 60 FPS en Mac/Windows a cuatro y seis personas; CPU/GPU/cuerpos/red/correcciones registrados. | Pendiente |
 | Q12 | Corte vertical probado 2–4: entrar, moverse, bebida, partida billar completa y salir sin bloqueo ni posesión/asiento duplicados. | Pendiente |
-
