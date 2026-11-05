@@ -9,24 +9,29 @@ namespace TavernChaos
         public const int Capacity=6;
         public sealed class Member
         {
-            public ulong Id; public string Name; public int Slot, Chips; public ulong LastSequence;
+            public ulong Id; public string Name; public int Slot; public ulong LastSequence;
+            internal SessionLedger Ledger; public long Chips=>Ledger.Balance(Id);
             internal string Identity; internal double BudgetAt; internal float Tokens=80;
         }
         public readonly Dictionary<ulong,Member> Members=new();
-        private readonly HashSet<string> credited=new();
+        public SessionLedger Ledger { get; }
+        private ulong serviceSerial;
+        public RoomRoster(SessionLedger ledger=null) { Ledger=ledger??new SessionLedger(); }
         private readonly HashSet<ulong> electorate=new(), votes=new();
         public ulong? VoteTarget { get; private set; }
         public double VoteEnd { get; private set; }
         public int Rejected { get; private set; }
         public Member Add(ulong id,string name,string identity,double now)
         {
-            if(Members.Count>=Capacity||Members.ContainsKey(id)) return null;
+            if(Members.Count>=Capacity||Members.ContainsKey(id)||!Ledger.Join(id,CleanName(name),identity)) return null;
             int slot=0; while(SlotUsed(slot)) slot++;
-            var m=new Member{Id=id,Name=CleanName(name),Identity=identity,Slot=slot,Chips=credited.Add(identity)?1000:0,BudgetAt=now}; Members.Add(id,m); return m;
+            var m=new Member{Id=id,Name=CleanName(name),Identity=identity,Slot=slot,Ledger=Ledger,BudgetAt=now}; Members.Add(id,m); return m;
         }
         private bool SlotUsed(int slot) { foreach(var m in Members.Values) if(m.Slot==slot) return true; return false; }
+        public int NextFreeSlot { get { for(int i=0;i<Capacity;i++) if(!SlotUsed(i)) return i; return -1; } }
         public void Remove(ulong id)
         {
+            Ledger.Leave(id);
             Members.Remove(id); electorate.Remove(id); votes.Remove(id);
             if(VoteTarget==id) CancelVote();
         }
@@ -38,9 +43,10 @@ namespace TavernChaos
             m.LastSequence=sequence;
             if(m.Tokens<1) { Rejected++; return false; } m.Tokens--; return true;
         }
-        public bool Spend(ulong id,int amount)
+        public bool Spend(ulong id,long amount,string operation=null,string service="service")
         {
-            if(amount<0||!Members.TryGetValue(id,out var m)||m.Chips<amount) return false; m.Chips-=amount; return true;
+            if(!Members.ContainsKey(id)) return false;
+            return Ledger.Spend(operation??("service/"+(++serviceSerial)),id,amount,service)==LedgerResult.Applied;
         }
         public bool BeginVote(ulong proposer,ulong target,double now)
         {

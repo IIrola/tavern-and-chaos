@@ -52,7 +52,7 @@
         "Evidence/pre-hito1/VALIDACION.md",
         "Evidence/pool-lan/build-macos.json"
       ],
-      "remaining": "0.3.1 tiene evidencia Windows y macOS por separado. Falta repetir Windows con 0.4.0, juego cruzado entre equipos y mando físico."
+      "remaining": "0.3.1 tiene evidencia Windows y macOS por separado. 0.5.0 está probada en Mac; falta Windows actual, juego cruzado entre equipos y mando físico."
     },
     {
       "id": "P01",
@@ -643,9 +643,11 @@
       "requirement": "Libro servidor, 1000 fichas una vez por IP/sala; salida destruye disponible, apuesta sigue en bote; sin recarga.",
       "status": "partial",
       "evidence": [
-        "Evidence/pre-hito1/run-20261104-225520/summary.json"
+        "Evidence/economy/ledger.json",
+        "Evidence/economy/processes/summary.json",
+        "Evidence/economy/processes-side1/summary.json"
       ],
-      "remaining": "Grant por IP sin puerto, sin nueva concesión al regresar; botes y apuestas pendientes."
+      "remaining": "Libro autoritativo implementado: concesión por IP, historial de salidos, saldo destruido y apuestas retenidas/liquidadas. Probado puro y en dos salas de tres procesos. Falta integración de los otros cinco juegos y red entre equipos."
     },
     {
       "id": "E02",
@@ -653,12 +655,10 @@
       "requirement": "Aperturas: billar 10, blackjack 10, póker 10, dominó 5, pesca 5, pulseadas 5; bebida 20 al servir.",
       "status": "partial",
       "evidence": [
-        "Docs/REGLAS_BOLA8.md",
-        "Evidence/pool-lan/rules.json",
-        "Evidence/pool-lan/processes/summary.json",
-        "Evidence/pool-lan/processes-side1/summary.json"
+        "TavernChaos/Assets/Resources/EconomySettings.asset",
+        "Evidence/economy/ledger.json"
       ],
-      "remaining": "Bebida de prueba 20 y apertura de billar 10. Precios de otras mesas y coctelería completa pendientes."
+      "remaining": "Precios del GDD editables en ScriptableObject, congelados por sala; billar y bebida de prueba cobran. Otras cinco mesas y servicio de coctelería completo pendientes."
     },
     {
       "id": "E03",
@@ -666,19 +666,22 @@
       "requirement": "Organizador paga apertura una vez, apuestas separadas, mínimo participantes antes de cobrar y devolución si falla apertura.",
       "status": "partial",
       "evidence": [
-        "Docs/REGLAS_BOLA8.md",
-        "Evidence/pool-lan/rules.json",
-        "Evidence/pool-lan/processes/summary.json",
-        "Evidence/pool-lan/processes-side1/summary.json"
+        "Evidence/economy/ledger.json",
+        "Evidence/economy/processes/summary.json"
       ],
-      "remaining": "Billar comprueba dos sentados antes de cobrar una vez al organizador; otras mesas y transacciones con apuestas pendientes."
+      "remaining": "Reserva atómica de apertura/apuestas, mínimo de dos, confirmación por revisión y devolución ante fallo de apertura integrados en billar. Falta aplicar el contrato a otras mesas."
     },
     {
       "id": "E04",
       "section": "13. Economía, sesión y estadísticas",
       "requirement": "Apuesta opcional salvo blackjack; precio/efecto mostrado; botes conservados y emisiones de banca infinita registradas.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/economy/ledger.json",
+        "Evidence/economy/processes/00-confirmation.png",
+        "Evidence/economy/processes/02-result.png"
+      ],
+      "remaining": "Apuesta opcional de billar, desglose y consentimiento, bote y premio exacto. Pagos de banca 1:1/3:2 comprobados solo en el libro puro; blackjack y otros juegos pendientes."
     },
     {
       "id": "E05",
@@ -691,8 +694,13 @@
       "id": "E06",
       "section": "13. Economía, sesión y estadísticas",
       "requirement": "Estadísticas servidor de victorias/empates/apuestas/fichas/caídas/bebidas, incluidos salidos, una victoria por mesa.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/economy/processes/04-statistics.png",
+        "Evidence/economy/processes/summary.json",
+        "Evidence/economy/ledger.json"
+      ],
+      "remaining": "Historial por conexión, páginas bajo demanda, victorias/empates/apuestas ganadas/beneficio/pérdida/gastos/caídas/bebidas, incluidos salidos. Falta pantalla final de sesión e integración de otras actividades."
     },
     {
       "id": "E07",
@@ -707,10 +715,11 @@
       "requirement": "Unity y paquetes fijados con licencia y backend; decisión LTS y URP explícita, build repetible con resultado inspeccionado.",
       "status": "partial",
       "evidence": [
-        "Evidence/pool-lan/regression/player-tests.json",
-        "Evidence/pre-hito1/run-20261104-225520/summary.json"
+        "Evidence/economy/build-macos.json",
+        "Evidence/economy/build-macos-steps.json",
+        "Evidence/economy/build-investigation.json"
       ],
-      "remaining": "Unity y paquetes fijados, compilación repetible y player ejecutado. LTS/URP pendientes; investigar contador de errores 745 de BuildReport Mac pese a Succeeded y registro sin errores de compilación."
+      "remaining": "Unity y paquetes fijados, Mono y construcción limpia validada por resumen/pasos. Metadatos duplicados detectados y regenerados por el script, con copia conservada. LTS/URP y validación Windows actual pendientes."
     },
     {
       "id": "Q02",
@@ -728,17 +737,22 @@
       "requirement": "Replicación/interpolación y validación de entrada; objetos/billar solo simulados en servidor, latencia/jitter/pérdida medidos.",
       "status": "partial",
       "evidence": [
-        "Evidence/pre-hito1/run-20261104-225520/summary.json"
+        "Evidence/economy/processes/summary.json",
+        "Evidence/economy/processes-side1/summary.json"
       ],
-      "remaining": "Snapshots públicos de actores/objetos; predicción, física de billar en red y latencia/jitter/pérdidas pendientes."
+      "remaining": "Física de billar/objetos solo en servidor, réplicas cinemáticas y snapshots comprobados entre procesos. Predicción, redes entre equipos y medidas de latencia/jitter/pérdida pendientes."
     },
     {
       "id": "Q04",
       "section": "14. Arquitectura y calidad",
       "requirement": "Módulos Core/Player/Interactions/Bar/Tables/juegos/Presentation/Content; reglas puras y configuración ScriptableObject.",
       "status": "partial",
-      "evidence": [],
-      "remaining": "Reglas puras y contrato común de mesa en billar; faltan módulos completos, configuración ScriptableObject y los otros juegos."
+      "evidence": [
+        "TavernChaos/Assets/Scripts/Economy/SessionLedger.cs",
+        "TavernChaos/Assets/Resources/EconomySettings.asset",
+        "Evidence/economy/ledger.json"
+      ],
+      "remaining": "Reglas y libro puros, contrato de mesa y configuración estática ScriptableObject. Falta división completa de módulos y otros cinco juegos."
     },
     {
       "id": "Q05",
@@ -789,10 +803,12 @@
       "requirement": "Pruebas reglas/propiedades/contabilidad/privacidad/red/física/accesibilidad y sesiones sin guía con nuevas personas.",
       "status": "partial",
       "evidence": [
-        "Evidence/pool-lan/regression/player-tests.json",
-        "Evidence/pre-hito1/run-20261104-225520/summary.json"
+        "Evidence/economy/ledger.json",
+        "Evidence/economy/pool-rules.json",
+        "Evidence/economy/processes/summary.json",
+        "Evidence/economy/regression/player-tests.json"
       ],
-      "remaining": "Regresión local y procesos de red; sesiones humanas, hardware y accesibilidad completa pendientes."
+      "remaining": "Pruebas de reglas, contabilidad, red y regresión física/entrada. Faltan manos privadas, otras actividades, accesibilidad completa y sesiones humanas sin guía."
     },
     {
       "id": "Q11",

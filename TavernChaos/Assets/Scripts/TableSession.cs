@@ -82,6 +82,7 @@ namespace TavernChaos
         }
         public float AbsenceRemaining(double now) => AbsentSince.HasValue?(float)Math.Max(0,60-(now-AbsentSince.Value)):60;
         public void Finish() { Phase=TablePhase.Result; Turn=null; AbsentSince=null; }
+        internal void AbortStart() { participants.Clear(); Turn=null; AbsentSince=null; Phase=Organizer.HasValue?TablePhase.Preparation:TablePhase.Available; }
         public void Close()
         {
             participants.Clear(); Turn=null; AbsentSince=null;

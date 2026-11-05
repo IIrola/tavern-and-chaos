@@ -135,9 +135,9 @@
 | E01 | Libro servidor, 1000 fichas una vez por IP/sala; salida destruye disponible, apuesta sigue en bote; sin recarga. | Parcial |
 | E02 | Aperturas: billar 10, blackjack 10, póker 10, dominó 5, pesca 5, pulseadas 5; bebida 20 al servir. | Parcial |
 | E03 | Organizador paga apertura una vez, apuestas separadas, mínimo participantes antes de cobrar y devolución si falla apertura. | Parcial |
-| E04 | Apuesta opcional salvo blackjack; precio/efecto mostrado; botes conservados y emisiones de banca infinita registradas. | Pendiente |
+| E04 | Apuesta opcional salvo blackjack; precio/efecto mostrado; botes conservados y emisiones de banca infinita registradas. | Parcial |
 | E05 | Fin por tiempo o nadie puede pagar, esperando resoluciones/retornos; bloquear nuevas acciones y liquidar sin fuga de fichas. | Pendiente |
-| E06 | Estadísticas servidor de victorias/empates/apuestas/fichas/caídas/bebidas, incluidos salidos, una victoria por mesa. | Pendiente |
+| E06 | Estadísticas servidor de victorias/empates/apuestas/fichas/caídas/bebidas, incluidos salidos, una victoria por mesa. | Parcial |
 | E07 | Cinemática compartida de expulsión del bar por insolvencia, fin y opción nueva sala/menú. | Pendiente |
 
 ## 14. Arquitectura y calidad

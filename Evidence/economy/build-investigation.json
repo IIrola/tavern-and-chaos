@@ -1,0 +1,70 @@
+{
+  "initial_result": "Succeeded",
+  "initial_summary_errors": 745,
+  "initial_step_errors": 745,
+  "step": "Generate and validate platform script types",
+  "examples": [
+    "Generate and validate platform script types: TypeDB: Class 'TavernChaos.DemoAudio' was already registered, previous declaration was in 'Assembly-CSharp' with 1 fields, current declaration is in 'Assembly-CSharp'. Please check if your project doesn't contain classes with duplicate names. For ex., non-generic 'class MyClass' and generic 'class MyClass<T>.",
+    "Generate and validate platform script types: TypeDB: Class 'TavernChaos.DemoGame' was already registered, previous declaration was in 'Assembly-CSharp' with 5 fields, current declaration is in 'Assembly-CSharp'. Please check if your project doesn't contain classes with duplicate names. For ex., non-generic 'class MyClass' and generic 'class MyClass<T>.",
+    "Generate and validate platform script types: TypeDB: Class 'TavernChaos.DemoHUD' was already registered, previous declaration was in 'Assembly-CSharp' with 0 fields, current declaration is in 'Assembly-CSharp'. Please check if your project doesn't contain classes with duplicate names. For ex., non-generic 'class MyClass' and generic 'class MyClass<T>."
+  ],
+  "clean_build_cache_alone": "same 745 duplicate registration errors; validation exits 1",
+  "next_action": "Fresh Library import while preserving old cache outside Assets",
+  "unity_clean_build_documentation": "https://docs.unity.com/en-us/engine/6000.6/manual/building-and-publishing/build-clean-build",
+  "resolution": "Regenerate only the generated script metadata before CLI builds, keeping an ignored backup. Editor build rejects numbered duplicate metadata and all reported errors. Origin of duplicate files remains undetermined.",
+  "fresh_import_summary_errors": 0,
+  "fresh_import_result": "Succeeded",
+  "fresh_import_process_exit": 0,
+  "validation_policy": "Fail if BuildResult is not Succeeded, summary errors are nonzero, or any build step reports Error/Exception/Assert",
+  "repeat_clean_build": {
+    "process_exit": 0,
+    "result": "Succeeded",
+    "summary_errors": 0,
+    "step_errors": 0
+  },
+  "later_script_edit": {
+    "result": "Succeeded",
+    "summary_errors": 3850,
+    "step_errors": 3850,
+    "validation_exit": 1
+  },
+  "duplicate_cached_metadata": [
+    {
+      "path": "Editor/TypeDb-All 2.json",
+      "canonical": "TypeDb-All.json",
+      "byte_identical": true,
+      "sha256": "66f56dfba3e5b1070f8e3347dc5c7823528ac2c5f98e70bcaafbbff75738f4b4"
+    },
+    {
+      "path": "Player/RuntimeInitializeOnLoads 2.json",
+      "canonical": "RuntimeInitializeOnLoads.json",
+      "byte_identical": true,
+      "sha256": "2cbecb28922b9f7dbe6ec76a07208caf6cea5ecd4a45dda842f0103c54b6e4e7"
+    },
+    {
+      "path": "Player/TypeDb-All 2.json",
+      "canonical": "TypeDb-All.json",
+      "byte_identical": true,
+      "sha256": "a95d3ab76058f4f08f21bbd7a35a80bdb12c9711c9c86abdf6aad0782df0db70"
+    }
+  ],
+  "diagnosis": "Duplicate numbered TypeDb and RuntimeInitializeOnLoads files were present alongside their byte-identical canonical files in Library/BuildPlayerData. Test rebuilding after isolating that generated metadata cache; origin of duplicates not established.",
+  "targeted_rebuild": {
+    "action": "Moved only Library/BuildPlayerData out of the project; retained all other Library caches",
+    "summary_errors": 0,
+    "step_errors": 0,
+    "result": "Succeeded",
+    "process_exit": 0,
+    "regenerated_files": [
+      "Editor/TypeDb-All.json",
+      "Player/TypeDb-All.json",
+      "Player/RuntimeInitializeOnLoads.json"
+    ]
+  },
+  "cli_metadata_regeneration_validation": {
+    "process_exit": 0,
+    "summary_errors": 0,
+    "step_errors": 0,
+    "result": "Succeeded"
+  }
+}

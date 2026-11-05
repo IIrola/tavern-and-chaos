@@ -14,6 +14,8 @@ namespace TavernChaos
         public DemoAudio Audio { get; private set; }
         public DemoInput Input { get; private set; }
         public LanSession Lan { get; private set; }
+        public EconomySettings Economy { get; private set; }
+        private bool ownsEconomySettings;
         public bool Started { get; private set; }
         public bool SmokeMode { get; private set; }
         internal bool TestDriveInput;
@@ -53,6 +55,8 @@ namespace TavernChaos
             Pool.Changed+=OnPoolChanged;
             Rig.ReduceMotion=PlayerPrefs.GetInt("reduceMotion",0)==1; Rig.Sensitivity=PlayerPrefs.GetFloat("sensitivity",.13f); Audio.Volume=PlayerPrefs.GetFloat("volume",.6f);
             SetCursor(false);
+            Economy=Resources.Load<EconomySettings>("EconomySettings");
+            if(!Economy||!Economy.Valid) { Economy=ScriptableObject.CreateInstance<EconomySettings>(); ownsEconomySettings=true; }
             Lan=gameObject.AddComponent<LanSession>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests")) gameObject.AddComponent<DemoSmokeTests>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-lan-check")) gameObject.AddComponent<LanProcessChecks>();
@@ -168,10 +172,10 @@ namespace TavernChaos
             if(room) {
                 if(Input.PoolRules.WasPressedThisFrame()) { hud.ShowTableRules(); return; }
                 var table=Lan.View?.pool;
-                if(Input.PoolConfirm.WasPressedThisFrame()&&table!=null) Lan.Send(table.phase==TablePhase.Preparation?LanAction.PoolStart:table.phase==TablePhase.Result?LanAction.PoolClose:LanAction.PoolAccept);
+                if(Input.PoolConfirm.WasPressedThisFrame()&&table!=null) { if(table.phase==TablePhase.Preparation) Lan.ConfirmPoolSetup(); else Lan.Send(table.phase==TablePhase.Result?LanAction.PoolClose:LanAction.PoolAccept); }
                 if(Input.PoolAlternative.WasPressedThisFrame()) Lan.Send(LanAction.PoolRerack);
-                if(Input.PoolNext.WasPressedThisFrame()) Lan.CyclePoolCall(false);
-                if(Input.PoolPocket.WasPressedThisFrame()) Lan.CyclePoolCall(true);
+                if(Input.PoolNext.WasPressedThisFrame()) { if(table?.phase==TablePhase.Preparation) Lan.CyclePoolWager(); else Lan.CyclePoolCall(false); }
+                if(Input.PoolPocket.WasPressedThisFrame()) { if(table?.phase==TablePhase.Preparation) Lan.CyclePoolWager(true); else Lan.CyclePoolCall(true); }
             }
             if(!room&&Input.PoolReset.WasPressedThisFrame()) Pool.RequestReset();
             if(!room&&Input.PoolNext.WasPressedThisFrame()&&!Pool.Moving) Pool.SelectDrill((PoolDrill)(((int)Pool.Drill+1)%4));
@@ -336,6 +340,6 @@ namespace TavernChaos
             Hits=Misses=Throws=0; Goals=new bool[4]; Rig.Yaw=0; Rig.Pitch=0; Rig.Snap(); RefreshInputContext();
         }
         private void OnApplicationFocus(bool focus) { if(!focus&&Started&&!Paused&&!SmokeMode) SetPause(true); }
-        private void OnDestroy() { if(Lan) Lan.Leave(); if(Pool!=null) Pool.Changed-=OnPoolChanged; Input?.Dispose(); Time.timeScale=1; Cursor.lockState=CursorLockMode.None; Cursor.visible=true; if(Instance==this) Instance=null; }
+        private void OnDestroy() { if(Lan) Lan.Leave(); if(Pool!=null) Pool.Changed-=OnPoolChanged; Input?.Dispose(); if(ownsEconomySettings&&Economy) Destroy(Economy); Time.timeScale=1; Cursor.lockState=CursorLockMode.None; Cursor.visible=true; if(Instance==this) Instance=null; }
     }
 }

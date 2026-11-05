@@ -23,6 +23,9 @@ namespace TavernChaos
             var disabled=new List<InputDevice>();
             foreach(var device in InputSystem.devices) if(device.enabled&&(device is Mouse||device is Keyboard||device is Gamepad)) { disabled.Add(device); InputSystem.DisableDevice(device); }
             var mouse=InputSystem.AddDevice<Mouse>(); var keyboard=InputSystem.AddDevice<Keyboard>();
+            var maps=new[]{g.Input.Move.actionMap,g.Input.Point.actionMap,g.Input.Accept.actionMap};
+            var previous=Array.ConvertAll(maps,map=>map.devices);
+            foreach(var map in maps) map.devices=new InputDevice[]{mouse,keyboard};
             g.TestDriveInput=true;
             try {
             g.Menu(); yield return new WaitForSecondsRealtime(.4f);
@@ -36,7 +39,7 @@ namespace TavernChaos
             check(!DemoHUD.PoolUIContains(aim),"UX: projected target is inside the usable cloth region");
             MouseStateAt(mouse,aim); yield return null; yield return null;
             Debug.Log($"POOL_POINTER device={mouse.position.ReadValue()} action={g.Input.Point.ReadValue<Vector2>()} source={g.Input.Point.activeControl?.path}");
-            check(Vector2.Distance(mouse.position.ReadValue(),aim)<1,"UX: virtual pointer preserves the requested position");
+            check(g.Input.Point.activeControl?.device==mouse&&Vector2.Distance(g.Input.Point.ReadValue<Vector2>(),aim)<1,"UX: virtual pointer exclusively owns the point action at the requested position");
             check(Vector3.Dot(g.Pool.Direction,Vector3.right)>.99f,"UX: mouse points directly from cue to the selected cloth position");
             Vector2 uiPoint=new(Screen.width*.84f,Screen.height*.75f);
             MouseStateAt(mouse,uiPoint,true); yield return null; MouseStateAt(mouse,uiPoint); yield return null;
@@ -58,6 +61,7 @@ namespace TavernChaos
             check(g.Started&&g.Pool.Active,"UX: the keyboard-accessible main-menu shortcut opens billiards directly");
             } finally {
                 g.TestDriveInput=false;
+                for(int i=0;i<maps.Length;i++) maps[i].devices=previous[i];
                 InputSystem.RemoveDevice(mouse); InputSystem.RemoveDevice(keyboard);
                 foreach(var device in disabled) InputSystem.EnableDevice(device);
                 InputSystem.settings.backgroundBehavior=background;

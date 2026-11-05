@@ -1,0 +1,20 @@
+{
+    "role": "client",
+    "version": "0.5.0",
+    "passed": true,
+    "checks": [
+        "Client starts real UDP connection",
+        "Client receives table snapshot",
+        "Scenario finishes or disconnected spectator returns to usable menu",
+        "Client observes physical shots and full-match result",
+        "Client ball bodies remain kinematic; host alone simulates",
+        "Client receives shot and pocket audio events from authority",
+        "Client enters server-confirmed table camera",
+        "Own seated replica faces the table instead of retaining free-look yaw",
+        "Authoritative paid result reaches the client including exact pot/payout",
+        "Statistics page arrives on demand across UDP with departed history",
+        "No runtime errors in client"
+    ],
+    "failures": [],
+    "errors": []
+}

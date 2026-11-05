@@ -1,0 +1,40 @@
+{
+  "failed_run": {
+    "checks_passed": 84,
+    "failed_checks": [
+      "one click fires the aimed shot",
+      "holding cannot repeat-fire"
+    ],
+    "runtime_errors": 0
+  },
+  "observed_point": {
+    "virtual_device": [
+      796.83,
+      450
+    ],
+    "action": [
+      2824,
+      -495
+    ],
+    "action_source": "Mouse/position"
+  },
+  "diagnosis": "Disabling desktop devices alone did not isolate action binding/control selection from their cursor position. The action used the desktop position; the UI guard correctly rejected the shot.",
+  "test_change": "Restrict gameplay, billiards and menu action maps to the test devices; restore their previous restrictions in finally. Assert the point action device and value, not only the queued virtual-device state.",
+  "focused_validation": {
+    "passed": true,
+    "checks": 14,
+    "process_exit": 0,
+    "point_action_source": "Mouse1/position",
+    "expected_and_action_position": [
+      796.83,
+      450
+    ]
+  },
+  "full_regression": {
+    "passed": true,
+    "checks": 86,
+    "process_exit": 0,
+    "failures": 0,
+    "runtime_errors": 0
+  }
+}

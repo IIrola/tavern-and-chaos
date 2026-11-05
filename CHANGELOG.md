@@ -1,5 +1,13 @@
 # Cambios
 
+## 0.5.0 · Apuestas y cuentas de sala
+
+- Libro autoritativo de fichas con reservas, devoluciones, botes y pagos únicos; separa ingresos del bar, beneficios de banca y fichas destruidas.
+- Billar con apuesta opcional igual por lado. Ambos confirman apertura/apuesta; cualquier cambio de propuesta o asientos exige confirmar de nuevo. Una apertura fallida devuelve todo lo reservado.
+- Resultado con bote, premio, apuesta propia y beneficio; estadísticas paginadas incluyen a quienes salieron y separan victorias de mesa de apuestas ganadas.
+- Precios del GDD en `EconomySettings`, sin guardar estado mutable en el asset. Protocolo LAN 5; todas las copias deben actualizarse.
+- Validación y límites en `Evidence/economy/VALIDACION.md`. El cierre de sesión por tiempo/insolvencia y los otros cinco juegos siguen pendientes.
+
 ## 0.4.0 · Bola 8 compartida en desarrollo
 
 - Se continúa desde `main` 0.3.1 conservando primera persona, cuerpos replicados y efectos de impacto.

@@ -1,0 +1,10 @@
+{
+  "failed_step": "Second organizer requested zero wager before its local snapshot contained the new seat/proposal revision. The server correctly rejected that obsolete revision; spectator could not confirm the old stake of 50 with balance zero.",
+  "change": "Revision-tag the zero-wager stage, wait until the client sees that exact revision, and assert wager/ready prerequisites before continuing. No production consent validation relaxed.",
+  "scope": "Automated process coordinator timing; not evidence of latency tolerance in normal gameplay.",
+  "final_validation": {
+    "first_side_0_checks": 82,
+    "first_side_1_checks": 80,
+    "both_passed": true
+  }
+}

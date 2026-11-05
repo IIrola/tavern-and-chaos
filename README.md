@@ -1,12 +1,12 @@
 # Tavern & Chaos · Primera ronda
 
-Proyecto de trabajo **0.4.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La release pública 0.2.0 es una demo local anterior.
+Proyecto de trabajo **0.5.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La demo descargable actual para Mac es la 0.5.0; las releases anteriores conservan su alcance histórico.
 
-Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual añade asientos y bola 8 en LAN; el estado, los límites y siguientes pasos están en [Docs/ESTADO_ACTUAL.md](Docs/ESTADO_ACTUAL.md), y la revisión de cada iteración en [Docs/ITERACIONES.md](Docs/ITERACIONES.md).
+Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual añade apuestas opcionales y cuentas a la bola 8 en LAN; el estado, los límites y siguientes pasos están en [Docs/ESTADO_ACTUAL.md](Docs/ESTADO_ACTUAL.md), y la revisión de cada iteración en [Docs/ITERACIONES.md](Docs/ITERACIONES.md).
 
 ## Descargar la demo
 
-El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP local actual está en `Builds/Tavern-and-Chaos-0.4.0-macOS-Universal.zip`; todavía no se ha publicado como release. En [GitHub Releases](https://github.com/IIrola/tavern-and-chaos/releases) permanece la demo anterior.
+El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP para Mac se descarga en [la versión 0.5.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.5.0). La copia local está en `Builds/Tavern-and-Chaos-0.5.0-macOS-Universal.zip`. Es una demo en desarrollo; el cierre económico y los otros cinco juegos siguen pendientes.
 
 Para jugar desde una copia descargada del repositorio, compila el proyecto o descomprime el ZIP de la release dentro de `Builds/macOS/`, de modo que exista `Builds/macOS/Tavern and Chaos.app`.
 
@@ -14,9 +14,9 @@ El diseño completo está en [GDD_y_plan_de_desarrollo.md](GDD_y_plan_de_desarro
 
 ## Bola 8 en LAN
 
-Junto al billar pulsa **E/A** para sentarte. Con dos personas sentadas, el organizador inicia con **Enter/A**; se cobran **10 fichas** una vez. El primer turno es aleatorio. **Tab/RB** elige bola y **C/LB** tronera; apunta, ajusta potencia y tira con **clic/RT**. Las troneras están numeradas y la línea limita la blanca cuando corresponde. **H/X** abre las reglas de la mesa; **E/B** permite levantarse y volver.
+Junto al billar pulsa **E/A** para sentarte. Con dos personas sentadas, el organizador elige apuesta (cero permite jugar sin apostar). Ambos confirman su desglose con **Enter/A** y, después, el organizador inicia con **Enter/A**. Se cobran **10 fichas** de apertura solo al organizador, además de la apuesta de cada lado. Cambiar apuesta o asientos cancela las confirmaciones. El primer turno es aleatorio. **Tab/RB** elige bola y **C/LB** tronera; apunta, ajusta potencia y tira con **clic/RT**. Las troneras están numeradas y la línea limita la blanca cuando corresponde. **H/X** abre las reglas de la mesa; **E/B** permite levantarse y volver.
 
-Una caída libera el asiento pero conserva la participación y el tiro iniciado. El minuto de ausencia solo corre durante tu turno; sentado no hay reloj. Quien llega a una partida iniciada espera a la siguiente. Esta versión es para dos lados individuales y no tiene apuestas opcionales todavía. La práctica local mantiene sus cuatro ejercicios separados. Ejecuta `python3 run-pool-room-checks.py --visual-host` para la integración Mac; los informes están en `Evidence/pool-lan/`.
+Una caída libera el asiento pero conserva la participación y el tiro iniciado. El minuto de ausencia solo corre durante tu turno; sentado no hay reloj. Quien llega a una partida iniciada espera a la siguiente. Esta versión es para dos lados individuales. El ganador cobra el bote una sola vez; la pantalla separa premio total y beneficio. En pausa puedes abrir estadísticas, incluidos quienes salieron. La práctica local mantiene sus cuatro ejercicios separados. Ejecuta `python3 run-pool-room-checks.py --visual-host` para la integración Mac; los informes actuales están en `Evidence/economy/`.
 
 ## Probar LAN en una sola máquina Windows
 
@@ -24,7 +24,7 @@ Fuera de Play, usa **Tavern → Build Windows LAN demo** en Unity. Después abre
 
 La sala integra movimiento, golpe, botella, Laguna Azul y bola 8. **R recoloca solo a quien lo solicita** si está de pie, fuera de una mesa y no está resolviendo un golpe; no reinicia la sala. La pausa es local. Para dos equipos de la misma red usa el código del anfitrión; las pruebas entre máquinas siguen pendientes.
 
-El invitado recibe las posturas de las seis partes del cuerpo y las caídas simuladas por el anfitrión. La interpolación de red controla esos cuerpos cinemáticos sin una segunda interpolación de PhysX. Los impactos tienen eventos identificados para reproducirse una sola vez. Todas las copias de esta iteración deben mostrar **0.4.0**; el protocolo cambió y rechaza versiones anteriores.
+El invitado recibe las posturas de las seis partes del cuerpo y las caídas simuladas por el anfitrión. La interpolación de red controla esos cuerpos cinemáticos sin una segunda interpolación de PhysX. Los impactos tienen eventos identificados para reproducirse una sola vez. Todas las copias de esta iteración deben mostrar **0.5.0**; el protocolo cambió y rechaza versiones anteriores.
 
 ## Jugar
 
@@ -73,7 +73,7 @@ No hay efectos laterales, saltos ni massé. La práctica local usa ejercicios; l
 2. Abre `Assets/Scenes/Tavern.unity` y pulsa Play. El entorno se compone al iniciar a partir de módulos originales en C#.
 3. Para compilar Mac desde el editor, selecciona macOS como plataforma activa en **File → Build Profiles** y usa **Tavern → Build macOS demo**. También puedes ejecutar `./build-demo.sh` desde esta carpeta en un Mac; el script selecciona la plataforma automáticamente. El editor necesita el módulo Mac Build Support correspondiente a su versión.
 
-La compilación usa la escena guardada, Mono, stripping desactivado y opciones de release. No regenera ni guarda la escena; rechaza cambios de escena sin guardar. El menú Windows genera x64 y el de macOS prepara un binario universal para Intel y Apple Silicon. El script inspecciona `BuildReport` y falla si el resultado no es `Succeeded`. Conserva los shaders usados por los materiales creados en ejecución. Se puede seleccionar otro editor mediante la variable `UNITY_EDITOR`; no se garantiza compatibilidad con otras versiones.
+La compilación usa la escena guardada, Mono, stripping desactivado y opciones de release. No regenera ni guarda la escena; rechaza cambios de escena sin guardar. El menú Windows genera x64 y el de macOS prepara un binario universal para Intel y Apple Silicon. El script hace una compilación limpia, inspecciona `BuildReport` y falla si el resultado no es `Succeeded` o si el resumen o los pasos contienen errores. Conserva los shaders usados por los materiales creados en ejecución. El script exige cerrar el editor del proyecto y regenera `Library/BuildPlayerData`, conservando copia en `.validation`: se detectaron allí metadatos numerados duplicados. El menú de construcción los rechaza con una indicación para regenerar esa caché. No se modifican los assets de origen. El diagnóstico está en `Evidence/economy/build-investigation.json`. Se puede seleccionar otro editor mediante la variable `UNITY_EDITOR`; no se garantiza compatibilidad con otras versiones.
 
 ## Validación del ejecutable
 
@@ -81,23 +81,24 @@ El [informe de validación Windows](Evidence/pre-hito1/VALIDACION.md) reúne la 
 
 ```sh
 "Builds/macOS/Tavern and Chaos.app/Contents/MacOS/Tavern and Chaos" \
-  -demo-smoke-tests -evidencePath "$PWD/Evidence/ux-physics" \
-  -logFile "$PWD/Evidence/ux-physics/player-tests.log"
+  -demo-smoke-tests -evidencePath "$PWD/Evidence/economy/regression" \
+  -logFile "$PWD/Evidence/economy/regression/player-tests.log"
 ```
 
 Las pruebas optativas recorren golpe válido, golpe fallido, recuperación, agarre/lanzamiento, impacto único, bebida y caducidad, pausa, tiro y salida del billar, límites de objetos y reinicio. También prueban transferencia de velocidad, conservación de energía, rebotes, reposo, troneras, apertura máxima, consistencia a 30/120 FPS de render y entrada a través de dispositivos virtuales de ratón/teclado. Escriben `player-tests.json`, `pool-physics.json`, capturas y código de salida distinto de cero ante fallos. No sustituyen una sesión con personas ni pruebas en otro hardware.
 
 ## Alcance y decisiones
 
-Esta entrega incluye práctica local, sala LAN de autoridad en el anfitrión, bola 8 compartida, caídas articuladas, botellas y una bebida. Se conserva el controlador de cápsula de main. Usa Built-in; una migración a URP y el active ragdoll de locomoción requieren decisiones independientes. Paquete de entrada fijado en 1.20.1 y NGO en 2.13.3. Arte geométrico y sonidos sintetizados originales; sin canciones ni servicios de emparejamiento.
+Esta entrega incluye práctica local, sala LAN de autoridad en el anfitrión, bola 8 compartida, caídas articuladas, botellas y una bebida. Se conserva el controlador de cápsula de main. La economía se configura en `Assets/Resources/EconomySettings.asset`; el estado mutable vive en el libro del servidor. Usa Built-in; una migración a URP y el active ragdoll de locomoción requieren decisiones independientes. Paquete de entrada fijado en 1.20.1 y NGO en 2.13.3. Arte geométrico y sonidos sintetizados originales; sin canciones ni servicios de emparejamiento.
 
-Quedan pendientes LAN entre máquinas y condiciones de latencia/pérdida, aceptación humana de bola 8, apuestas/economía completa, validación actual con seis personas, los otros cinco juegos, coctelería completa, mando físico, reasignación y juego cruzado. El arte final sigue diferido. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. No es una distribución pública firmada.
+Quedan pendientes LAN entre máquinas y condiciones de latencia/pérdida, aceptación humana de bola 8, cierre económico de sesión y economía de las otras mesas, validación actual con seis personas, los otros cinco juegos, coctelería completa, mando físico, reasignación y juego cruzado. El arte final sigue diferido. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. No es una distribución pública firmada.
 
 ## Código principal
 
 - `TableSession`: asientos, organizador, participantes, espera y ausencia durante turno.
 - `EightBallRules`: reglas puras de bola 8 y decisiones del tiro.
-- `PoolRoomController`: coordinación autoritativa entre mesa, reglas, física y cobro de apertura.
+- `PoolRoomController`: coordinación autoritativa entre mesa, reglas, física, consentimiento y pagos.
+- `Economy/SessionLedger`, `EconomySettings`: saldos/botes/estadísticas en servidor y precios estáticos editables.
 
 - `DemoGame`: sesión, objetivos y resolución de acciones en paso fijo.
 - `TavernActor`: movimiento, caída articulada, restauración y efecto temporal.

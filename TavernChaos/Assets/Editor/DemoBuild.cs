@@ -1,5 +1,7 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
@@ -49,7 +51,7 @@ namespace TavernChaos.Editor
         {
             if(!File.Exists(ScenePath)) throw new FileNotFoundException("The saved demo scene is missing.",ScenePath);
             if(EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Save scene changes before building the demo.");
-            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.4.0";
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.5.0";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);
@@ -80,13 +82,16 @@ namespace TavernChaos.Editor
         [MenuItem("Tavern/Build macOS demo")]
         public static void BuildMac()
         {
+            RejectDuplicateTypeMetadata();
+            EconomyValidation.Run();
             PoolRulesValidation.Run();
             ConfigureMacArchitecture(); Configure(); Directory.CreateDirectory("../Builds/macOS");
-            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.None });
+            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.CleanBuildCache });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence/pool-lan");
-            File.WriteAllText("../Evidence/pool-lan/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
-            if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
+            Directory.CreateDirectory("../Evidence/economy");
+            File.WriteAllText("../Evidence/economy/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            InspectSteps(report,"macos");
+            if(summary.result!=BuildResult.Succeeded||summary.totalErrors>0) throw new Exception($"Build failed validation: {summary.totalErrors} errors.");
             Debug.Log($"DEMO_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
         }
         private static void ConfigureMacArchitecture()
@@ -100,15 +105,38 @@ namespace TavernChaos.Editor
         [MenuItem("Tavern/Build Windows LAN demo")]
         public static void BuildWindows()
         {
+            RejectDuplicateTypeMetadata();
+            EconomyValidation.Run();
             PoolRulesValidation.Run();
             Configure(); Directory.CreateDirectory("../Builds/Windows");
-            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/Windows/Tavern and Chaos.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None });
+            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/Windows/Tavern and Chaos.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.CleanBuildCache });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence/pool-lan");
-            File.WriteAllText("../Evidence/pool-lan/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
-            if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
+            Directory.CreateDirectory("../Evidence/economy");
+            File.WriteAllText("../Evidence/economy/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            InspectSteps(report,"windows");
+            if(summary.result!=BuildResult.Succeeded||summary.totalErrors>0) throw new Exception($"Build failed validation: {summary.totalErrors} errors.");
             Debug.Log($"WINDOWS_LAN_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
         }
+        private static void RejectDuplicateTypeMetadata()
+        {
+            const string path="Library/BuildPlayerData";
+            if(!Directory.Exists(path)) return;
+            foreach(string file in Directory.EnumerateFiles(path,"*.json",SearchOption.AllDirectories))
+                if(Regex.IsMatch(Path.GetFileName(file),@"^(TypeDb-All|RuntimeInitializeOnLoads) [1-9][0-9]*\.json$"))
+                    throw new InvalidOperationException("Duplicate generated script metadata: "+file+". Close Unity and run build-demo.sh to regenerate Library/BuildPlayerData. Source assets are unaffected.");
+        }
+        private static void InspectSteps(BuildReport report,string platform)
+        {
+            var evidence=new StepEvidence();
+            foreach(var step in report.steps) foreach(var message in step.messages) {
+                if(message.type==LogType.Error||message.type==LogType.Exception||message.type==LogType.Assert) evidence.errors.Add(step.name+": "+message.content);
+                if(message.type==LogType.Warning) evidence.warnings.Add(step.name+": "+message.content);
+                evidence.messages++;
+            }
+            File.WriteAllText("../Evidence/economy/build-"+platform+"-steps.json",JsonUtility.ToJson(evidence,true));
+            if(evidence.errors.Count>0) throw new Exception("Build steps contain "+evidence.errors.Count+" errors; inspect build evidence.");
+        }
+        [Serializable] private sealed class StepEvidence { public int messages; public List<string> errors=new(),warnings=new(); }
         [Serializable] private sealed class BuildEvidence { public string result,unity,platform,backend,version; public ulong bytes; public double seconds; public int errors,warnings; }
     }
 }
