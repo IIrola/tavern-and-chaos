@@ -1,0 +1,65 @@
+using System;
+using System.IO;
+using UnityEditor;
+using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
+using UnityEditor.SceneManagement;
+using UnityEngine;
+using UnityEngine.Rendering;
+
+namespace TavernChaos.Editor
+{
+    public static class DemoBuild
+    {
+        private const string ScenePath="Assets/Scenes/Tavern.unity";
+        [MenuItem("Tavern/Prepare demo scene")]
+        public static void Prepare()
+        {
+            Directory.CreateDirectory("Assets/Scenes");
+            var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
+            new GameObject("Tavern demo | runtime composition").AddComponent<DemoGame>();
+            EditorSceneManager.SaveScene(scene,ScenePath);
+            EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(ScenePath,true)};
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.2.0";
+            PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
+            PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
+            PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);
+            PlayerSettings.SetArchitecture(NamedBuildTarget.Standalone,1); // Native Apple Silicon demo.
+            PlayerSettings.defaultScreenWidth=1440; PlayerSettings.defaultScreenHeight=900;
+            PlayerSettings.fullScreenMode=FullScreenMode.Windowed; PlayerSettings.resizableWindow=true; PlayerSettings.runInBackground=false;
+            PlayerSettings.colorSpace=ColorSpace.Linear; PlayerSettings.usePlayerLog=true;
+            var so=new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/ProjectSettings.asset")[0]);
+            var active=so.FindProperty("activeInputHandler"); if(active!=null) active.intValue=1; so.ApplyModifiedPropertiesWithoutUndo();
+            var tags=new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/TagManager.asset")[0]);
+            var layers=tags.FindProperty("layers"); layers.GetArrayElementAtIndex(PoolPhysics.BallLayer).stringValue="Pool Balls"; layers.GetArrayElementAtIndex(PoolPhysics.CushionLayer).stringValue="Pool Cushions"; tags.ApplyModifiedPropertiesWithoutUndo();
+            QualitySettings.SetQualityLevel(2,true); QualitySettings.shadows=ShadowQuality.All; QualitySettings.shadowResolution=ShadowResolution.Medium;
+            QualitySettings.shadowDistance=22; QualitySettings.antiAliasing=2; QualitySettings.pixelLightCount=6;
+            // Runtime-created materials must keep their shaders in a stripped player.
+            var graphics=new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset")[0]);
+            var shaders=graphics.FindProperty("m_AlwaysIncludedShaders");
+            // Internal font shaders come from the built-in font, not the player shader list.
+            for(int i=shaders.arraySize-1;i>=0;i--) {
+                var existing=shaders.GetArrayElementAtIndex(i).objectReferenceValue as Shader;
+                if(existing && existing.name=="GUI/Text Shader") { shaders.GetArrayElementAtIndex(i).objectReferenceValue=null; shaders.DeleteArrayElementAtIndex(i); }
+            }
+            foreach(string name in new[]{"Standard","Sprites/Default"}) {
+                var shader=Shader.Find(name); bool found=false;
+                for(int i=0;i<shaders.arraySize;i++) if(shaders.GetArrayElementAtIndex(i).objectReferenceValue==shader) found=true;
+                if(shader&&!found) { shaders.InsertArrayElementAtIndex(shaders.arraySize); shaders.GetArrayElementAtIndex(shaders.arraySize-1).objectReferenceValue=shader; }
+            }
+            graphics.ApplyModifiedPropertiesWithoutUndo(); AssetDatabase.SaveAssets();
+        }
+        [MenuItem("Tavern/Build macOS demo")]
+        public static void BuildMac()
+        {
+            Prepare(); Directory.CreateDirectory("../Builds/macOS");
+            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.None });
+            var summary=report.summary;
+            Directory.CreateDirectory("../Evidence");
+            File.WriteAllText("../Evidence/build-report.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Apple Silicon",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
+            Debug.Log($"DEMO_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
+        }
+        [Serializable] private sealed class BuildEvidence { public string result,unity,platform,backend,version; public ulong bytes; public double seconds; public int errors,warnings; }
+    }
+}

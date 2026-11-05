@@ -1,0 +1,64 @@
+using UnityEngine;
+
+namespace TavernChaos
+{
+    public sealed class ThrowableBottle : MonoBehaviour
+    {
+        public bool Held { get; private set; }
+        public bool Flying { get; private set; }
+        public Rigidbody Body { get; private set; }
+        private Vector3 rack, previous;
+        private Collider hitbox;
+        private float resetAt;
+        private bool used;
+        public static ThrowableBottle Create(Vector3 p)
+        {
+            var go=new GameObject("Throwable bottle"); go.layer=9; go.transform.position=p;
+            var b=go.AddComponent<ThrowableBottle>(); b.rack=p;
+            TavernWorld.BottleVisual(Vector3.zero,go.transform,TavernWorld.Blue);
+            b.hitbox=go.AddComponent<CapsuleCollider>(); ((CapsuleCollider)b.hitbox).radius=.12f; ((CapsuleCollider)b.hitbox).height=.65f; ((CapsuleCollider)b.hitbox).center=Vector3.up*.1f;
+            b.Body=go.AddComponent<Rigidbody>(); b.Body.mass=.6f; b.Body.isKinematic=true; b.Body.interpolation=RigidbodyInterpolation.Interpolate; b.Body.collisionDetectionMode=CollisionDetectionMode.ContinuousSpeculative;
+            return b;
+        }
+        public void Grab(TavernActor actor)
+        {
+            if(Held || Flying) return;
+            Held=true; Body.isKinematic=true; hitbox.enabled=false; transform.SetParent(actor.Hand,false); transform.localPosition=Vector3.zero; transform.localRotation=Quaternion.identity;
+        }
+        public void Release(Vector3 velocity)
+        {
+            if(!Held) return;
+            transform.SetParent(null,true); hitbox.enabled=true; Body.isKinematic=false; Body.linearVelocity=velocity; Body.angularVelocity=new(0,4,5);
+            Held=false; Flying=true; used=false; resetAt=Time.time+6; previous=Body.position;
+        }
+        public void ResetToRack()
+        {
+            transform.SetParent(null,true); Body.isKinematic=true; hitbox.enabled=true; transform.SetPositionAndRotation(rack,Quaternion.identity); Flying=false; Held=false; used=false;
+        }
+        private void FixedUpdate()
+        {
+            if(!Flying) return;
+            var g=DemoGame.Instance;
+            // Swept actor check supplements CCD, including CharacterControllers.
+            Vector3 a=previous+Vector3.up*.1f, b=Body.position+Vector3.up*.1f;
+            if(!used && Body.linearVelocity.magnitude>5 && !g.Rival.Fallen) {
+                Vector3 ab=b-a; float t=ab.sqrMagnitude<.0001f?0:Mathf.Clamp01(Vector3.Dot(g.Rival.Focus-a,ab)/ab.sqrMagnitude);
+                if(Vector3.Distance(a+ab*t,g.Rival.Focus)<.62f) Impact(g.Rival);
+            }
+            previous=Body.position;
+            if(Time.time>=resetAt || transform.position.y < -2) ResetToRack();
+        }
+        private void OnCollisionEnter(Collision c)
+        {
+            if(!Flying || used) return;
+            var actor=c.collider.GetComponentInParent<TavernActor>();
+            if(actor && !actor.IsPlayer && c.relativeVelocity.magnitude>5) Impact(actor);
+            else if(c.relativeVelocity.magnitude>2) DemoGame.Instance.Audio.Play("clink",.2f);
+        }
+        private void Impact(TavernActor actor)
+        {
+            if(used || actor.Fallen) return; used=true;
+            actor.Fall(Body.linearVelocity.normalized*4.5f); DemoGame.Instance.BottleHit(actor.Focus); resetAt=Time.time+2;
+        }
+    }
+}

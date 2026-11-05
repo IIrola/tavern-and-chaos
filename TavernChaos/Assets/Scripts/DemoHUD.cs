@@ -1,0 +1,192 @@
+using UnityEngine;
+
+namespace TavernChaos
+{
+    public sealed class DemoHUD : MonoBehaviour
+    {
+        private readonly Color ivory=new(.96f,.91f,.81f), muted=new(.67f,.71f,.72f), mint=new(.37f,.89f,.74f), orange=new(1,.43f,.24f), ink=new(.035f,.046f,.06f,.95f);
+        private GUIStyle text, button;
+        private DemoGame g;
+        private float scale, ox, oy;
+        private const float W=1440,H=900;
+        private int focus, controls, lastControls, accept=-1;
+        private float nextNavigate;
+        private string menuScreen;
+        private string poolStatus, poolResult, drillName;
+        private int poolShots, poolPotted, poolTotal;
+        private PoolPhase poolPhase;
+        private void Start() { g=DemoGame.Instance; g.Pool.Changed+=PoolChanged; PoolChanged(); }
+        private void OnDestroy() { if(g&&g.Pool!=null) g.Pool.Changed-=PoolChanged; }
+        private void PoolChanged() { poolStatus=g.Pool.Status; poolResult=g.Pool.Result; drillName=g.Pool.DrillName; poolShots=g.Pool.Shots; poolPotted=g.Pool.Potted; poolTotal=g.Pool.TotalTargets; poolPhase=g.Pool.Phase; }
+        public void HandleMenuInput()
+        {
+            if(!g) g=DemoGame.Instance;
+            string screen=(g.Started?"pause":"menu")+(g.Settings?"settings":"");
+            if(menuScreen!=screen) { menuScreen=screen; focus=0; accept=-1; nextNavigate=0; }
+            if(g.Input.Back.WasPressedThisFrame()) { if(g.Settings) { g.SaveSettings(); g.Settings=false; } else if(g.Paused) g.SetPause(false); return; }
+            Vector2 nav=g.Input.Navigate.ReadValue<Vector2>();
+            if(Mathf.Abs(nav.y)>.5f && Time.unscaledTime>=nextNavigate && lastControls>0) { focus=(focus+(nav.y>0?-1:1)+lastControls)%lastControls; nextNavigate=Time.unscaledTime+.2f; }
+            if(Mathf.Abs(nav.y)<.2f) nextNavigate=0;
+            if(g.Settings&&Mathf.Abs(nav.x)>.2f) { if(focus==0) g.Audio.Volume=Mathf.Clamp01(g.Audio.Volume+nav.x*Time.unscaledDeltaTime*.5f); if(focus==1) g.Rig.Sensitivity=Mathf.Clamp(g.Rig.Sensitivity+nav.x*Time.unscaledDeltaTime*.15f,.04f,.3f); }
+            if(g.Input.Accept.WasPressedThisFrame()) accept=focus;
+        }
+        public static bool PoolUIContains(Vector2 screenPoint)
+        {
+            float s=Mathf.Min(Screen.width/W,Screen.height/H);
+            Vector2 p=new((screenPoint.x-(Screen.width-W*s)*.5f)/s,(Screen.height-screenPoint.y-(Screen.height-H*s)*.5f)/s);
+            return p.x<390 || p.x>1000 || p.y<106 || p.y>754;
+        }
+        private void Init()
+        {
+            g=DemoGame.Instance;
+            var font=Resources.GetBuiltinResource<Font>("LegacyRuntime.ttf");
+            text=new GUIStyle { font=font,richText=true,wordWrap=true,normal={textColor=ivory} };
+            button=new GUIStyle(text) { alignment=TextAnchor.MiddleCenter,fontSize=18,fontStyle=FontStyle.Bold };
+        }
+        private void OnGUI()
+        {
+            if(text==null) Init();
+            // Fit a logical safe area, including 16:10 and ultrawide, without stretching the type.
+            scale=Mathf.Min(Screen.width/W,Screen.height/H); ox=(Screen.width-W*scale)*.5f; oy=(Screen.height-H*scale)*.5f;
+            GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
+            controls=0;
+            if(!g.Started) Menu(); else { GUI.enabled=!g.Paused; Game(); GUI.enabled=true; if(g.Paused) Pause(); }
+            lastControls=controls;
+            GUI.matrix=Matrix4x4.identity;
+        }
+        private void Box(Rect r,Color c) { GUI.color=QualitySettings.activeColorSpace==ColorSpace.Linear?c.linear:c; GUI.DrawTexture(r,Texture2D.whiteTexture); GUI.color=Color.white; }
+        private void Label(Rect r,string s,int size,Color? color=null,FontStyle style=FontStyle.Normal,TextAnchor align=TextAnchor.UpperLeft)
+        {
+            text.fontSize=size; text.fontStyle=style; text.normal.textColor=color??ivory; text.alignment=align; GUI.Label(r,s,text);
+        }
+        private int FocusControl(Rect r)
+        {
+            if(!GUI.enabled || (g.Started&&!g.Paused)) return -1;
+            int index=controls++;
+            if(index==focus) { Box(new(r.x-4,r.y-4,r.width+8,3),mint); Box(new(r.x-4,r.y+r.height+1,r.width+8,3),mint); }
+            return index;
+        }
+        private bool Button(Rect r,string s,bool primary=false)
+        {
+            int index=FocusControl(r); Vector2 p=Event.current.mousePosition; bool hover=r.Contains(p)&&GUI.enabled;
+            Box(r,!GUI.enabled?new Color(.07f,.09f,.1f):primary?(hover?new Color(1,.57f,.34f):orange):(hover?new Color(.18f,.23f,.24f):new Color(.11f,.15f,.17f)));
+            button.normal.textColor=!GUI.enabled?muted:primary?ink:ivory;
+            bool keyboard=index>=0&&accept==index&&Event.current.type==EventType.Repaint;
+            if(keyboard) accept=-1;
+            return GUI.Button(r,s,button)||keyboard;
+        }
+        private void Tag(float x,float y,string s,Color c) { Box(new(x,y,8,8),c); Label(new(x+18,y-4,360,25),s,13,c,FontStyle.Bold); }
+        private void Menu()
+        {
+            GUI.enabled=!g.Settings;
+            Box(new(0,0,660,H),new Color(.025f,.035f,.048f,.94f)); Box(new(0,0,8,H),orange);
+            Tag(64,57,"PRIMERA RONDA   /   DEMO 01",mint);
+            Label(new(60,130,580,180),"TAVERN\n<color=#FF7947>& CHAOS</color>",81,ivory,FontStyle.Bold);
+            Label(new(64,338,480,45),"Una taberna. Un golpe. Mucho caos.",25,ivory,FontStyle.Bold);
+            Label(new(64,397,475,84),"Entra, prueba tu puntería y deja que la física\nhaga el resto. Bruno ya te está esperando.",20,muted);
+            if(Button(new(64,521,440,66),"ABRIR LA TABERNA    →",true)) g.Begin();
+            if(Button(new(64,603,440,49),"PRACTICAR BILLAR")) g.BeginPoolPractice();
+            if(Button(new(64,668,212,49),"AJUSTES")) g.Settings=!g.Settings;
+            if(Button(new(292,668,212,49),"SALIR")) Application.Quit();
+            Label(new(64,739,500,32),"EXPERIENCIA LOCAL · 1 JUGADOR + BRUNO",13,mint,FontStyle.Bold);
+            Label(new(64,778,505,52),"WASD  moverse     RATÓN  mirar\nE  interactuar     MANTENER CLIC  cargar golpe",16,muted);
+            Label(new(64,838,520,30),"↑ ↓  ELEGIR    ENTER  ACEPTAR    ESC  VOLVER",12,muted);
+            Box(new(1010,57,366,44),ink); Label(new(1024,67,338,26),"ROCK, FÍSICA Y MALAS DECISIONES",13,ivory,FontStyle.Bold);
+            Card(702,650,"01","CONECTA O CAE","Aciertas: cae Bruno.\nFallas: caes tú.");
+            Card(936,650,"02","SIRVE EL CAOS","Pies de hielo y\nbotellas voladoras.");
+            Card(1170,650,"03","BAJA EL RITMO","Billar libre entre\ngolpe y golpe.");
+            GUI.enabled=true;
+            if(g.Settings) Settings(new(710,130,640,475));
+        }
+        private void Card(float x,float y,string num,string title,string desc)
+        {
+            Box(new(x,y,212,183),ink); Box(new(x,y,212,3),mint); Label(new(x+18,y+20,160,30),num,24,orange,FontStyle.Bold); Label(new(x+18,y+64,180,28),title,14,ivory,FontStyle.Bold); Label(new(x+18,y+106,177,65),desc,16,muted);
+        }
+        private void Game()
+        {
+            Box(new(32,28,1376,62),ink); Label(new(52,43,350,35),"TAVERN <color=#FF7947>& CHAOS</color>",22,ivory,FontStyle.Bold);
+            Label(new(480,49,520,30),g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+            Label(new(1110,49,270,30),g.Pool.Active?"ESC  Pausa     E  Volver":"ESC  Pausa y ajustes",15,muted,FontStyle.Normal,TextAnchor.UpperRight);
+            if(!g.Pool.Active) {
+                Box(new(32,114,312,258),ink); Tag(52,137,g.Complete?"RONDA COMPLETADA":"TU PRIMERA RONDA",g.Complete?orange:mint);
+                string[] goals={"Conecta un golpe a Bruno","Falla un golpe y vuelve a pie","Prueba Laguna Azul en la barra","Derriba a Bruno con una botella"};
+                for(int i=0;i<4;i++) { Label(new(52,181+i*43,25,28),g.Goals[i]?"✓":"○",20,g.Goals[i]?mint:muted); Label(new(87,183+i*43,238,36),goals[i],16,g.Goals[i]?ivory:muted); }
+                if(g.Complete) { Box(new(32,388,312,100),ink); Label(new(52,406,276,68),"¡Ya eres de la casa!\nSigue jugando o prueba el billar.",18,ivory,FontStyle.Bold); }
+                // A target label is shown only close to Bruno and in front of the camera.
+                Vector3 sp=Camera.main.WorldToScreenPoint(g.Rival.Focus+Vector3.up*1.1f);
+                if(sp.z>0&&Vector3.Distance(g.Player.transform.position,g.Rival.transform.position)<6) {
+                    float sx=(sp.x-ox)/scale, sy=(Screen.height-sp.y-oy)/scale;
+                    if(sx>360&&sx<1300&&sy>100&&sy<670) { Box(new(sx-85,sy-10,170,40),ink); Label(new(sx-80,sy-2,160,30),g.Rival.Fallen?"BRUNO · AL SUELO":"BRUNO · RIVAL",13,g.Rival.Fallen?orange:mint,FontStyle.Bold,TextAnchor.UpperCenter); }
+                }
+                Box(new(32,690,230,65),ink); Label(new(50,704,195,42),"ACIERTO  "+g.Hits+"     FALLO  "+g.Misses,15,ivory,FontStyle.Bold);
+                if(g.Player.EffectRemaining>0) { Box(new(1050,114,358,78),ink); Label(new(1070,132,320,52),"LAGUNA AZUL  /  "+g.Player.EffectRemaining.ToString("0.0")+" s\nFricción reducida · cuidado al frenar",16,mint,FontStyle.Bold); }
+                // Small reticle; targeting is based on actor orientation and reach, not color alone.
+                Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
+            } else { PoolHUD(); }
+            if(!g.Pool.Active&&Time.unscaledTime<g.ToastUntil) { Box(new(385,666,670,76),ink); Label(new(407,684,626,50),g.Toast,18,ivory,FontStyle.Bold,TextAnchor.UpperCenter); }
+            if(g.Charging) {
+                Box(new(510,590,420,56),ink); Label(new(528,600,380,24),(g.Held?"LANZAMIENTO":g.Pool.Active?"POTENCIA DEL TIRO":"CARGANDO GOLPE")+"  "+Mathf.RoundToInt(g.Charge*100)+"%",14,ivory,FontStyle.Bold);
+                Box(new(528,629,384,5),new Color(.18f,.23f,.25f)); Box(new(528,629,384*g.Charge,5),orange);
+            }
+            Box(new(284,763,872,54),ink); Label(new(302,780,836,32),g.Prompt(),16,ivory,FontStyle.Bold,TextAnchor.UpperCenter);
+            Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),g.Pool.Active?"RATÓN / STICK  apuntar     RUEDA / ↑ ↓  potencia     ← →  ajuste fino     CLIC / RT  tirar     TAB / RB  ejercicio     E / B  salir":"WASD / STICK  moverse     SHIFT  correr     RATÓN / STICK  mirar     CLIC / RT  golpe     E / A  interactuar     Q / B  soltar     R  reiniciar",14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
+        }
+        private void PoolHUD()
+        {
+            var pool=g.Pool;
+            Box(new(32,114,330,212),ink); Tag(52,138,"BILLAR · PRÁCTICA",mint);
+            Label(new(52,173,290,35),drillName??pool.DrillName,21,ivory,FontStyle.Bold);
+            Label(new(52,221,290,44),poolPotted+" / "+poolTotal+" embocadas",27,mint,FontStyle.Bold);
+            Label(new(52,280,290,30),"TIROS  "+poolShots,17,muted,FontStyle.Bold);
+            Box(new(32,344,330,199),ink); Label(new(52,365,290,54),poolStatus??pool.Status,18,poolPhase==PoolPhase.Complete?mint:orange,FontStyle.Bold);
+            Label(new(52,425,290,100),poolResult??pool.Result,18,ivory);
+            Box(new(1032,114,376,307),ink);
+            bool placing=pool.Phase==PoolPhase.BallInHand, complete=pool.Phase==PoolPhase.Complete;
+            Label(new(1052,137,330,30),placing?"BLANCA EN MANO":"POTENCIA",16,mint,FontStyle.Bold);
+            Label(new(1052,173,330,48),placing?"Busca un hueco":Mathf.RoundToInt(pool.Power*100)+" %",placing?25:34,ivory,FontStyle.Bold);
+            bool enabled=GUI.enabled; GUI.enabled=enabled&&!g.Paused;
+            if(!placing) {
+                float power=GUI.HorizontalSlider(new(1052,236,332,25),pool.Power,.05f,1);
+                if(!Mathf.Approximately(power,pool.Power)) pool.SetPower(power);
+            }
+            Label(new(1052,275,330,48),placing?"Cursor sobre el paño y clic.\nEl contorno verde indica sitio libre.":"Rueda o ↑ ↓ para ajustar.\n← → para afinar la dirección.",16,muted);
+            GUI.enabled=enabled&&!g.Paused&&(pool.CanShoot||(placing&&pool.CanPlace)||complete);
+            string action=complete?"REPETIR EJERCICIO":placing?"COLOCAR BLANCA":pool.Moving?"BOLAS EN MOVIMIENTO":"TIRAR    CLIC / RT";
+            if(Button(new(1052,340,332,55),action,true)) { if(complete) pool.Reset(); else if(placing) pool.ConfirmPlacement(); else g.QueuePoolShot(); }
+            GUI.enabled=enabled&&!g.Paused&&!pool.Moving;
+            Box(new(1032,443,376,298),ink); Label(new(1052,464,330,28),"ELIGE UN EJERCICIO",16,mint,FontStyle.Bold);
+            string[] names={"Emboque recto","Tiro de corte","Bandas","Triángulo de seis"};
+            for(int i=0;i<4;i++) if(Button(new(1052,508+i*49,332,40),(pool.Drill==(PoolDrill)i?"●  ":"")+(i+1)+"  "+names[i])) pool.SelectDrill((PoolDrill)i);
+            GUI.enabled=enabled&&!g.Paused;
+            if(Button(new(32,565,330,48),pool.ResetPending?"CONFIRMAR REINICIO · R":"REINICIAR EJERCICIO · R")) pool.RequestReset();
+            if(Button(new(32,630,330,48),"VOLVER A LA TABERNA · E")) pool.Exit();
+            GUI.enabled=enabled;
+            Label(new(52,706,290,43),"Sin apuestas ni reglas de bola 8.\nObjetivo: embocar en pocos tiros.",14,muted);
+            for(int i=0;i<pool.Balls.Count;i++) {
+                var ball=pool.Balls[i]; if(!ball.gameObject.activeSelf||ball.isKinematic) continue;
+                Vector3 p=Camera.main.WorldToScreenPoint(ball.position); float x=(p.x-ox)/scale,y=(Screen.height-p.y-oy)/scale;
+                if(p.z>0&&x>390&&x<1000&&y>106&&y<754) Label(new(x-12,y-11,24,24),i==0?"•":i.ToString(),16,i==0?ink:ivory,FontStyle.Bold,TextAnchor.MiddleCenter);
+            }
+        }
+        private void Pause()
+        {
+            Box(new(-ox/scale,-oy/scale,Screen.width/scale,Screen.height/scale),new Color(0,0,0,.65f));
+            if(g.Settings) { Settings(new(400,185,640,475)); return; }
+            Box(new(480,200,480,490),ink); Tag(524,237,"LA TABERNA PUEDE ESPERAR",mint); Label(new(524,295,380,65),"UN RESPIRO",42,ivory,FontStyle.Bold);
+            if(Button(new(524,390,392,58),"VOLVER A LA RONDA",true)) g.SetPause(false);
+            if(Button(new(524,466,392,50),"AJUSTES")) g.Settings=true;
+            if(Button(new(524,534,392,50),"REINICIAR DEMO")) { g.ResetSession(); g.SetPause(false); }
+            if(Button(new(524,602,392,50),"VOLVER AL INICIO")) g.Menu();
+        }
+        private void Settings(Rect panel)
+        {
+            Box(panel,ink); float x=panel.x+36,y=panel.y+30;
+            Label(new(x,y,560,55),"A TU MANERA",32,ivory,FontStyle.Bold);
+            Label(new(x,y+79,560,28),"Volumen de efectos",18,ivory); FocusControl(new(x,y+115,550,28)); g.Audio.Volume=GUI.HorizontalSlider(new(x,y+118,550,22),g.Audio.Volume,0,1);
+            Label(new(x,y+155,560,28),"Sensibilidad de cámara",18,ivory); FocusControl(new(x,y+191,550,28)); g.Rig.Sensitivity=GUI.HorizontalSlider(new(x,y+194,550,22),g.Rig.Sensitivity,.04f,.3f);
+            if(Button(new(x,y+239,550,48),g.Rig.ReduceMotion?"MOVIMIENTO REDUCIDO: ACTIVADO":"MOVIMIENTO REDUCIDO: DESACTIVADO")) g.Rig.ReduceMotion=!g.Rig.ReduceMotion;
+            Label(new(x,y+305,550,44),"Desactiva las sacudidas de impacto.\n↑ ↓ elegir · ← → ajustar · Enter aceptar",15,muted);
+            if(Button(new(x,y+369,550,46),"GUARDAR Y VOLVER",true)) { g.SaveSettings(); g.Settings=false; }
+        }
+    }
+}

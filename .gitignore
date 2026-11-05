@@ -1,0 +1,41 @@
+# Unity-generated data and per-machine state
+[Tt]avernChaos/[Ll]ibrary/
+[Tt]avernChaos/[Tt]emp/
+[Tt]avernChaos/[Oo]bj/
+[Tt]avernChaos/[Ll]ogs/
+[Tt]avernChaos/[Uu]ser[Ss]ettings/
+[Tt]avernChaos/[Mm]emoryCaptures/
+[Tt]avernChaos/[Rr]ecordings/
+[Tt]avernChaos/.vs/
+[Tt]avernChaos/.idea/
+*.csproj
+*.sln
+*.slnx
+*.suo
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.opendb
+*.VC.db
+
+# Compiled players are distributed through GitHub Releases
+/Builds/
+*.app/
+*.log
+.DS_Store
+Thumbs.db
+
+# Local tooling and credentials
+/.codex/
+/.agents/
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.pfx
+*.key
+
+# Local validation paths, rather than portable test results
+Evidence/**/project-check.json

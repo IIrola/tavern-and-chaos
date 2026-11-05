@@ -1,0 +1,31 @@
+{
+    "unity": "6000.6.8f1",
+    "platform": "OSXPlayer",
+    "passed": true,
+    "checks": [
+        "Session starts with active controls",
+        "Charged in-range punch knocks down rival exactly once",
+        "Impact cannot repeat within one attack",
+        "Articulated rival recovers automatically after three seconds",
+        "Missed punch knocks down player after impact window",
+        "Player regains control after a missed punch",
+        "Bar interaction activates Laguna Azul",
+        "Repeated drink refreshes duration without stacking",
+        "Nearby bottle can be grabbed",
+        "Charged release throws the held physics body once",
+        "Swept bottle impact knocks down rival",
+        "All four first-round objectives can be completed",
+        "Falling releases bottle and clears drink effect",
+        "Drink expires and restores normal movement modifier",
+        "Pause freezes simulation",
+        "Pool table enters dedicated camera and moves player clear of balls",
+        "Practice cue applies impulse to the real physics ball",
+        "Pool reset stops and restores all balls",
+        "Pool exit returns to character controls",
+        "Throwable inventory stays bounded at five bottles",
+        "Session reset clears objectives, actors, props and effects",
+        "No runtime errors or exceptions"
+    ],
+    "failures": [],
+    "runtimeErrors": []
+}
