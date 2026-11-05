@@ -1,5 +1,24 @@
 # Cambios
 
+## 0.3.1 · Primera persona y demo LAN (cambios locales, sin publicar)
+
+- Integración de la demo local con la sala LAN: movimiento, golpe, agarre/lanzamiento de botellas y Laguna Azul, con autoridad en el anfitrión.
+- Cámara en primera persona tanto en local como en LAN: mirada hacia arriba, abajo y a los lados, cuerpo orientado con la vista y una cámara propia para cada jugador. Los lanzamientos siguen la dirección vertical y horizontal de la mirada; el billar conserva su cámara cenital de práctica local.
+- Corrección del reinicio manteniendo movimiento: R restablece posición, orientación, cámara e inercia. En LAN solo recoloca al jugador que lo solicita; no reinicia la sala ni cancela una caída o un golpe ya soltado.
+- Laguna Azul: en LAN cuesta 20 fichas y su efecto dura ocho segundos; repetirla renueva la duración. Mientras está activa, un choque frontal de al menos 3 m/s contra pared o mueble provoca un tropiezo y caída física. El suelo, los roces laterales y empujar lentamente una pared no activan la caída.
+- Al caer se suelta la botella, se cancela la carga pendiente y se elimina el efecto de la bebida. La recuperación comienza tras tres segundos y busca un punto libre para volver a estar de pie.
+- Corrección de cuerpos desplazados y pies/giros incorrectos en el invitado: se sincronizan las posiciones y rotaciones de las seis partes del cuerpo sin que la interpolación de PhysX sobrescriba la de red. Incluye al anfitrión, al propio invitado y a Bruno.
+- Las caídas del invitado muestran la postura física simulada por el anfitrión, en lugar de una inclinación aproximada que podía dejar a Bruno flotando. La botella agarrada sigue la mano del dueño representado en pantalla.
+- Partículas y sonido de impactos de puños y botellas en ambas copias, con eventos identificados para evitar repeticiones. También se comunican los sonidos de agarre, lanzamiento, bebida y resbalón.
+- Pausa local en LAN, posesión exclusiva de botellas, liberación al salir y limpieza de efectos al volver a entrar. La concesión de 1.000 fichas se mantiene una sola vez por IP y sala; una sala nueva reinicia el registro.
+- Compilación Windows 0.3.1 y lanzador `Probar-LAN.cmd` para abrir dos copias en un equipo. Protocolo de sala 3: todas las copias deben usar la misma versión; las antiguas deben cerrarse antes de volver a probar.
+- Compilación macOS 0.3.1 universal (Intel y Apple Silicon), con macOS 12.0 como mínimo, ZIP con permisos de ejecución e instrucciones de apertura. Generada desde Windows; ejecución en Mac y juego cruzado pendientes. El resultado de compilación se guarda por separado para conservar la evidencia de la release 0.2.0.
+- Exclusión de informes de migración, configuración local de Visual Studio, metadatos locales de skills y ensayos intermedios. Se conservan en Git los informes finales de validación, el código y sus `.meta`, paquetes y configuración del proyecto.
+
+Validación: 23 comprobaciones locales, 54 de integración por loopback y 115 de cuerpos, caídas, cámara y efectos aprobadas. Tras repetir la prueba, el usuario confirmó que las correcciones funcionan. Detalle técnico y límites en [Evidence/pre-hito1/VALIDACION.md](Evidence/pre-hito1/VALIDACION.md); recorrido y conexión en [Docs/LAN_HITO1.md](Docs/LAN_HITO1.md).
+
+Alcance: se conserva el controlador de cápsula con ragdoll pasivo al caer. Los tropiezos descritos son por choque con Laguna Azul, no un sistema general de ebriedad. Siguen pendientes las pruebas LAN entre equipos, latencia/pérdida, juego cruzado y seis personas. El billar sigue siendo local; no se han iniciado las mesas compartidas ni el Hito 2. La release macOS 0.2.0 no contiene estos cambios.
+
 ## 0.2.0 · Jugabilidad y UX
 
 - Billar: frenada constante de rodadura y giro, masas iguales, materiales distintos para bolas y bandas, contactos más precisos y detección continua.

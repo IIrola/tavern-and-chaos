@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "scope": "Automated pre-Hito 1 component integration: separate Windows players, real loopback UDP, controlled server fixtures. Not multi-machine LAN or manual acceptance.",
+  "manualHito1": "Pending: user will perform acceptance",
+  "results": [
+    {
+      "role": "smoke-host",
+      "exitCode": 0,
+      "passed": true,
+      "checks": 31,
+      "failures": [],
+      "runtimeErrors": [],
+      "rttMilliseconds": 0,
+      "bytesReceived": 0,
+      "snapshots": 0
+    },
+    {
+      "role": "smoke-client",
+      "exitCode": 0,
+      "passed": true,
+      "checks": 23,
+      "failures": [],
+      "runtimeErrors": [],
+      "rttMilliseconds": 33,
+      "bytesReceived": 1392900,
+      "snapshots": 150
+    }
+  ]
+}

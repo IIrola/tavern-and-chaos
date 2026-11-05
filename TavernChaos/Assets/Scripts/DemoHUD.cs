@@ -12,6 +12,10 @@ namespace TavernChaos
         private int focus, controls, lastControls, accept=-1;
         private float nextNavigate;
         private string menuScreen;
+        private bool lanLobby,roomRoster,editingLanField;
+        private GUIStyle lanField;
+        private string lanName="Invitado", lanAddress="127.0.0.1", lanPort="7777";
+        private int lanMinutes=30;
         private string poolStatus, poolResult, drillName;
         private int poolShots, poolPotted, poolTotal;
         private PoolPhase poolPhase;
@@ -21,9 +25,10 @@ namespace TavernChaos
         public void HandleMenuInput()
         {
             if(!g) g=DemoGame.Instance;
-            string screen=(g.Started?"pause":"menu")+(g.Settings?"settings":"");
+            string screen=(g.Started?"pause":"menu")+(g.Settings?"settings":lanLobby?"lan":roomRoster?"roster":"");
             if(menuScreen!=screen) { menuScreen=screen; focus=0; accept=-1; nextNavigate=0; }
-            if(g.Input.Back.WasPressedThisFrame()) { if(g.Settings) { g.SaveSettings(); g.Settings=false; } else if(g.Paused) g.SetPause(false); return; }
+            if(g.Input.Back.WasPressedThisFrame()) { if(roomRoster) roomRoster=false; else if(lanLobby) lanLobby=false; else if(g.Settings) { g.SaveSettings(); g.Settings=false; } else if(g.Paused) g.SetPause(false); return; }
+            if(lanLobby&&editingLanField) return;
             Vector2 nav=g.Input.Navigate.ReadValue<Vector2>();
             if(Mathf.Abs(nav.y)>.5f && Time.unscaledTime>=nextNavigate && lastControls>0) { focus=(focus+(nav.y>0?-1:1)+lastControls)%lastControls; nextNavigate=Time.unscaledTime+.2f; }
             if(Mathf.Abs(nav.y)<.2f) nextNavigate=0;
@@ -52,6 +57,7 @@ namespace TavernChaos
             controls=0;
             if(!g.Started) Menu(); else { GUI.enabled=!g.Paused; Game(); GUI.enabled=true; if(g.Paused) Pause(); }
             lastControls=controls;
+            editingLanField=lanLobby&&GUI.GetNameOfFocusedControl().StartsWith("lan-");
             GUI.matrix=Matrix4x4.identity;
         }
         private void Box(Rect r,Color c) { GUI.color=QualitySettings.activeColorSpace==ColorSpace.Linear?c.linear:c; GUI.DrawTexture(r,Texture2D.whiteTexture); GUI.color=Color.white; }
@@ -78,9 +84,9 @@ namespace TavernChaos
         private void Tag(float x,float y,string s,Color c) { Box(new(x,y,8,8),c); Label(new(x+18,y-4,360,25),s,13,c,FontStyle.Bold); }
         private void Menu()
         {
-            GUI.enabled=!g.Settings;
+            GUI.enabled=!g.Settings&&!lanLobby;
             Box(new(0,0,660,H),new Color(.025f,.035f,.048f,.94f)); Box(new(0,0,8,H),orange);
-            Tag(64,57,"PRIMERA RONDA   /   DEMO 01",mint);
+            Tag(64,57,"PRIMERA RONDA / LOCAL + LAN "+Application.version,mint);
             Label(new(60,130,580,180),"TAVERN\n<color=#FF7947>& CHAOS</color>",81,ivory,FontStyle.Bold);
             Label(new(64,338,480,45),"Una taberna. Un golpe. Mucho caos.",25,ivory,FontStyle.Bold);
             Label(new(64,397,475,84),"Entra, prueba tu puntería y deja que la física\nhaga el resto. Bruno ya te está esperando.",20,muted);
@@ -88,14 +94,17 @@ namespace TavernChaos
             if(Button(new(64,603,440,49),"PRACTICAR BILLAR")) g.BeginPoolPractice();
             if(Button(new(64,668,212,49),"AJUSTES")) g.Settings=!g.Settings;
             if(Button(new(292,668,212,49),"SALIR")) Application.Quit();
-            Label(new(64,739,500,32),"EXPERIENCIA LOCAL · 1 JUGADOR + BRUNO",13,mint,FontStyle.Bold);
+            Label(new(64,739,500,32),"PRÁCTICA LOCAL O SALA LAN · HASTA 6 PERSONAS",13,mint,FontStyle.Bold);
             Label(new(64,778,505,52),"WASD  moverse     RATÓN  mirar\nE  interactuar     MANTENER CLIC  cargar golpe",16,muted);
             Label(new(64,838,520,30),"↑ ↓  ELEGIR    ENTER  ACEPTAR    ESC  VOLVER",12,muted);
             Box(new(1010,57,366,44),ink); Label(new(1024,67,338,26),"ROCK, FÍSICA Y MALAS DECISIONES",13,ivory,FontStyle.Bold);
             Card(702,650,"01","CONECTA O CAE","Aciertas: cae Bruno.\nFallas: caes tú.");
             Card(936,650,"02","SIRVE EL CAOS","Pies de hielo y\nbotellas voladoras.");
             Card(1170,650,"03","BAJA EL RITMO","Billar libre entre\ngolpe y golpe.");
+            if(Button(new(1010,115,366,48),"CREAR / UNIRSE A SALA LAN")) lanLobby=true;
+            if(g.Lan&&!string.IsNullOrEmpty(g.Lan.Status)) Label(new(704,180,672,68),g.Lan.Status,17,muted);
             GUI.enabled=true;
+            if(lanLobby) Lobby();
             if(g.Settings) Settings(new(710,130,640,475));
         }
         private void Card(float x,float y,string num,string title,string desc)
@@ -105,9 +114,10 @@ namespace TavernChaos
         private void Game()
         {
             Box(new(32,28,1376,62),ink); Label(new(52,43,350,35),"TAVERN <color=#FF7947>& CHAOS</color>",22,ivory,FontStyle.Bold);
-            Label(new(480,49,520,30),g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+            Label(new(480,49,520,30),g.Lan&&g.Lan.Running?"SALA LAN · PRIMERA PERSONA":g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
             Label(new(1110,49,270,30),g.Pool.Active?"ESC  Pausa     E  Volver":"ESC  Pausa y ajustes",15,muted,FontStyle.Normal,TextAnchor.UpperRight);
-            if(!g.Pool.Active) {
+            if(g.Lan&&g.Lan.Running) { RoomHUD(); }
+            else if(!g.Pool.Active) {
                 Box(new(32,114,312,258),ink); Tag(52,137,g.Complete?"RONDA COMPLETADA":"TU PRIMERA RONDA",g.Complete?orange:mint);
                 string[] goals={"Conecta un golpe a Bruno","Falla un golpe y vuelve a pie","Prueba Laguna Azul en la barra","Derriba a Bruno con una botella"};
                 for(int i=0;i<4;i++) { Label(new(52,181+i*43,25,28),g.Goals[i]?"✓":"○",20,g.Goals[i]?mint:muted); Label(new(87,183+i*43,238,36),goals[i],16,g.Goals[i]?ivory:muted); }
@@ -119,7 +129,7 @@ namespace TavernChaos
                     if(sx>360&&sx<1300&&sy>100&&sy<670) { Box(new(sx-85,sy-10,170,40),ink); Label(new(sx-80,sy-2,160,30),g.Rival.Fallen?"BRUNO · AL SUELO":"BRUNO · RIVAL",13,g.Rival.Fallen?orange:mint,FontStyle.Bold,TextAnchor.UpperCenter); }
                 }
                 Box(new(32,690,230,65),ink); Label(new(50,704,195,42),"ACIERTO  "+g.Hits+"     FALLO  "+g.Misses,15,ivory,FontStyle.Bold);
-                if(g.Player.EffectRemaining>0) { Box(new(1050,114,358,78),ink); Label(new(1070,132,320,52),"LAGUNA AZUL  /  "+g.Player.EffectRemaining.ToString("0.0")+" s\nFricción reducida · cuidado al frenar",16,mint,FontStyle.Bold); }
+                if(g.Player.EffectRemaining>0) { Box(new(1050,114,358,78),ink); Label(new(1070,132,320,52),"LAGUNA AZUL  /  "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!",16,mint,FontStyle.Bold); }
                 // Small reticle; targeting is based on actor orientation and reach, not color alone.
                 Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
             } else { PoolHUD(); }
@@ -129,7 +139,54 @@ namespace TavernChaos
                 Box(new(528,629,384,5),new Color(.18f,.23f,.25f)); Box(new(528,629,384*g.Charge,5),orange);
             }
             Box(new(284,763,872,54),ink); Label(new(302,780,836,32),g.Prompt(),16,ivory,FontStyle.Bold,TextAnchor.UpperCenter);
-            Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),g.Pool.Active?"RATÓN / STICK  apuntar     RUEDA / ↑ ↓  potencia     ← →  ajuste fino     CLIC / RT  tirar     TAB / RB  ejercicio     E / B  salir":"WASD / STICK  moverse     SHIFT  correr     RATÓN / STICK  mirar     CLIC / RT  golpe     E / A  interactuar     Q / B  soltar     R  reiniciar",14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
+            Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),g.Pool.Active?"RATÓN / STICK  apuntar     RUEDA / ↑ ↓  potencia     ← →  ajuste fino     CLIC / RT  tirar     TAB / RB  ejercicio     E / B  salir":g.Lan&&g.Lan.Running?"WASD / STICK  moverse     SHIFT  correr     RATÓN / STICK  mirar     CLIC / RT  golpe     E / A  interactuar     Q / B  soltar     R  recolocarte":"WASD / STICK  moverse     SHIFT  correr     RATÓN / STICK  mirar     CLIC / RT  golpe     E / A  interactuar     Q / B  soltar     R  reiniciar",14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
+        }
+        internal void ShowLanPanelForCheck(bool show) { lanLobby=show; }
+        internal void ShowRosterForCheck() { roomRoster=true; }
+        private void Lobby()
+        {
+            Box(new(700,255,676,375),ink); Label(new(726,277,620,38),"UNA MESA PARA TU GRUPO",27,ivory,FontStyle.Bold);
+            if(lanField==null) lanField=new GUIStyle(GUI.skin.textField){fontSize=19,padding=new RectOffset(10,10,4,4)};
+            Label(new(726,330,150,28),"Tu nombre",18,muted);
+            GUI.SetNextControlName("lan-name"); lanName=GUI.TextField(new(880,326,462,32),lanName,24,lanField);
+            Label(new(726,375,150,28),"IP o código",18,muted);
+            GUI.SetNextControlName("lan-address"); lanAddress=GUI.TextField(new(880,371,312,32),lanAddress,32,lanField);
+            GUI.SetNextControlName("lan-port"); lanPort=GUI.TextField(new(1207,371,135,32),lanPort,5,lanField);
+            if(Button(new(726,420,616,40),"DURACIÓN DE SALA: "+lanMinutes+" MIN")) lanMinutes=lanMinutes==20?30:lanMinutes==30?45:lanMinutes==45?60:20;
+            bool valid=ushort.TryParse(lanPort,out ushort port)&&port>0;
+            GUI.enabled=valid;
+            if(Button(new(726,479,295,51),"CREAR SALA",true)) { if(g.Lan.Host(lanName,port,lanMinutes)) lanLobby=false; }
+            if(Button(new(1042,479,300,51),"ENTRAR EN SALA")) { if(g.Lan.Join(lanName,lanAddress,port)) lanLobby=false; }
+            GUI.enabled=true;
+            Label(new(726,547,616,60),"Mismo equipo: IP 127.0.0.1 y el mismo puerto.\nOtra máquina en tu red: usa el código del anfitrión.",16,muted);
+            if(Button(new(726,601,616,36),"VOLVER")) lanLobby=false;
+        }
+        private void RoomHUD()
+        {
+            var room=g.Lan; var view=room.View;
+            Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
+            float effectY=view?.voteActive==true?285:114;
+            Box(new(1032,effectY,376,110),ink);
+            Label(new(1052,effectY+18,332,80),g.Player.EffectRemaining>0?"LAGUNA AZUL · "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!":"BARRA · LAGUNA AZUL\nE para beber · 20 fichas\nEl billar sigue en práctica local.",16,g.Player.EffectRemaining>0?mint:muted,FontStyle.Bold);
+            Box(new(32,114,330,390),ink); Tag(52,138,room.IsHost?"SALA LAN · ANFITRIÓN":room.Connected?"SALA LAN · CONECTADO":"SALA LAN · CONECTANDO",mint);
+            Label(new(52,175,290,32),"CÓDIGO  "+room.RoomCode,19,ivory,FontStyle.Bold);
+            Label(new(52,216,290,30),(view?.actors?.Length??0)+" / 6 personas",18,mint,FontStyle.Bold);
+            if(view?.actors!=null) for(int i=0;i<view.actors.Length;i++) {
+                var actor=view.actors[i]; float y=260+i*32;
+                Label(new(52,y,290,28),(actor.name.Length>18?actor.name.Substring(0,17)+"…":actor.name)+"  ·  "+actor.chips,16,ivory);
+                if(room.ActorFor(actor.id) is TavernActor visual&&actor.id!=room.LocalId) {
+                    Vector3 p=Camera.main.WorldToScreenPoint(visual.Focus+Vector3.up*.6f);
+                    if(p.z>0) Label(new((p.x-ox)/scale-70,(Screen.height-p.y-oy)/scale-18,140,28),actor.name,15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+                }
+            }
+            if(view!=null) {
+                Label(new(52,461,290,30),"QUEDAN  "+Mathf.CeilToInt(view.secondsRemaining/60)+" MIN",15,muted);
+                Box(new(32,522,330,110),ink); Label(new(52,541,290,78),view.notice,17,ivory);
+                if(view.voteActive) {
+                    Box(new(1032,114,376,150),ink); Label(new(1052,134,330,55),"VOTACIÓN DE EXPULSIÓN\n"+view.votes+" / "+view.votesNeeded+" votos necesarios",17,ivory,FontStyle.Bold);
+                    Label(new(1052,206,332,40),"ESC → Jugadores para votar",16,mint,FontStyle.Bold);
+                }
+            }
         }
         private void PoolHUD()
         {
@@ -171,12 +228,34 @@ namespace TavernChaos
         private void Pause()
         {
             Box(new(-ox/scale,-oy/scale,Screen.width/scale,Screen.height/scale),new Color(0,0,0,.65f));
+            if(roomRoster&&g.Lan&&g.Lan.Running) { RosterMenu(); return; }
             if(g.Settings) { Settings(new(400,185,640,475)); return; }
             Box(new(480,200,480,490),ink); Tag(524,237,"LA TABERNA PUEDE ESPERAR",mint); Label(new(524,295,380,65),"UN RESPIRO",42,ivory,FontStyle.Bold);
             if(Button(new(524,390,392,58),"VOLVER A LA RONDA",true)) g.SetPause(false);
             if(Button(new(524,466,392,50),"AJUSTES")) g.Settings=true;
-            if(Button(new(524,534,392,50),"REINICIAR DEMO")) { g.ResetSession(); g.SetPause(false); }
+            if(g.Lan&&g.Lan.Running) { if(Button(new(524,534,392,50),"JUGADORES Y VOTACIÓN")) roomRoster=true; }
+            else if(Button(new(524,534,392,50),"REINICIAR DEMO")) { g.ResetSession(); g.SetPause(false); }
             if(Button(new(524,602,392,50),"VOLVER AL INICIO")) g.Menu();
+        }
+        private void RosterMenu()
+        {
+            var room=g.Lan; var view=room.View;
+            Box(new(420,160,600,590),ink); Label(new(455,189,530,42),"JUGADORES DE LA SALA",29,ivory,FontStyle.Bold);
+            Label(new(455,239,530,58),"Proponer una expulsión abre una votación de 15 s.\nHace falta más de la mitad de la sala.",17,muted);
+            if(view?.actors!=null) for(int i=0;i<view.actors.Length;i++) {
+                var member=view.actors[i]; float y=320+i*43;
+                Label(new(455,y+3,318,34),member.name+(member.id==room.LocalId?" (tú)":""),17,ivory);
+                GUI.enabled=member.id!=room.LocalId&&!view.voteActive;
+                if(Button(new(793,y,192,34),"PROPONER")) room.Send(LanAction.ProposeKick,target:member.id);
+                GUI.enabled=true;
+            }
+            if(view?.voteActive==true) {
+                Label(new(455,590,310,40),view.votes+" / "+view.votesNeeded+" votos necesarios",18,mint,FontStyle.Bold);
+                GUI.enabled=view.voteTarget!=room.LocalId;
+                if(Button(new(793,584,192,39),"A FAVOR",true)) room.Send(LanAction.VoteYes);
+                GUI.enabled=true;
+            }
+            if(Button(new(455,665,530,48),"VOLVER")) roomRoster=false;
         }
         private void Settings(Rect panel)
         {

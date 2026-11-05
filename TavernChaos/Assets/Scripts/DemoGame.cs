@@ -13,6 +13,7 @@ namespace TavernChaos
         public PoolPractice Pool { get; private set; }
         public DemoAudio Audio { get; private set; }
         public DemoInput Input { get; private set; }
+        public LanSession Lan { get; private set; }
         public bool Started { get; private set; }
         public bool SmokeMode { get; private set; }
         internal bool TestDriveInput;
@@ -38,7 +39,7 @@ namespace TavernChaos
         private readonly List<(GameObject obj,float end)> sparks=new();
         private void Awake()
         {
-            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
+            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
             Physics.defaultSolverIterations=10; Physics.defaultSolverVelocityIterations=4;
             TavernWorld.Build();
             Player=CreateActor("You | Mica",true,new(0,.08f,-4)); Rival=CreateActor("Rival | Bruno",false,new(0,.08f,-.1f));
@@ -47,17 +48,34 @@ namespace TavernChaos
             for(int i=0;i<5;i++) Bottles.Add(ThrowableBottle.Create(new(-2.8f+i*.3f,1.18f,-2.3f)));
             TavernWorld.Box("Bottle stand",new(-2.2f,.48f,-2.3f),new(1.8f,.96f,.8f),TavernWorld.DarkWood);
             TavernWorld.Text("BOTELLAS",new(-2.2f,1.8f,-2.3f),.13f,new Color(.5f,.95f,.83f));
-            var cam=new GameObject("Tavern camera"); cam.tag="MainCamera"; var c=cam.AddComponent<Camera>(); c.fieldOfView=60; c.nearClipPlane=.08f; c.farClipPlane=70; c.backgroundColor=new(.06f,.065f,.09f); cam.AddComponent<AudioListener>(); Rig=cam.AddComponent<TavernCamera>();
+            var cam=new GameObject("Tavern camera"); cam.tag="MainCamera"; var c=cam.AddComponent<Camera>(); c.fieldOfView=60; c.nearClipPlane=.03f; c.farClipPlane=70; c.backgroundColor=new(.06f,.065f,.09f); cam.AddComponent<AudioListener>(); Rig=cam.AddComponent<TavernCamera>();
             Audio=gameObject.AddComponent<DemoAudio>(); Input=new DemoInput(); hud=gameObject.AddComponent<DemoHUD>();
             Pool.Changed+=OnPoolChanged;
             Rig.ReduceMotion=PlayerPrefs.GetInt("reduceMotion",0)==1; Rig.Sensitivity=PlayerPrefs.GetFloat("sensitivity",.13f); Audio.Volume=PlayerPrefs.GetFloat("volume",.6f);
             SetCursor(false);
-            if(SmokeMode) gameObject.AddComponent<DemoSmokeTests>();
+            Lan=gameObject.AddComponent<LanSession>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests")) gameObject.AddComponent<DemoSmokeTests>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-lan-check")) gameObject.AddComponent<LanProcessChecks>();
         }
+        internal TavernActor CreateRoomActor(string name,Vector3 home)=>CreateActor(name,true,home);
+        internal void SetRoomHeld(ThrowableBottle bottle) { Held=bottle; }
+        public IEnumerable<TavernActor> CombatTargets()
+        {
+            if(Lan&&Lan.IsHost) { foreach(var actor in Lan.CombatTargets()) yield return actor; }
+            else yield return Rival;
+        }
+        public void ResetLocalView() { Rig.Yaw=Rig.Pitch=0; Charging=false; Charge=0; move=Vector2.zero; run=false; Rig.Snap(); }
         private TavernActor CreateActor(string name,bool player,Vector3 home)
         {
             var go=new GameObject(name); go.layer=8; var actor=go.AddComponent<TavernActor>(); actor.Initialize(player,home); foreach(Transform t in go.GetComponentsInChildren<Transform>()) t.gameObject.layer=8; return actor;
         }
+#if UNITY_EDITOR
+        public void RunFirstPersonChecks()
+        {
+            SmokeMode=true;
+            var checks=gameObject.AddComponent<DemoSmokeTests>(); checks.FirstPersonOnly=true;
+        }
+#endif
         public void Begin()
         {
             Started=true; Settings=false; Paused=false; Time.timeScale=1; ResetSession(); SetCursor(true); Rig.Snap(); RefreshInputContext(); Audio.Play("ui"); Notify("Acércate a Bruno. Mantén el golpe y suelta cerca de él.");
@@ -69,10 +87,13 @@ namespace TavernChaos
         public void SetPause(bool value)
         {
             if(!Started) return; Paused=value; Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; move=Vector2.zero; run=false; interactRequest=dropRequest=false;
-            Time.timeScale=value?0:1; RefreshInputContext(); Audio.Play("ui");
+            Time.timeScale=Lan&&Lan.Running?1:value?0:1;
+            if(value&&Lan&&Lan.Connected) Lan.Send(LanAction.Stop);
+            RefreshInputContext(); Audio.Play("ui");
         }
         public void Menu()
         {
+            if(Lan) Lan.Leave();
             Time.timeScale=1; Started=false; Paused=false; Settings=false; Pool.Exit(); Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; move=Vector2.zero;
             if(Held) { Held.ResetToRack(); Held=null; } Player.ClearEffect(); SetCursor(false); Rig.Snap(); RefreshInputContext();
         }
@@ -80,9 +101,16 @@ namespace TavernChaos
         {
             PlayerPrefs.SetInt("reduceMotion",Rig.ReduceMotion?1:0); PlayerPrefs.SetFloat("sensitivity",Rig.Sensitivity); PlayerPrefs.SetFloat("volume",Audio.Volume); PlayerPrefs.Save();
         }
-        private static void SetCursor(bool capture) { Cursor.lockState=capture?CursorLockMode.Locked:CursorLockMode.None; Cursor.visible=!capture; }
+        private static void SetCursor(bool capture)
+        {
+            var state=capture?CursorLockMode.Locked:CursorLockMode.None;
+            if(Cursor.lockState!=state) Cursor.lockState=state;
+            if(Cursor.visible==capture) Cursor.visible=!capture;
+        }
+        private PoolPhase lastPoolPhase;
         private void OnPoolChanged()
         {
+            if(Pool.Phase!=lastPoolPhase) { lastPoolPhase=Pool.Phase; poolPointerSeen=false; }
             if(!Pool.Active) { pendingPower=-1; Charging=false; Charge=0; }
             RefreshInputContext();
         }
@@ -98,15 +126,33 @@ namespace TavernChaos
             for(int i=sparks.Count-1;i>=0;i--) if(Time.time>sparks[i].end) { Destroy(sparks[i].obj); sparks.RemoveAt(i); }
             if(SmokeMode&&!TestDriveInput) { Pool.UpdateGuide(); return; }
             if(!Started || Paused) { hud.HandleMenuInput(); return; }
+            if(Lan&&Lan.Running) { UpdateRoomInput(); return; }
             if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); return; }
             if(Input.Pause.WasPressedThisFrame()) { Settings=false; SetPause(true); return; }
-            Rig.Look(Input.Look.ReadValue<Vector2>());
+            if(Input.Reset.WasPressedThisFrame()) { ResetSession(); return; }
+            Vector2 look=Input.Look.ReadValue<Vector2>();
+            // Mouse delta is already per-frame; a stick is an angular rate and needs delta time.
+            if(Input.Look.activeControl?.device is UnityEngine.InputSystem.Gamepad) look*=Time.unscaledDeltaTime*60;
+            Rig.Look(look);
             move=Input.Move.ReadValue<Vector2>(); run=Input.Run.IsPressed();
             if(Input.Interact.WasPressedThisFrame()) interactRequest=true;
             if(Input.Drop.WasPressedThisFrame()) dropRequest=true;
-            if(Input.Reset.WasPressedThisFrame()) ResetSession();
             if(!Player.Fallen && Input.Punch.WasPressedThisFrame() && Time.time>=cooldown) { Charging=true; Charge=0; }
             if(Charging) { Charge=Mathf.Min(1,Charge+Time.deltaTime); Player.PunchPose(Charge); if(Input.Punch.WasReleasedThisFrame()) { pendingPower=Charge; Charging=false; Charge=0; } }
+            if(Player.Fallen) { Charging=false; Charge=0; }
+        }
+        private void UpdateRoomInput()
+        {
+            if(Input.Pause.WasPressedThisFrame()) { Settings=false; SetPause(true); return; }
+            if(Input.Reset.WasPressedThisFrame()) { Charging=false; Charge=0; Lan.Send(LanAction.Reset); return; }
+            Vector2 look=Input.Look.ReadValue<Vector2>();
+            if(Input.Look.activeControl?.device is UnityEngine.InputSystem.Gamepad) look*=Time.unscaledDeltaTime*60;
+            Rig.Look(look); Vector2 axis=Input.Move.ReadValue<Vector2>();
+            Lan.LocalMove(Rig.Right*axis.x+Rig.Forward*axis.y,Input.Run.IsPressed(),Rig.Yaw,Rig.Pitch);
+            if(Input.Interact.WasPressedThisFrame()) Lan.Send(LanAction.Interact,yaw:Rig.Yaw,pitch:Rig.Pitch);
+            if(Input.Drop.WasPressedThisFrame()) { Charging=false; Charge=0; Lan.Send(LanAction.Drop,yaw:Rig.Yaw,pitch:Rig.Pitch); }
+            if(Input.Punch.WasPressedThisFrame()&&!Player.Fallen) { Charging=true; Charge=0; Lan.Send(LanAction.Charge,yaw:Rig.Yaw,pitch:Rig.Pitch); }
+            if(Charging) { Charge=Mathf.Min(1,Charge+Time.deltaTime); if(Input.Punch.WasReleasedThisFrame()) { Lan.Send(LanAction.Release,yaw:Rig.Yaw,pitch:Rig.Pitch); Charging=false; Charge=0; } }
             if(Player.Fallen) { Charging=false; Charge=0; }
         }
         private void UpdatePoolInput()
@@ -152,9 +198,10 @@ namespace TavernChaos
         }
         private void FixedUpdate()
         {
+            if(Lan&&Lan.Running) { Lan.FixedTick(); return; }
             if(!Started || Paused) return;
             Player.TickRecovery(); Rival.TickRecovery();
-            if(!Pool.Active) { Player.Move(Rig.Right*move.x+Rig.Forward*move.y,run); if(Charging) Player.Aim(Rig.Forward); }
+            if(!Pool.Active) { Player.Aim(Rig.Forward); Player.Move(Rig.Right*move.x+Rig.Forward*move.y,run); }
             if(!Rival.Fallen) { Rival.Move(Vector3.zero,false); Rival.Face(Player.transform.position); }
             if(interactRequest) { interactRequest=false; Interact(); }
             if(dropRequest) { dropRequest=false; Drop(); }
@@ -172,16 +219,13 @@ namespace TavernChaos
             if(Player.Fallen || Time.time<cooldown) return;
             cooldown=Time.time+.6f; Player.Aim(Rig.Forward);
             if(Held) {
-                var bottle=Held; Held=null; bottle.Release((Player.transform.forward+Vector3.up*.1f).normalized*Mathf.Lerp(7,15,power)); Throws++; Audio.Play("miss",.4f); Notify("¡Botella al aire!"); return;
+                var bottle=Held; Held=null; bottle.Release(InteractionRules.LaunchVelocity(Rig.ViewForward,power)); Throws++; Audio.Play("miss",.4f); Notify("¡Botella al aire!"); return;
             }
-            hitPower=power; attackDirection=Rig.Forward; attackUntil=Time.time+.25f; Player.Swing();
+            hitPower=power; attackDirection=Rig.ViewForward; attackUntil=Time.time+.25f; Player.Swing();
         }
         private bool TryHit()
         {
-            if(Rival.Fallen) return false;
-            Vector3 delta=Rival.transform.position-Player.transform.position; delta.y=0;
-            if(delta.magnitude>2.05f || Vector3.Dot(attackDirection,delta.normalized)<.45f) return false;
-            if(Physics.Linecast(Player.Focus,Rival.Focus,1<<0,QueryTriggerInteraction.Ignore)) return false;
+            if(!InteractionRules.CanStrike(Player,Rival,attackDirection)) return false;
             Rival.Fall(attackDirection*Mathf.Lerp(3.4f,6,hitPower)); Hits++; Goals[0]=true; Impact(Rival.Focus); Audio.Play("hit"); Notify("¡CONECTADO! Un golpe. Una caída. Ningún rencor."); return true;
         }
         public void Interact()
@@ -189,17 +233,49 @@ namespace TavernChaos
             if(Player.Fallen) return;
             if(Pool.Active) { Pool.Exit(); Charging=false; move=Vector2.zero; return; }
             if(Held) { Notify("Tienes una botella. Lánzala con el golpe o suéltala con Q."); return; }
+            if(!InteractionRules.CanInteract(Player,false,Charging,attackUntil>=0||pendingPower>=0)) return;
             if(Vector3.Distance(Player.transform.position,TavernWorld.BarPoint)<2.2f) { Drink(); return; }
             if(Vector3.Distance(Player.transform.position,TavernWorld.PoolPoint)<2.5f) { Pool.Enter(); Charging=false; move=Vector2.zero; pendingPower=-1; attackUntil=-1; Notify("Apunta con el cursor. Rueda para potencia, clic para tirar."); return; }
-            ThrowableBottle nearest=null; float dist=2.05f;
-            foreach(var b in Bottles) if(!b.Held&&!b.Flying) { float d=Vector3.Distance(Player.Focus,b.transform.position); if(d<dist) { dist=d; nearest=b; } }
-            if(nearest) { Held=nearest; Held.Grab(Player); Audio.Play("clink",.4f); Notify("Botella equipada. Apunta hacia Bruno y carga el lanzamiento."); }
+            ThrowableBottle nearest=InteractionRules.SelectBottle(Player,Rig.ViewForward,Bottles);
+            if(nearest&&nearest.Grab(Player)) { Held=nearest; Audio.Play("clink",.4f); Notify("Botella equipada. Apunta hacia Bruno y carga el lanzamiento."); }
             else Notify("Busca las botellas, la barra o el billar. Acércate y pulsa E.");
         }
-        public void Drink() { if(Player.Fallen||Held) return; Player.Drink(); Goals[2]=true; Audio.Play("drink"); Impact(Player.Focus,true); Notify("LAGUNA AZUL · 8 s de pies deslizantes. Repetir renueva el efecto."); }
-        public void Drop() { if(!Held) return; var b=Held; Held=null; b.Release(Player.transform.forward*1.5f); }
-        public void ActorFell(TavernActor actor) { if(actor==Player) { Drop(); Pool.Exit(); Charging=false; pendingPower=-1; } }
-        public void BottleHit(Vector3 pos) { Goals[3]=true; Impact(pos); Audio.Play("hit"); Notify("¡BOTELLAZO! Las botellas vuelven al expositor tras unos segundos."); }
+        public void Drink() { if(Player.Fallen||Held) return; Player.Drink(); Goals[2]=true; Audio.Play("drink"); Impact(Player.Focus,true); Notify("LAGUNA AZUL · 8 s deslizándote. ¡Chocar fuerte te derriba!"); }
+        public void Drop()
+        {
+            Charging=false; Charge=0;
+            if(attackUntil<0) pendingPower=-1;
+            if(!Held) return; var b=Held; Held=null; b.Release(Player.transform.forward*1.5f);
+        }
+        public void ActorFell(TavernActor actor)
+        {
+            if(Lan&&Lan.Running) Lan.ActorFell(actor);
+            if(actor==Player) { if(!Lan||!Lan.Running) Drop(); Pool.Exit(); Charging=false; Charge=0; pendingPower=attackUntil=-1; }
+        }
+        public void BottleHit(Vector3 pos)
+        {
+            if(Lan&&Lan.IsHost) { Lan.EmitFeedback(LanFeedbackKind.BottleHit,pos); return; }
+            Goals[3]=true; Impact(pos); Audio.Play("hit"); Notify("¡BOTELLAZO! Las botellas vuelven al expositor tras unos segundos.");
+        }
+        public void SlipFeedback(Vector3 position)
+        {
+            if(Lan&&Lan.IsHost) { Lan.EmitFeedback(LanFeedbackKind.Slip,position); return; }
+            Audio.Play("hit",.5f); Rig.AddImpact(.35f); Notify("¡Resbalón! Con Laguna Azul, chocar a gran velocidad te derriba.");
+        }
+        public int LanHitEffects { get; private set; }
+        public void PresentLanFeedback(LanFeedback feedback)
+        {
+            float gain=Mathf.Clamp01(1-Vector3.Distance(Rig.transform.position,feedback.position)/25);
+            switch(feedback.kind) {
+                case LanFeedbackKind.PunchHit: case LanFeedbackKind.BottleHit:
+                    LanHitEffects++; Impact(feedback.position); Audio.Play("hit",gain); break;
+                case LanFeedbackKind.Miss: Audio.Play("miss",gain); break;
+                case LanFeedbackKind.Throw: Audio.Play("miss",gain*.4f); break;
+                case LanFeedbackKind.Grab: Audio.Play("clink",gain*.4f); break;
+                case LanFeedbackKind.Drink: Impact(feedback.position,true); Audio.Play("drink",gain); break;
+                case LanFeedbackKind.Slip: Impact(feedback.position); Audio.Play("hit",gain*.5f); break;
+            }
+        }
         private void Impact(Vector3 pos,bool blue=false)
         {
             Rig.AddImpact(blue?.2f:.55f);
@@ -210,6 +286,7 @@ namespace TavernChaos
         public void Notify(string text) { Toast=text; ToastUntil=Time.unscaledTime+4.5f; }
         public string Prompt()
         {
+            if(Lan&&Lan.Running) return Player.Fallen?"RECUPERÁNDOTE · "+Mathf.CeilToInt(Player.RecoverAt-Time.time)+" s":"SALA LAN · E interactuar   CLIC cargar   Q soltar   R recolocarte   ESC menú";
             if(Player.Fallen) return "RECUPERÁNDOTE · "+Mathf.CeilToInt(Player.RecoverAt-Time.time)+" s";
             if(Pool.Active) return Pool.Phase switch {
                 PoolPhase.Rolling=>"Bolas en movimiento · prepara tu siguiente línea",
@@ -227,12 +304,12 @@ namespace TavernChaos
         public void ResetSession()
         {
             foreach(var spark in sparks) Destroy(spark.obj); sparks.Clear();
-            Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; cooldown=0; move=Vector2.zero; interactRequest=dropRequest=false;
+            Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; cooldown=0; move=Vector2.zero; run=false; interactRequest=dropRequest=false;
             if(Held) { Held.ResetToRack(); Held=null; } foreach(var b in Bottles) b.ResetToRack();
             Pool.Exit(); Player.ClearEffect(); Player.Teleport(Player.Home,Quaternion.identity); Rival.Teleport(Rival.Home,Quaternion.Euler(0,180,0)); Pool.Reset();
-            Hits=Misses=Throws=0; Goals=new bool[4]; Rig.Yaw=0; Rig.Pitch=23; Rig.Snap(); RefreshInputContext();
+            Hits=Misses=Throws=0; Goals=new bool[4]; Rig.Yaw=0; Rig.Pitch=0; Rig.Snap(); RefreshInputContext();
         }
         private void OnApplicationFocus(bool focus) { if(!focus&&Started&&!Paused&&!SmokeMode) SetPause(true); }
-        private void OnDestroy() { if(Pool!=null) Pool.Changed-=OnPoolChanged; Input?.Dispose(); Time.timeScale=1; Cursor.lockState=CursorLockMode.None; Cursor.visible=true; if(Instance==this) Instance=null; }
+        private void OnDestroy() { if(Lan) Lan.Leave(); if(Pool!=null) Pool.Changed-=OnPoolChanged; Input?.Dispose(); Time.timeScale=1; Cursor.lockState=CursorLockMode.None; Cursor.visible=true; if(Instance==this) Instance=null; }
     }
 }

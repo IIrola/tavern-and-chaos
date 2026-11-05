@@ -12,19 +12,47 @@ namespace TavernChaos.Editor
     public static class DemoBuild
     {
         private const string ScenePath="Assets/Scenes/Tavern.unity";
+        [MenuItem("Tavern/Run first-person checks")]
+        public static void RunFirstPersonChecks()
+        {
+            if(EditorApplication.isPlayingOrWillChangePlaymode) return;
+            SessionState.SetBool("Tavern.FirstPersonChecks",true);
+            EditorApplication.EnterPlaymode();
+        }
+        [InitializeOnLoadMethod]
+        private static void RegisterChecks()
+        {
+            EditorApplication.playModeStateChanged-=StartChecks;
+            EditorApplication.playModeStateChanged+=StartChecks;
+        }
+        private static void StartChecks(PlayModeStateChange state)
+        {
+            if(state!=PlayModeStateChange.EnteredPlayMode||!SessionState.GetBool("Tavern.FirstPersonChecks",false)) return;
+            SessionState.SetBool("Tavern.FirstPersonChecks",false);
+            EditorApplication.delayCall+=()=> {
+                var game=UnityEngine.Object.FindAnyObjectByType<DemoGame>();
+                if(game) game.RunFirstPersonChecks();
+                else { Debug.LogError("Open Tavern.unity before running demo checks."); EditorApplication.isPlaying=false; }
+            };
+        }
         [MenuItem("Tavern/Prepare demo scene")]
         public static void Prepare()
         {
+            if(File.Exists(ScenePath)) { Debug.Log("Demo scene already exists; it was not regenerated."); return; }
             Directory.CreateDirectory("Assets/Scenes");
             var scene=EditorSceneManager.NewScene(NewSceneSetup.EmptyScene,NewSceneMode.Single);
             new GameObject("Tavern demo | runtime composition").AddComponent<DemoGame>();
             EditorSceneManager.SaveScene(scene,ScenePath);
             EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(ScenePath,true)};
-            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.2.0";
+        }
+        private static void Configure()
+        {
+            if(!File.Exists(ScenePath)) throw new FileNotFoundException("The saved demo scene is missing.",ScenePath);
+            if(EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Save scene changes before building the demo.");
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.3.1";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);
-            PlayerSettings.SetArchitecture(NamedBuildTarget.Standalone,1); // Native Apple Silicon demo.
             PlayerSettings.defaultScreenWidth=1440; PlayerSettings.defaultScreenHeight=900;
             PlayerSettings.fullScreenMode=FullScreenMode.Windowed; PlayerSettings.resizableWindow=true; PlayerSettings.runInBackground=false;
             PlayerSettings.colorSpace=ColorSpace.Linear; PlayerSettings.usePlayerLog=true;
@@ -52,13 +80,32 @@ namespace TavernChaos.Editor
         [MenuItem("Tavern/Build macOS demo")]
         public static void BuildMac()
         {
-            Prepare(); Directory.CreateDirectory("../Builds/macOS");
+            ConfigureMacArchitecture(); Configure(); Directory.CreateDirectory("../Builds/macOS");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.None });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence");
-            File.WriteAllText("../Evidence/build-report.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Apple Silicon",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            Directory.CreateDirectory("../Evidence/pre-hito1");
+            File.WriteAllText("../Evidence/pre-hito1/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
             if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
             Debug.Log($"DEMO_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
+        }
+        private static void ConfigureMacArchitecture()
+        {
+#if UNITY_STANDALONE_OSX
+            UnityEditor.OSXStandalone.UserBuildSettings.architecture=OSArchitecture.x64ARM64;
+#else
+            throw new InvalidOperationException("Switch the active build platform to macOS first, or use -buildTarget osx in batch mode.");
+#endif
+        }
+        [MenuItem("Tavern/Build Windows LAN demo")]
+        public static void BuildWindows()
+        {
+            Configure(); Directory.CreateDirectory("../Builds/Windows");
+            var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/Windows/Tavern and Chaos.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None });
+            var summary=report.summary;
+            Directory.CreateDirectory("../Evidence/pre-hito1");
+            File.WriteAllText("../Evidence/pre-hito1/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
+            Debug.Log($"WINDOWS_LAN_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
         }
         [Serializable] private sealed class BuildEvidence { public string result,unity,platform,backend,version; public ulong bytes; public double seconds; public int errors,warnings; }
     }

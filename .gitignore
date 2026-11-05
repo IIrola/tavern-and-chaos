@@ -8,6 +8,8 @@
 [Tt]avernChaos/[Rr]ecordings/
 [Tt]avernChaos/.vs/
 [Tt]avernChaos/.idea/
+[Tt]avernChaos/.vsconfig
+[Tt]avernChaos/UpgradeLog*
 *.csproj
 *.sln
 *.slnx
@@ -29,6 +31,7 @@ Thumbs.db
 # Local tooling and credentials
 /.codex/
 /.agents/
+/skills-lock.json
 .env
 .env.*
 !.env.example
@@ -39,3 +42,11 @@ Thumbs.db
 
 # Local validation paths, rather than portable test results
 Evidence/**/project-check.json
+Evidence/pre-hito1/**/*.ready
+/.validation/
+
+# Keep the final runs linked in VALIDACION.md; exclude intermediate retries.
+/Evidence/pre-hito1/run-*/
+/Evidence/pre-hito1/replication-*/
+!/Evidence/pre-hito1/run-20261104-225520/
+!/Evidence/pre-hito1/replication-20261104-230256/

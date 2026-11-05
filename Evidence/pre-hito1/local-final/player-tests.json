@@ -1,0 +1,32 @@
+{
+    "unity": "6000.6.8f1",
+    "platform": "WindowsPlayer",
+    "passed": true,
+    "checks": [
+        "First person: camera starts at the player's eyes",
+        "First person: local head is hidden from inside view",
+        "First person: can look up without flipping",
+        "First person: can look down without flipping",
+        "First person: strafing keeps the body facing the view",
+        "Reset: held movement resets the controller and camera together",
+        "Reset: camera immediately follows the reset position (offset=0.000 m)",
+        "Reset: held movement resumes from spawn in the reset direction",
+        "Laguna Azul: a fast wall collision without the drink does not knock down",
+        "Laguna Azul: a slow collision and holding against a wall do not invent impact speed",
+        "Laguna Azul: running parallel to a wall and over the floor does not knock down",
+        "Laguna Azul: reaching speed alone does not cause a fall",
+        "Laguna Azul: a fast frontal collision triggers ragdoll and clears the effect",
+        "Laguna Azul: collision fall recovers to first-person control",
+        "First person: billiards keeps its overhead camera and restores the visible head",
+        "First person: leaving billiards returns directly to eye view",
+        "First person: a forward punch still knocks down Bruno",
+        "First person: the bottle rack remains reachable",
+        "First person: looking up launches the bottle upward (vertical speed=10.02 m/s)",
+        "Actions: mouse input starts a charge",
+        "Actions: drop cancels the active charge even without a bottle",
+        "Actions: releasing after cancellation cannot queue a phantom punch",
+        "No runtime errors or exceptions"
+    ],
+    "failures": [],
+    "runtimeErrors": []
+}

@@ -1,0 +1,65 @@
+{
+  "version": "0.3.1",
+  "unity": "6000.6.8f1",
+  "package": "Builds/macOS/Tavern-and-Chaos-0.3.1-macOS-Universal.zip",
+  "bytes": 46000275,
+  "sha256": "4f26a6d9a0d228f9aff1295c587e2ec8a711a28168de5ecaebdbd79b6e846560",
+  "minimumMacOS": "12.0",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "verifiedArchivedFiles": 170,
+  "archiveContentsMatchBuild": true,
+  "zipCreatorPlatform": "Unix",
+  "mainExecutablePermissions": "0755",
+  "launcherPermissions": "0755",
+  "nativeBinaries": [
+    {
+      "file": "Contents/Frameworks/libmono-native.dylib",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "file": "Contents/Frameworks/libmonobdwgc-2.0.dylib",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "file": "Contents/Frameworks/libMonoPosixHelper.dylib",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "file": "Contents/Frameworks/UnityPlayer.dylib",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "file": "Contents/MacOS/Tavern and Chaos",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    },
+    {
+      "file": "Contents/PlugIns/lib_burst_generated.bundle",
+      "architectures": [
+        "x86_64",
+        "arm64"
+      ]
+    }
+  ],
+  "builtOn": "Windows",
+  "executionOnMac": "Pending: friend must test on actual Mac",
+  "windowsMacLAN": "Not yet tested",
+  "appleNotarization": "Not notarized"
+}

@@ -1,0 +1,35 @@
+{
+  "passed": true,
+  "scope": "Rendered-body and feedback regression with separate Windows players, real loopback UDP, controlled poses and client-camera captures. Not manual Hito 1 acceptance.",
+  "manualHito1": "Pending: user will perform acceptance",
+  "results": [
+    {
+      "role": "replica-host",
+      "exitCode": 0,
+      "passed": true,
+      "checks": 31,
+      "failures": [],
+      "runtimeErrors": [],
+      "rttMilliseconds": 0,
+      "bytesReceived": 0,
+      "snapshots": 0,
+      "maxStandingBodyDrift": 0.0,
+      "maxStandingCameraDrift": 0.0,
+      "renderedFrames": 0
+    },
+    {
+      "role": "replica-client",
+      "exitCode": 0,
+      "passed": true,
+      "checks": 84,
+      "failures": [],
+      "runtimeErrors": [],
+      "rttMilliseconds": 0,
+      "bytesReceived": 4317966,
+      "snapshots": 459,
+      "maxStandingBodyDrift": 0.017275750637054443,
+      "maxStandingCameraDrift": 0.0,
+      "renderedFrames": 88877
+    }
+  ]
+}
