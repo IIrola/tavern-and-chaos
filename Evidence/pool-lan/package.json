@@ -1,0 +1,11 @@
+{
+  "archive": "Tavern-and-Chaos-0.4.0-macOS-Universal.zip",
+  "version": "0.4.0",
+  "bytes": 44418443,
+  "sha256": "01aca64bbb2b3d1fdceca0e2b5060366c21e249a33d2c7058909e21bd2f5cb5b",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "distribution": "Local archive; source on GitHub, no new public release created"
+}

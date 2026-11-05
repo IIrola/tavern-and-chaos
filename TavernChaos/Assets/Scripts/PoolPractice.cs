@@ -11,6 +11,15 @@ namespace TavernChaos
     {
         public static readonly Vector3 Center = new(6, 1.28f, 1.1f);
         public event Action Changed;
+        public event Action<EightBallEvents> ShotSettled;
+        public bool MatchMode { get; private set; }
+        private bool replica;
+        private bool headOnly;
+        private PoolBallView[] replicaTargets;
+        private EightBallEvents shotEvents;
+        private readonly float[] shotStartZ=new float[16];
+        public const float HeadLine=-1.275f;
+        public IReadOnlyList<Vector3> Pockets => pockets;
         public bool Active { get; private set; }
         public PoolPhase Phase { get; private set; } = PoolPhase.Aiming;
         public PoolDrill Drill { get; private set; } = PoolDrill.Straight;
@@ -19,7 +28,7 @@ namespace TavernChaos
         public int TotalTargets => Drill == PoolDrill.Rack ? 6 : 1;
         public bool Moving => Phase == PoolPhase.Rolling;
         public bool Transitioning => enterDelay>0;
-        public bool CanShoot => Active && !DemoGame.Instance.Paused && Phase == PoolPhase.Aiming && !Transitioning;
+        public bool CanShoot => Active && !DemoGame.Instance.Paused && Phase == PoolPhase.Aiming && !Transitioning && (!MatchMode||DemoGame.Instance.Lan.CanLocalPoolAct);
         public float Power { get; private set; } = .45f;
         public float Angle;
         public Vector3 Direction => Quaternion.Euler(0, Angle, 0) * Vector3.forward;
@@ -43,7 +52,7 @@ namespace TavernChaos
             new(-1.5f,0,-2.55f), new(1.5f,0,-2.55f), new(-1.61f,0,0),
             new(1.61f,0,0), new(-1.5f,0,2.55f), new(1.5f,0,2.55f)
         };
-        private readonly LineRenderer guide, objectGuide, reboundGuide, ghost, cueStick, placementRing;
+        private readonly LineRenderer guide, objectGuide, reboundGuide, ghost, cueStick, placementRing, headGuide;
         private readonly RaycastHit[] guideHits = new RaycastHit[16];
         private Vector3 returnPosition;
         private Quaternion returnRotation;
@@ -86,12 +95,17 @@ namespace TavernChaos
             for(int layer=0;layer<32;layer++) Physics.IgnoreLayerCollision(PoolPhysics.BallLayer,layer,layer!=PoolPhysics.BallLayer&&layer!=PoolPhysics.CushionLayer);
             Physics.bounceThreshold=.05f;
             var surface=PoolPhysics.Material("Billiard ball · equal mass",PoolPhysics.BallRestitution);
-            Color[] colors={Color.white,new(1,.7f,.12f),new(.14f,.35f,1),new(.95f,.18f,.13f),new(.64f,.17f,.8f),new(1,.4f,.08f),new(.04f,.7f,.33f)};
-            for(int i=0;i<7;i++) {
-                var go=TavernWorld.Shape(i==0?"Cue ball":"Object ball "+i,PrimitiveType.Sphere,Center,Vector3.one*PoolPhysics.Radius*2,TavernWorld.Mat("Ball "+i,colors[i],.15f)); go.layer=PoolPhysics.BallLayer;
+            Color[] colors={Color.white,new(1,.7f,.12f),new(.14f,.35f,1),new(.95f,.18f,.13f),new(.64f,.17f,.8f),new(1,.4f,.08f),new(.04f,.7f,.33f),new(.52f,.07f,.12f),new(.025f,.03f,.035f)};
+            for(int i=0;i<16;i++) {
+                int color=i>8?i-8:i;
+                var go=TavernWorld.Shape(i==0?"Cue ball":"Object ball "+i,PrimitiveType.Sphere,Center,Vector3.one*PoolPhysics.Radius*2,TavernWorld.Mat("Ball "+i,colors[color],.15f)); go.layer=PoolPhysics.BallLayer;
+                if(i>8) {
+                    // White caps distinguish stripes without relying solely on colour. No extra collider.
+                    foreach(int sign in new[]{-1,1}) TavernWorld.Shape("Stripe white cap",PrimitiveType.Sphere,new(0,sign*.3f,0),new(.81f,.42f,.81f),TavernWorld.Mat("Stripe white",Color.white),go.transform,false);
+                }
                 var c=go.GetComponent<SphereCollider>(); c.sharedMaterial=surface; c.contactOffset=.0015f;
                 var rb=go.AddComponent<Rigidbody>(); PoolPhysics.Configure(rb);
-                go.AddComponent<PoolBallSound>(); balls.Add(rb); colliders.Add(c); previous.Add(Center); sinking.Add(-1); sinkFrom.Add(Center); sinkTo.Add(Center);
+                go.AddComponent<PoolBallSound>().Number=i; balls.Add(rb); colliders.Add(c); previous.Add(Center); sinking.Add(-1); sinkFrom.Add(Center); sinkTo.Add(Center);
             }
             guide=Line("Cue path",new(.95f,.94f,.82f,.9f),.022f);
             objectGuide=Line("Object ball direction",new(.35f,.95f,.78f,.85f),.022f);
@@ -99,6 +113,7 @@ namespace TavernChaos
             ghost=Line("Ghost contact ball",new(1,.92f,.7f,.8f),.015f,49);
             cueStick=Line("Cue alignment",new(.8f,.58f,.32f),.045f);
             placementRing=Line("Cue placement",new(.35f,1,.7f),.025f,49);
+            headGuide=Line("Head string",new(.95f,.8f,.35f),.025f);
             Reset();
         }
         private static LineRenderer Line(string name,Color color,float width,int count=2)
@@ -135,13 +150,23 @@ namespace TavernChaos
         public bool Shoot(float power,Vector3 direction)
         {
             if(!CanShoot || !float.IsFinite(power) || !Finite(direction)) return false;
+            if(MatchMode) return false; // Room shots can only enter through the authoritative match controller.
+            return Strike(power,direction);
+        }
+        internal bool Strike(float power,Vector3 direction)
+        {
+            if(replica||Phase!=PoolPhase.Aiming||!Cue.gameObject.activeSelf||!float.IsFinite(power)||!Finite(direction)) return false;
             direction.y=0; if(direction.sqrMagnitude<.001f) return false;
             Cue.WakeUp(); Cue.linearVelocity=direction.normalized*PoolPhysics.ShotSpeed(power);
             Shots++; pottedBefore=Potted; scratch=outOfBounds=false; Phase=PoolPhase.Rolling; stillTime=shotTime=0; resetUntil=0;
-            Result="Espera a que se detengan las bolas."; HideGuides(); DemoGame.Instance.Audio.Play("clink",.5f); Emit(); return true;
+            if(MatchMode) { shotEvents=new EightBallEvents(); for(int i=0;i<balls.Count;i++) shotStartZ[i]=balls[i].position.z-Center.z; }
+            Result="Espera a que se detengan las bolas."; HideGuides();
+            if(DemoGame.Instance.Lan.IsHost) DemoGame.Instance.Lan.EmitFeedback(LanFeedbackKind.PoolShot,Cue.position); else DemoGame.Instance.Audio.Play("clink",.5f);
+            Emit(); return true;
         }
         public void FixedTick()
         {
+            if(replica) return;
             enterDelay=Mathf.Max(0,enterDelay-Time.fixedDeltaTime);
             bool anyMoving=false, anySinking=false;
             for(int i=0;i<balls.Count;i++) {
@@ -160,7 +185,7 @@ namespace TavernChaos
             if(Phase!=PoolPhase.Rolling) return;
             shotTime+=Time.fixedDeltaTime;
             stillTime=anyMoving||anySinking?0:stillTime+Time.fixedDeltaTime;
-            if(shotTime>18) { StopAll(); stillTime=PoolPhysics.SettleTime; }
+            if(shotTime>18) { if(shotEvents!=null) shotEvents.Timeout=true; StopAll(); stillTime=PoolPhysics.SettleTime; }
             if(stillTime>=PoolPhysics.SettleTime) FinishShot();
         }
         private int FindPocket(Vector3 a,Vector3 b)
@@ -176,10 +201,12 @@ namespace TavernChaos
         }
         private void StartSink(int i,int pocket)
         {
+            if(MatchMode&&shotEvents!=null) shotEvents.Pockets.TryAdd(i,pocket);
             var b=balls[i]; b.linearVelocity=b.angularVelocity=Vector3.zero; b.isKinematic=true; colliders[i].enabled=false;
             sinking[i]=0; sinkFrom[i]=b.position; sinkTo[i]=Center+pockets[pocket];
             if(i==0) scratch=true; else Potted++;
-            DemoGame.Instance.Audio.Play("clink",.65f); Emit();
+            if(DemoGame.Instance.Lan.IsHost) DemoGame.Instance.Lan.EmitFeedback(LanFeedbackKind.PoolPot,b.position); else DemoGame.Instance.Audio.Play("clink",.65f);
+            Emit();
         }
         private void TickSink(int i)
         {
@@ -191,12 +218,14 @@ namespace TavernChaos
         }
         private void ReSpotOutOfBounds(int i)
         {
+            if(MatchMode&&shotEvents!=null) shotEvents.OffTable.Add(i);
             if(i==0) { scratch=true; balls[0].gameObject.SetActive(false); return; }
             Put(i,FindFree(new(0,0,.65f),i)); Result="Bola fuera de la mesa: repuesta, sin sumar un emboque.";
         }
         private void FinishShot()
         {
             StopAll();
+            if(MatchMode) { Phase=PoolPhase.Complete; var events=shotEvents; shotEvents=null; ShotSettled?.Invoke(events); Emit(); return; }
             if(Potted==TotalTargets) { Phase=PoolPhase.Complete; Result=$"¡Mesa limpia en {Shots} "+(Shots==1?"tiro!":"tiros!"); }
             else if(scratch) { Phase=PoolPhase.BallInHand; Result="Blanca embocada o fuera. Colócala sobre el paño para continuar."; Placement=FindFree(new(0,0,-1.5f),0); CanPlace=true; }
             else { Phase=PoolPhase.Aiming; Result=outOfBounds?"Bola fuera: repuesta sin sumar puntos.":Potted>pottedBefore?$"¡Dentro! {Potted} / {TotalTargets}. Prepara tu siguiente tiro.":"Prueba otra línea o ajusta la potencia."; }
@@ -207,17 +236,22 @@ namespace TavernChaos
             Placement=new(world.x,Center.y,world.z);
             Vector3 p=Placement-Center;
             CanPlace=Finite(Placement)&&Mathf.Abs(p.x)<=PoolPhysics.HalfWidth-PoolPhysics.Radius-.04f&&Mathf.Abs(p.z)<=PoolPhysics.HalfLength-PoolPhysics.Radius-.04f;
+            if(MatchMode&&headOnly&&p.z>=HeadLine) CanPlace=false;
             if(CanPlace) foreach(var b in balls) if(b!=Cue&&b.gameObject.activeSelf&&Vector3.Distance(Placement,b.position)<PoolPhysics.Radius*2+.025f) CanPlace=false;
         }
         public bool ConfirmPlacement()
         {
+            if(MatchMode) return false;
             if(!Active||DemoGame.Instance.Paused||Phase!=PoolPhase.BallInHand||!CanPlace) return false;
             Put(0,Placement); scratch=false; Phase=PoolPhase.Aiming; enterDelay=.15f; Result="Blanca colocada. Apunta y tira."; Emit(); return true;
         }
         private Vector3 FindFree(Vector3 local,int skip)
         {
-            for(int j=0;j<121;j++) {
-                Vector3 p=Center+(j==0?local:new Vector3((j%11-5)*.24f,0,(j/11-5)*.4f)); bool free=true;
+            var candidates=new List<Vector3>{local};
+            for(int x=-4;x<=4;x++) for(int z=-8;z<=8;z++) candidates.Add(new Vector3(x*.28f,0,z*.28f));
+            candidates.Sort((a,b)=> { int distance=(a-local).sqrMagnitude.CompareTo((b-local).sqrMagnitude); return distance!=0?distance:a.x!=b.x?a.x.CompareTo(b.x):a.z.CompareTo(b.z); });
+            foreach(var candidate in candidates) {
+                Vector3 p=Center+candidate; bool free=true;
                 for(int i=0;i<balls.Count;i++) if(i!=skip&&balls[i].gameObject.activeSelf&&sinking[i]<0&&Vector3.Distance(p,balls[i].position)<PoolPhysics.Radius*2+.025f) free=false;
                 if(free) return p;
             }
@@ -225,12 +259,13 @@ namespace TavernChaos
         }
         public bool RequestReset()
         {
+            if(MatchMode) return false;
             if(Phase==PoolPhase.Complete) { Reset(); return true; }
             if(!ResetPending) { resetUntil=Time.unscaledTime+3; Emit(); return false; }
             Reset(); return true;
         }
         public void CancelReset() { resetUntil=0; Emit(); }
-        public void SelectDrill(PoolDrill drill) { Drill=drill; Reset(); }
+        public void SelectDrill(PoolDrill drill) { if(MatchMode) return; Drill=drill; Reset(); }
         private void Put(int i,Vector3 p)
         {
             var b=balls[i]; b.gameObject.SetActive(true); b.isKinematic=false; colliders[i].enabled=true;
@@ -243,6 +278,7 @@ namespace TavernChaos
         }
         public void Reset()
         {
+            if(MatchMode) return;
             Potted=Shots=0; stillTime=shotTime=resetUntil=0; enterDelay=.15f; scratch=outOfBounds=false; CanPlace=false;
             for(int i=0;i<balls.Count;i++) { Put(i,Center); balls[i].gameObject.SetActive(false); }
             if(Drill==PoolDrill.Straight) { Put(0,Center+new Vector3(-.9f,0,0)); Put(1,Center+new Vector3(.7f,0,0)); Angle=90; }
@@ -256,9 +292,14 @@ namespace TavernChaos
         }
         public void UpdateGuide()
         {
+            RenderRoomBalls();
             HideGuides(); PreviewBall=-1;
             if(!Active||DemoGame.Instance.Paused) return;
-            if(Phase==PoolPhase.BallInHand) { Circle(placementRing,Placement,PoolPhysics.Radius,CanPlace?new(.3f,1,.65f):new(1,.3f,.2f)); return; }
+            if(MatchMode&&!DemoGame.Instance.Lan.CanLocalPoolAct) return;
+            if(Phase==PoolPhase.BallInHand) {
+                if(MatchMode&&headOnly) Segment(headGuide,Center+new Vector3(-1.35f,0,HeadLine),Center+new Vector3(1.35f,0,HeadLine));
+                Circle(placementRing,Placement,PoolPhysics.Radius,CanPlace?new(.3f,1,.65f):new(1,.3f,.2f)); return;
+            }
             if(Phase!=PoolPhase.Aiming) return;
             Vector3 origin=Cue.position, direction=Direction;
             int count=Physics.SphereCastNonAlloc(origin,PoolPhysics.Radius,direction,guideHits,7,(1<<PoolPhysics.BallLayer)|(1<<PoolPhysics.CushionLayer),QueryTriggerInteraction.Ignore);
@@ -277,7 +318,7 @@ namespace TavernChaos
                 Segment(reboundGuide,end,end+reflected.normalized*.9f);
             }
         }
-        private void HideGuides() { guide.enabled=objectGuide.enabled=reboundGuide.enabled=ghost.enabled=cueStick.enabled=placementRing.enabled=false; }
+        private void HideGuides() { guide.enabled=objectGuide.enabled=reboundGuide.enabled=ghost.enabled=cueStick.enabled=placementRing.enabled=headGuide.enabled=false; }
         private static void Segment(LineRenderer line,Vector3 a,Vector3 b) { line.enabled=true; a.y=b.y=Center.y+.025f; line.SetPosition(0,a); line.SetPosition(1,b); }
         private static void Circle(LineRenderer line,Vector3 center,float radius,Color color)
         {
@@ -285,10 +326,89 @@ namespace TavernChaos
             for(int i=0;i<line.positionCount;i++) { float a=i*Mathf.PI*2/(line.positionCount-1); line.SetPosition(i,center+new Vector3(Mathf.Sin(a)*radius,0,Mathf.Cos(a)*radius)); }
         }
         private static bool Finite(Vector3 p) => float.IsFinite(p.x)&&float.IsFinite(p.y)&&float.IsFinite(p.z);
-        public void ContactSound(float speed)
+        public void ContactSound(float speed,Vector3 position)
         {
             if(speed<.15f||Time.unscaledTime<soundCooldown) return; soundCooldown=Time.unscaledTime+.035f;
-            DemoGame.Instance.Audio.Play("clink",Mathf.Lerp(.08f,.55f,Mathf.Clamp01(speed/4)));
+            if(DemoGame.Instance.Lan.IsHost) DemoGame.Instance.Lan.EmitFeedback(LanFeedbackKind.PoolContact,position);
+            else DemoGame.Instance.Audio.Play("clink",Mathf.Lerp(.08f,.55f,Mathf.Clamp01(speed/4)));
+        }
+        internal void ObserveContact(int number,Collision collision)
+        {
+            if(!MatchMode||replica||Phase!=PoolPhase.Rolling||shotEvents==null) return;
+            long step=(long)Math.Round(Time.fixedTimeAsDouble/Time.fixedDeltaTime);
+            if(number==0&&collision.rigidbody&&collision.rigidbody.TryGetComponent<PoolBallSound>(out var other)&&other.Number>0)
+                shotEvents.Contact(other.Number,step,headOnly&&shotStartZ[other.Number]<HeadLine);
+            if(collision.gameObject.layer==PoolPhysics.CushionLayer) shotEvents.Rail(number,step);
+        }
+        internal void BeginMatch(int[] rack)
+        {
+            replica=false; MatchMode=true; Potted=Shots=0; shotEvents=null; stillTime=shotTime=resetUntil=0;
+            StopAll(); for(int i=0;i<balls.Count;i++) { Put(i,Center); balls[i].gameObject.SetActive(false); }
+            Put(0,Center+new Vector3(0,0,-1.8f));
+            for(int row=0,index=0;row<5;row++) for(int col=0;col<=row;col++) Put(rack[index++],Center+new Vector3((col-row*.5f)*.244f,0,.62f+row*.212f));
+            Phase=PoolPhase.BallInHand; headOnly=true; Placement=Cue.position; CanPlace=true; Angle=0; Emit();
+        }
+        internal void MatchPhase(EightBallPhase phase,bool behindLine,string notice)
+        {
+            headOnly=behindLine; Result=notice;
+            Phase=phase==EightBallPhase.Placement?PoolPhase.BallInHand:phase==EightBallPhase.Aiming?PoolPhase.Aiming:phase==EightBallPhase.Rolling?PoolPhase.Rolling:PoolPhase.Complete;
+            if(Phase==PoolPhase.BallInHand&&!replica) { Cue.gameObject.SetActive(false); Placement=FindFree(new(0,0,-1.8f),0); UpdatePlacement(Placement); }
+            Emit();
+        }
+        internal bool PlaceMatch(Vector3 point)
+        {
+            if(replica||!MatchMode||Phase!=PoolPhase.BallInHand) return false;
+            UpdatePlacement(point); if(!CanPlace) return false; Put(0,Placement); return true;
+        }
+        internal void RespotMatch(int number) { if(number>0&&number<16) Put(number,FindFree(new(0,0,.62f),number)); }
+        internal void SetRoomView(bool active)
+        {
+            if(DemoGame.Instance.Lan.Running) MatchMode=true;
+            if(Active==active) return; Active=active; enterDelay=.15f; HideGuides(); Emit();
+        }
+        internal PoolBallView[] CaptureBalls()
+        {
+            var result=new PoolBallView[balls.Count]; for(int i=0;i<balls.Count;i++) result[i]=new(){number=i,active=balls[i].gameObject.activeSelf,position=balls[i].position,rotation=balls[i].rotation}; return result;
+        }
+        internal void ApplyRoomBalls(PoolRoomView view)
+        {
+            replica=true; MatchMode=true;
+            if(view.balls==null) return;
+            replicaTargets=view.balls;
+            foreach(var state in view.balls) if(state.number>=0&&state.number<balls.Count) {
+                int i=state.number; var b=balls[i];
+                if(!b.isKinematic) { b.linearVelocity=b.angularVelocity=Vector3.zero; b.isKinematic=true; }
+                b.interpolation=RigidbodyInterpolation.None; colliders[i].enabled=true;
+                if(b.gameObject.activeSelf!=state.active||Vector3.Distance(b.position,state.position)>2) { b.position=state.position; b.rotation=state.rotation; }
+                b.gameObject.SetActive(state.active); b.transform.localScale=Vector3.one*PoolPhysics.Radius*2;
+            }
+            Shots=view.shots; MatchPhase(view.playPhase,view.headOnly,view.notice);
+        }
+        private void RenderRoomBalls()
+        {
+            if(!replica||replicaTargets==null) return;
+            float t=1-Mathf.Exp(-25*Time.unscaledDeltaTime);
+            foreach(var state in replicaTargets) if(state.active&&state.number>=0&&state.number<balls.Count) {
+                var b=balls[state.number]; b.position=Vector3.Lerp(b.position,state.position,t); b.rotation=Quaternion.Slerp(b.rotation,state.rotation,t);
+            }
+        }
+        internal void EndMatch()
+        {
+            Active=false; MatchMode=false; replica=false; replicaTargets=null; headOnly=false; shotEvents=null; HideGuides();
+            foreach(var b in balls) b.interpolation=RigidbodyInterpolation.Interpolate;
+            Reset(); Emit();
+        }
+        // Controlled physical arrangements for the opt-in integration suite; never callable by a network intent.
+        internal void ArrangeMatchCheck(int target,bool weak=false)
+        {
+            if(!DemoGame.Instance.SmokeMode||!MatchMode||replica||Moving) return;
+            int index=0;
+            for(int i=1;i<balls.Count;i++) if(balls[i].gameObject.activeSelf) {
+                Put(i,Center+new Vector3((index%5-2)*.30f,0,.65f+(index/5)*.32f)); index++;
+            }
+            if(weak) { Put(0,Center+new Vector3(0,0,-1.8f)); Put(target,Center+new Vector3(0,0,-1.53f)); }
+            else { Put(0,Center+new Vector3(-.9f,0,0)); Put(target,Center+new Vector3(.7f,0,0)); }
+            Physics.SyncTransforms();
         }
         // Deterministic arrangements for opt-in physics regression tests; same bodies/materials as play.
         internal void TestLayout(Vector3[] positions,Vector3[] velocities)

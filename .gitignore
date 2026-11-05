@@ -42,6 +42,10 @@ Thumbs.db
 
 # Local validation paths, rather than portable test results
 Evidence/**/project-check.json
+Evidence/lan-project-check.json
+Evidence/**/*.ready
+__pycache__/
+*.pyc
 Evidence/pre-hito1/**/*.ready
 /.validation/
 

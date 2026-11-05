@@ -3,6 +3,7 @@ namespace TavernChaos
 {
     public sealed class PoolBallSound : MonoBehaviour
     {
-        private void OnCollisionEnter(Collision c) => DemoGame.Instance?.Pool?.ContactSound(c.relativeVelocity.magnitude);
+        public int Number;
+        private void OnCollisionEnter(Collision c) { var pool=DemoGame.Instance?.Pool; pool?.ContactSound(c.relativeVelocity.magnitude,transform.position); pool?.ObserveContact(Number,c); }
     }
 }

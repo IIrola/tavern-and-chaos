@@ -1,6 +1,15 @@
 # Cambios
 
-## 0.3.1 · Primera persona y demo LAN (cambios locales, sin publicar)
+## 0.4.0 · Bola 8 compartida en desarrollo
+
+- Se continúa desde `main` 0.3.1 conservando primera persona, cuerpos replicados y efectos de impacto.
+- Contrato común de mesas aplicado a billar: asientos próximos y libres, organizador, apertura de 10 fichas una vez, cola, retorno tras caída y preparación de siguiente ronda.
+- Bola 8 con quince bolas y blanca, anuncios, grupos, faltas, colocación, decisiones de saque y resultado. Reglas puras y variantes WPA/GDD visibles en la mesa.
+- El anfitrión simula; los demás reciben bolas cinemáticas interpoladas y eventos de audio. Los clientes envían intención de tiro/colocación y no pueden fijar resultados.
+- Una caída conserva la participación y deja terminar el tiro. La ausencia solo cuenta durante el turno; sentarse cancela el minuto. Salida y desconexión tienen resolución definida.
+- Pruebas de reglas, dos recorridos con tres procesos y regresión local; alcance y límites en `Evidence/pool-lan/VALIDACION.md`. No acredita aún LAN entre equipos ni completa el GDD.
+
+## 0.3.1 · Primera persona y demo LAN (recibida de main)
 
 - Integración de la demo local con la sala LAN: movimiento, golpe, agarre/lanzamiento de botellas y Laguna Azul, con autoridad en el anfitrión.
 - Cámara en primera persona tanto en local como en LAN: mirada hacia arriba, abajo y a los lados, cuerpo orientado con la vista y una cámara propia para cada jugador. Los lanzamientos siguen la dirección vertical y horizontal de la mirada; el billar conserva su cámara cenital de práctica local.

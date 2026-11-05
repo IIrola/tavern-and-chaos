@@ -49,7 +49,7 @@ namespace TavernChaos.Editor
         {
             if(!File.Exists(ScenePath)) throw new FileNotFoundException("The saved demo scene is missing.",ScenePath);
             if(EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Save scene changes before building the demo.");
-            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.3.1";
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.4.0";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);
@@ -80,11 +80,12 @@ namespace TavernChaos.Editor
         [MenuItem("Tavern/Build macOS demo")]
         public static void BuildMac()
         {
+            PoolRulesValidation.Run();
             ConfigureMacArchitecture(); Configure(); Directory.CreateDirectory("../Builds/macOS");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.None });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence/pre-hito1");
-            File.WriteAllText("../Evidence/pre-hito1/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            Directory.CreateDirectory("../Evidence/pool-lan");
+            File.WriteAllText("../Evidence/pool-lan/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
             if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
             Debug.Log($"DEMO_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
         }
@@ -99,11 +100,12 @@ namespace TavernChaos.Editor
         [MenuItem("Tavern/Build Windows LAN demo")]
         public static void BuildWindows()
         {
+            PoolRulesValidation.Run();
             Configure(); Directory.CreateDirectory("../Builds/Windows");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/Windows/Tavern and Chaos.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.None });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence/pre-hito1");
-            File.WriteAllText("../Evidence/pre-hito1/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            Directory.CreateDirectory("../Evidence/pool-lan");
+            File.WriteAllText("../Evidence/pool-lan/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
             if(summary.result!=BuildResult.Succeeded) throw new Exception($"Build failed: {summary.totalErrors} errors.");
             Debug.Log($"WINDOWS_LAN_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
         }

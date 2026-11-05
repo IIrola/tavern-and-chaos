@@ -1,5 +1,7 @@
 # Demo LAN integrada: preparación del Hito 1
 
+Documento histórico de la versión 0.3.1 recibida de `main`. El desarrollo posterior de mesas y bola 8 se describe en [ESTADO_ACTUAL.md](ESTADO_ACTUAL.md).
+
 La integración se mantiene en el alcance del Hito 1. En la primera prueba, el usuario dejó parciales la representación de jugadores, las botellas y el combate por los desfases del invitado y la ausencia de efectos de golpe. Tras las correcciones de la 0.3.1, confirmó que ya funcionan en su prueba con dos copias en un equipo. Las pruebas entre equipos siguen pendientes. No se han iniciado el contrato de mesas, las reglas de bola 8 ni el Hito 2. Los cambios por versión se registran en [CHANGELOG.md](../CHANGELOG.md).
 
 ## Base y decisiones

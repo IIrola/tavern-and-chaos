@@ -1,24 +1,30 @@
 # Tavern & Chaos · Primera ronda
 
-Demo de trabajo **0.3.1, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. La compilación Windows actual queda en `Builds/Windows/Tavern and Chaos.exe`. La nueva compilación universal para Mac está en `Builds/macOS/Tavern-and-Chaos-0.3.1-macOS-Universal.zip`; consulta [cómo probarla](Docs/PROBAR_MAC.md). La release pública anterior 0.2.0 de macOS es una demo local; no incluye esta integración.
+Proyecto de trabajo **0.4.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La release pública 0.2.0 es una demo local anterior.
 
-El historial de funciones y correcciones está en [CHANGELOG.md](CHANGELOG.md), incluida la primera persona en LAN, los tropiezos con Laguna Azul y las correcciones de sincronización de la 0.3.1. Son cambios locales todavía sin publicar en GitHub.
+Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual añade asientos y bola 8 en LAN; el estado, los límites y siguientes pasos están en [Docs/ESTADO_ACTUAL.md](Docs/ESTADO_ACTUAL.md), y la revisión de cada iteración en [Docs/ITERACIONES.md](Docs/ITERACIONES.md).
 
 ## Descargar la demo
 
-El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP de Mac 0.3.1 se comparte por separado; todavía no se ha subido a [GitHub Releases](https://github.com/IIrola/tavern-and-chaos/releases), donde permanece la release anterior.
+El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP local actual está en `Builds/Tavern-and-Chaos-0.4.0-macOS-Universal.zip`; todavía no se ha publicado como release. En [GitHub Releases](https://github.com/IIrola/tavern-and-chaos/releases) permanece la demo anterior.
 
 Para jugar desde una copia descargada del repositorio, compila el proyecto o descomprime el ZIP de la release dentro de `Builds/macOS/`, de modo que exista `Builds/macOS/Tavern and Chaos.app`.
 
-Esta copia integra la fundación de `work/lan-foundation` con la primera persona, el reinicio y las caídas por Laguna Azul. El diseño completo está en [GDD_y_plan_de_desarrollo.md](GDD_y_plan_de_desarrollo.md); el alcance y recorrido de prueba actuales están en [Docs/LAN_HITO1.md](Docs/LAN_HITO1.md). El usuario confirmó que las correcciones de la 0.3.1 funcionan en su prueba con dos copias en un equipo; las pruebas entre equipos siguen pendientes. No se han iniciado las mesas compartidas ni el Hito 2.
+El diseño completo está en [GDD_y_plan_de_desarrollo.md](GDD_y_plan_de_desarrollo.md) y se sigue mediante [85 criterios](Docs/REQUISITOS.md). La aceptación anterior de la 0.3.1 se conserva en [Docs/LAN_HITO1.md](Docs/LAN_HITO1.md). La nueva bola 8 todavía necesita sesiones humanas y pruebas entre equipos; el resto del GDD sigue en desarrollo.
+
+## Bola 8 en LAN
+
+Junto al billar pulsa **E/A** para sentarte. Con dos personas sentadas, el organizador inicia con **Enter/A**; se cobran **10 fichas** una vez. El primer turno es aleatorio. **Tab/RB** elige bola y **C/LB** tronera; apunta, ajusta potencia y tira con **clic/RT**. Las troneras están numeradas y la línea limita la blanca cuando corresponde. **H/X** abre las reglas de la mesa; **E/B** permite levantarse y volver.
+
+Una caída libera el asiento pero conserva la participación y el tiro iniciado. El minuto de ausencia solo corre durante tu turno; sentado no hay reloj. Quien llega a una partida iniciada espera a la siguiente. Esta versión es para dos lados individuales y no tiene apuestas opcionales todavía. La práctica local mantiene sus cuatro ejercicios separados. Ejecuta `python3 run-pool-room-checks.py --visual-host` para la integración Mac; los informes están en `Evidence/pool-lan/`.
 
 ## Probar LAN en una sola máquina Windows
 
 Fuera de Play, usa **Tavern → Build Windows LAN demo** en Unity. Después abre **`Probar-LAN.cmd`**: inicia dos copias con registros separados. Crea una sala en una, y en la otra entra mediante IP **127.0.0.1**, puerto **7777**. Usa nombres distintos y el mismo puerto en ambas. No necesitas abrir dos editores ni cambiar de rama. Las comprobaciones automáticas de componentes se pueden repetir con `./run-lan-checks.ps1`; no sustituyen la aceptación manual del Hito 1.
 
-La sala integra movimiento, golpe, botella y Laguna Azul en primera persona. **R recoloca solo a quien lo solicita** si está de pie y no está resolviendo un golpe; no reinicia la sala. La pausa es local. El billar sigue como práctica local separada. Para dos equipos de la misma red usa el código del anfitrión; las pruebas entre máquinas siguen pendientes.
+La sala integra movimiento, golpe, botella, Laguna Azul y bola 8. **R recoloca solo a quien lo solicita** si está de pie, fuera de una mesa y no está resolviendo un golpe; no reinicia la sala. La pausa es local. Para dos equipos de la misma red usa el código del anfitrión; las pruebas entre máquinas siguen pendientes.
 
-En 0.3.1, el invitado recibe las posturas de las seis partes del cuerpo y las caídas simuladas por el anfitrión. La interpolación de red controla esos cuerpos cinemáticos sin una segunda interpolación de PhysX. Los impactos de puños y botellas tienen eventos de partículas y sonido, identificados para reproducirse una sola vez. Cierra las dos copias antiguas y abre de nuevo `Probar-LAN.cmd`; ambas deben mostrar 0.3.1 en el menú.
+El invitado recibe las posturas de las seis partes del cuerpo y las caídas simuladas por el anfitrión. La interpolación de red controla esos cuerpos cinemáticos sin una segunda interpolación de PhysX. Los impactos tienen eventos identificados para reproducirse una sola vez. Todas las copias de esta iteración deben mostrar **0.4.0**; el protocolo cambió y rechaza versiones anteriores.
 
 ## Jugar
 
@@ -59,7 +65,7 @@ Esc abre pausa y ajustes: volumen de efectos, sensibilidad y desactivación de s
 
 Simulación plana de práctica: PhysX resuelve contactos entre esferas de igual masa y bandas; el paño aplica una resistencia constante de rodadura. Las bolas giran de acuerdo con su desplazamiento, y las bandas tienen restitución propia. La simulación corre a 100 Hz con interpolación y detección continua. Las bolas están aisladas de los colisionadores del mueble y los personajes. Las bocas biseladas y el detector de entrada en tronera comparten geometría; hay una breve caída visual al embocar. Un tiro termina después de un intervalo de reposo estable, con un límite de recuperación ante bloqueos.
 
-No hay efectos laterales, saltos, massé ni reglas competitivas de bola 8. Esta aproximación debe seguir afinándose con sesiones de juego; no representa una mesa profesional calibrada.
+No hay efectos laterales, saltos ni massé. La práctica local usa ejercicios; la mesa LAN aplica las reglas de bola 8 descritas arriba. La física debe seguir afinándose con sesiones de juego; no representa una mesa profesional calibrada.
 
 ## Abrir y compilar con Unity
 
@@ -83,11 +89,15 @@ Las pruebas optativas recorren golpe válido, golpe fallido, recuperación, agar
 
 ## Alcance y decisiones
 
-Esta entrega integra la práctica local con una sala LAN de autoridad en el anfitrión, caídas articuladas, botellas y una bebida. Se conserva el controlador de cápsula por decisión del usuario para este hito. Usa Built-in; una migración a URP y el active ragdoll de locomoción requieren decisiones independientes. Paquete de entrada fijado en 1.20.1 y NGO en 2.13.3. Arte geométrico y sonidos sintetizados originales; sin canciones ni servicios de emparejamiento.
+Esta entrega incluye práctica local, sala LAN de autoridad en el anfitrión, bola 8 compartida, caídas articuladas, botellas y una bebida. Se conserva el controlador de cápsula de main. Usa Built-in; una migración a URP y el active ragdoll de locomoción requieren decisiones independientes. Paquete de entrada fijado en 1.20.1 y NGO en 2.13.3. Arte geométrico y sonidos sintetizados originales; sin canciones ni servicios de emparejamiento.
 
-Quedan pendientes LAN entre máquinas y condiciones de latencia/pérdida, partidas compartidas de billar con reglas oficiales, validación actual con seis personas, los otros juegos, coctelería completa, arte final, mando físico, reasignación y juego cruzado. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. No es una distribución pública firmada.
+Quedan pendientes LAN entre máquinas y condiciones de latencia/pérdida, aceptación humana de bola 8, apuestas/economía completa, validación actual con seis personas, los otros cinco juegos, coctelería completa, mando físico, reasignación y juego cruzado. El arte final sigue diferido. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. No es una distribución pública firmada.
 
 ## Código principal
+
+- `TableSession`: asientos, organizador, participantes, espera y ausencia durante turno.
+- `EightBallRules`: reglas puras de bola 8 y decisiones del tiro.
+- `PoolRoomController`: coordinación autoritativa entre mesa, reglas, física y cobro de apertura.
 
 - `DemoGame`: sesión, objetivos y resolución de acciones en paso fijo.
 - `TavernActor`: movimiento, caída articulada, restauración y efecto temporal.

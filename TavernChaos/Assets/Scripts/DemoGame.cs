@@ -39,7 +39,7 @@ namespace TavernChaos
         private readonly List<(GameObject obj,float end)> sparks=new();
         private void Awake()
         {
-            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
+            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
             Physics.defaultSolverIterations=10; Physics.defaultSolverVelocityIterations=4;
             TavernWorld.Build();
             Player=CreateActor("You | Mica",true,new(0,.08f,-4)); Rival=CreateActor("Rival | Bruno",false,new(0,.08f,-.1f));
@@ -56,6 +56,7 @@ namespace TavernChaos
             Lan=gameObject.AddComponent<LanSession>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests")) gameObject.AddComponent<DemoSmokeTests>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-lan-check")) gameObject.AddComponent<LanProcessChecks>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-pool-room-check")) gameObject.AddComponent<PoolRoomChecks>();
         }
         internal TavernActor CreateRoomActor(string name,Vector3 home)=>CreateActor(name,true,home);
         internal void SetRoomHeld(ThrowableBottle bottle) { Held=bottle; }
@@ -103,6 +104,8 @@ namespace TavernChaos
         }
         private static void SetCursor(bool capture)
         {
+            // Headless test peers must never request an OS cursor lock or interfere with a visible player.
+            if(SystemInfo.graphicsDeviceType==UnityEngine.Rendering.GraphicsDeviceType.Null) return;
             var state=capture?CursorLockMode.Locked:CursorLockMode.None;
             if(Cursor.lockState!=state) Cursor.lockState=state;
             if(Cursor.visible==capture) Cursor.visible=!capture;
@@ -126,7 +129,7 @@ namespace TavernChaos
             for(int i=sparks.Count-1;i>=0;i--) if(Time.time>sparks[i].end) { Destroy(sparks[i].obj); sparks.RemoveAt(i); }
             if(SmokeMode&&!TestDriveInput) { Pool.UpdateGuide(); return; }
             if(!Started || Paused) { hud.HandleMenuInput(); return; }
-            if(Lan&&Lan.Running) { UpdateRoomInput(); return; }
+            if(Lan&&Lan.Running) { if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); } else { UpdateRoomInput(); Pool.UpdateGuide(); } return; }
             if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); return; }
             if(Input.Pause.WasPressedThisFrame()) { Settings=false; SetPause(true); return; }
             if(Input.Reset.WasPressedThisFrame()) { ResetSession(); return; }
@@ -160,9 +163,18 @@ namespace TavernChaos
             if(Input.PoolPause.WasPressedThisFrame()) {
                 if(Pool.ResetPending) Pool.CancelReset(); else SetPause(true); return;
             }
-            if(Input.PoolExit.WasPressedThisFrame()) { Pool.Exit(); return; }
-            if(Input.PoolReset.WasPressedThisFrame()) Pool.RequestReset();
-            if(Input.PoolNext.WasPressedThisFrame()&&!Pool.Moving) Pool.SelectDrill((PoolDrill)(((int)Pool.Drill+1)%4));
+            bool room=Lan&&Lan.Running;
+            if(Input.PoolExit.WasPressedThisFrame()) { if(room) Lan.Send(LanAction.PoolLeave); else Pool.Exit(); return; }
+            if(room) {
+                if(Input.PoolRules.WasPressedThisFrame()) { hud.ShowTableRules(); return; }
+                var table=Lan.View?.pool;
+                if(Input.PoolConfirm.WasPressedThisFrame()&&table!=null) Lan.Send(table.phase==TablePhase.Preparation?LanAction.PoolStart:table.phase==TablePhase.Result?LanAction.PoolClose:LanAction.PoolAccept);
+                if(Input.PoolAlternative.WasPressedThisFrame()) Lan.Send(LanAction.PoolRerack);
+                if(Input.PoolNext.WasPressedThisFrame()) Lan.CyclePoolCall(false);
+                if(Input.PoolPocket.WasPressedThisFrame()) Lan.CyclePoolCall(true);
+            }
+            if(!room&&Input.PoolReset.WasPressedThisFrame()) Pool.RequestReset();
+            if(!room&&Input.PoolNext.WasPressedThisFrame()&&!Pool.Moving) Pool.SelectDrill((PoolDrill)(((int)Pool.Drill+1)%4));
             if(Pool.Transitioning) { poolPointerSeen=false; return; }
             Vector2 pointer=Input.Point.ReadValue<Vector2>();
             bool pointerMoved=!poolPointerSeen||(pointer-lastPoolPointer).sqrMagnitude>.2f;
@@ -182,19 +194,25 @@ namespace TavernChaos
             float power=Input.PoolPower.ReadValue<float>();
             if(Mathf.Abs(power)>.1f) Pool.SetPower(Pool.Power+power*Time.deltaTime*.45f);
             if(Input.PoolShoot.WasPressedThisFrame()) {
-                if(SmokeMode) Debug.Log($"POOL_INPUT click: phase={Pool.Phase} canShoot={Pool.CanShoot} pointer={pointer} ui={DemoHUD.PoolUIContains(pointer)} shots={Pool.Shots}");
+                if(SmokeMode) Debug.Log($"POOL_INPUT click: phase={Pool.Phase} canShoot={Pool.CanShoot} pointer={pointer} source={Input.Point.activeControl?.path} ui={DemoHUD.PoolUIContains(pointer)} shots={Pool.Shots}");
                 // UI clicks are consumed by widgets, never also by the simulation.
                 bool mouse=Input.PoolShoot.activeControl?.device is UnityEngine.InputSystem.Mouse;
                 if(!mouse || !DemoHUD.PoolUIContains(pointer)) {
-                    if(Pool.Phase==PoolPhase.BallInHand) Pool.ConfirmPlacement(); else QueuePoolShot();
+                    if(Pool.Phase==PoolPhase.BallInHand) ConfirmPoolPlacement(); else QueuePoolShot();
                 }
             }
         }
         public void QueuePoolShot()
         {
             if(!Started||Paused||!Pool.CanShoot) return;
+            if(Lan&&Lan.Running) { var table=Lan.View?.pool; if(table!=null) Lan.Send(LanAction.PoolShoot,Pool.Direction,ball:table.callBall,pocket:table.callPocket,power:Pool.Power); return; }
             pendingPower=Pool.Power; pendingPoolDirection=Pool.Direction;
             if(SmokeMode) Debug.Log($"POOL_INPUT queued: {pendingPower}, {pendingPoolDirection}");
+        }
+        public void ConfirmPoolPlacement()
+        {
+            if(Lan&&Lan.Running) { if(Lan.CanLocalPoolAct&&Pool.CanPlace) Lan.Send(LanAction.PoolPlace,Pool.Placement); }
+            else Pool.ConfirmPlacement();
         }
         private void FixedUpdate()
         {
@@ -274,6 +292,9 @@ namespace TavernChaos
                 case LanFeedbackKind.Grab: Audio.Play("clink",gain*.4f); break;
                 case LanFeedbackKind.Drink: Impact(feedback.position,true); Audio.Play("drink",gain); break;
                 case LanFeedbackKind.Slip: Impact(feedback.position); Audio.Play("hit",gain*.5f); break;
+                case LanFeedbackKind.PoolContact: Audio.Play("clink",gain*.35f); break;
+                case LanFeedbackKind.PoolPot: Audio.Play("clink",gain*.65f); break;
+                case LanFeedbackKind.PoolShot: Audio.Play("clink",gain*.5f); break;
             }
         }
         private void Impact(Vector3 pos,bool blue=false)
@@ -286,7 +307,12 @@ namespace TavernChaos
         public void Notify(string text) { Toast=text; ToastUntil=Time.unscaledTime+4.5f; }
         public string Prompt()
         {
-            if(Lan&&Lan.Running) return Player.Fallen?"RECUPERÁNDOTE · "+Mathf.CeilToInt(Player.RecoverAt-Time.time)+" s":"SALA LAN · E interactuar   CLIC cargar   Q soltar   R recolocarte   ESC menú";
+            if(Lan&&Lan.Running) {
+                if(Player.Fallen) return "RECUPERÁNDOTE · "+Mathf.CeilToInt(Player.RecoverAt-Time.time)+" s";
+                if(Pool.Active) return "BOLA 8 · E / B levantarte · la partida continúa · ESC pausa local";
+                if(PoolRoomController.Near(Player.transform.position)) return "E / A · Sentarte a bola 8 o apuntarte a la espera";
+                return "SALA LAN · E interactuar   CLIC cargar   Q soltar   R recolocarte   ESC menú";
+            }
             if(Player.Fallen) return "RECUPERÁNDOTE · "+Mathf.CeilToInt(Player.RecoverAt-Time.time)+" s";
             if(Pool.Active) return Pool.Phase switch {
                 PoolPhase.Rolling=>"Bolas en movimiento · prepara tu siguiente línea",

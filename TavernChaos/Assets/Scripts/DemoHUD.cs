@@ -12,7 +12,7 @@ namespace TavernChaos
         private int focus, controls, lastControls, accept=-1;
         private float nextNavigate;
         private string menuScreen;
-        private bool lanLobby,roomRoster,editingLanField;
+        private bool lanLobby,roomRoster,editingLanField,tableRules;
         private GUIStyle lanField;
         private string lanName="Invitado", lanAddress="127.0.0.1", lanPort="7777";
         private int lanMinutes=30;
@@ -25,9 +25,9 @@ namespace TavernChaos
         public void HandleMenuInput()
         {
             if(!g) g=DemoGame.Instance;
-            string screen=(g.Started?"pause":"menu")+(g.Settings?"settings":lanLobby?"lan":roomRoster?"roster":"");
+            string screen=(g.Started?"pause":"menu")+(g.Settings?"settings":lanLobby?"lan":roomRoster?"roster":tableRules?"rules":"");
             if(menuScreen!=screen) { menuScreen=screen; focus=0; accept=-1; nextNavigate=0; }
-            if(g.Input.Back.WasPressedThisFrame()) { if(roomRoster) roomRoster=false; else if(lanLobby) lanLobby=false; else if(g.Settings) { g.SaveSettings(); g.Settings=false; } else if(g.Paused) g.SetPause(false); return; }
+            if(g.Input.Back.WasPressedThisFrame()) { if(tableRules) { tableRules=false; g.SetPause(false); } else if(roomRoster) roomRoster=false; else if(lanLobby) lanLobby=false; else if(g.Settings) { g.SaveSettings(); g.Settings=false; } else if(g.Paused) g.SetPause(false); return; }
             if(lanLobby&&editingLanField) return;
             Vector2 nav=g.Input.Navigate.ReadValue<Vector2>();
             if(Mathf.Abs(nav.y)>.5f && Time.unscaledTime>=nextNavigate && lastControls>0) { focus=(focus+(nav.y>0?-1:1)+lastControls)%lastControls; nextNavigate=Time.unscaledTime+.2f; }
@@ -114,9 +114,9 @@ namespace TavernChaos
         private void Game()
         {
             Box(new(32,28,1376,62),ink); Label(new(52,43,350,35),"TAVERN <color=#FF7947>& CHAOS</color>",22,ivory,FontStyle.Bold);
-            Label(new(480,49,520,30),g.Lan&&g.Lan.Running?"SALA LAN · PRIMERA PERSONA":g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+            Label(new(480,49,520,30),g.Lan&&g.Lan.Running?(g.Pool.Active?"BOLA 8 EN SALA":"SALA LAN · PRIMERA PERSONA"):g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
             Label(new(1110,49,270,30),g.Pool.Active?"ESC  Pausa     E  Volver":"ESC  Pausa y ajustes",15,muted,FontStyle.Normal,TextAnchor.UpperRight);
-            if(g.Lan&&g.Lan.Running) { RoomHUD(); }
+            if(g.Lan&&g.Lan.Running) { if(g.Pool.Active) PoolRoomHUD(); else RoomHUD(); }
             else if(!g.Pool.Active) {
                 Box(new(32,114,312,258),ink); Tag(52,137,g.Complete?"RONDA COMPLETADA":"TU PRIMERA RONDA",g.Complete?orange:mint);
                 string[] goals={"Conecta un golpe a Bruno","Falla un golpe y vuelve a pie","Prueba Laguna Azul en la barra","Derriba a Bruno con una botella"};
@@ -139,10 +139,13 @@ namespace TavernChaos
                 Box(new(528,629,384,5),new Color(.18f,.23f,.25f)); Box(new(528,629,384*g.Charge,5),orange);
             }
             Box(new(284,763,872,54),ink); Label(new(302,780,836,32),g.Prompt(),16,ivory,FontStyle.Bold,TextAnchor.UpperCenter);
-            Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),g.Pool.Active?"RATÓN / STICK  apuntar     RUEDA / ↑ ↓  potencia     ← →  ajuste fino     CLIC / RT  tirar     TAB / RB  ejercicio     E / B  salir":g.Lan&&g.Lan.Running?"WASD / STICK  moverse     SHIFT  correr     RATÓN / STICK  mirar     CLIC / RT  golpe     E / A  interactuar     Q / B  soltar     R  recolocarte":"WASD / STICK  moverse     SHIFT  correr     RATÓN / STICK  mirar     CLIC / RT  golpe     E / A  interactuar     Q / B  soltar     R  reiniciar",14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
+            string controls=g.Pool.Active?(g.Lan&&g.Lan.Running?"RATÓN / STICK apuntar · ↑ ↓ potencia · TAB / RB bola · C / LB tronera · CLIC / RT tirar · ENTER / A confirmar · E / B salir":"RATÓN / STICK apuntar · ↑ ↓ potencia · CLIC / RT tirar · TAB / RB ejercicio · E / B salir"):"WASD / STICK moverse · RATÓN / STICK mirar · CLIC / RT golpe · E / A interactuar · Q / B soltar · ESC menú";
+            Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),controls,14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
         }
         internal void ShowLanPanelForCheck(bool show) { lanLobby=show; }
         internal void ShowRosterForCheck() { roomRoster=true; }
+        public void ShowTableRules() { tableRules=true; g.SetPause(true); }
+        public void CloseTableRules() { tableRules=false; g.SetPause(false); }
         private void Lobby()
         {
             Box(new(700,255,676,375),ink); Label(new(726,277,620,38),"UNA MESA PARA TU GRUPO",27,ivory,FontStyle.Bold);
@@ -167,7 +170,7 @@ namespace TavernChaos
             Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
             float effectY=view?.voteActive==true?285:114;
             Box(new(1032,effectY,376,110),ink);
-            Label(new(1052,effectY+18,332,80),g.Player.EffectRemaining>0?"LAGUNA AZUL · "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!":"BARRA · LAGUNA AZUL\nE para beber · 20 fichas\nEl billar sigue en práctica local.",16,g.Player.EffectRemaining>0?mint:muted,FontStyle.Bold);
+            Label(new(1052,effectY+18,332,80),g.Player.EffectRemaining>0?"LAGUNA AZUL · "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!":"BOLA 8 · E junto a un asiento\nDos personas · apertura 10 fichas\nBARRA · Laguna Azul 20 fichas",16,g.Player.EffectRemaining>0?mint:muted,FontStyle.Bold);
             Box(new(32,114,330,390),ink); Tag(52,138,room.IsHost?"SALA LAN · ANFITRIÓN":room.Connected?"SALA LAN · CONECTADO":"SALA LAN · CONECTANDO",mint);
             Label(new(52,175,290,32),"CÓDIGO  "+room.RoomCode,19,ivory,FontStyle.Bold);
             Label(new(52,216,290,30),(view?.actors?.Length??0)+" / 6 personas",18,mint,FontStyle.Bold);
@@ -186,6 +189,72 @@ namespace TavernChaos
                     Box(new(1032,114,376,150),ink); Label(new(1052,134,330,55),"VOTACIÓN DE EXPULSIÓN\n"+view.votes+" / "+view.votesNeeded+" votos necesarios",17,ivory,FontStyle.Bold);
                     Label(new(1052,206,332,40),"ESC → Jugadores para votar",16,mint,FontStyle.Bold);
                 }
+                if(view.pool?.phase==TablePhase.Playing&&view.pool.IsParticipant(room.LocalId)&&!view.pool.IsSeated(room.LocalId)) {
+                    Box(new(1032,445,376,145),ink);
+                    Label(new(1052,463,332,112),view.pool.turn==room.LocalId?"SIGUES EN LA PARTIDA\nEs tu turno: vuelve al asiento en "+Mathf.CeilToInt(view.pool.absenceRemaining)+" s.\nE junto al billar para sentarte.":"SIGUES EN LA PARTIDA\nEl minuto solo contará al llegar tu turno. Puedes volver al asiento.",18,orange,FontStyle.Bold);
+                }
+            }
+        }
+        private string RoomName(ulong id)
+        {
+            if(g.Lan.View?.actors!=null) foreach(var a in g.Lan.View.actors) if(a.id==id) return a.name;
+            return "Persona desconectada";
+        }
+        private void PoolRoomHUD()
+        {
+            var room=g.Lan; var table=room.View?.pool; if(table==null) return;
+            bool enabled=GUI.enabled,mine=room.CanLocalPoolAct;
+            Box(new(32,114,330,610),ink); Tag(52,138,"BOLA 8 · DOS LADOS",mint);
+            Label(new(52,177,290,34),table.phase==TablePhase.Preparation?"PREPARAR PARTIDA":table.phase==TablePhase.Result?"RESULTADO":table.hasTurn?"TURNO: "+RoomName(table.turn):"MESA DISPONIBLE",20,orange,FontStyle.Bold);
+            for(int i=0;i<table.seated.Length;i++) Label(new(52,225+i*35,290,34),(table.seated[i]==room.LocalId?"TÚ · ":"")+RoomName(table.seated[i])+(table.hasOrganizer&&table.organizer==table.seated[i]?" ★":""),17,ivory,FontStyle.Bold);
+            for(int i=0;i<table.participants.Length;i++) {
+                int group=table.groups.Length>i?table.groups[i]:0;
+                Label(new(52,315+i*51,290,50),RoomName(table.participants[i])+"\n"+(group==1?"LISAS 1–7":group==2?"RAYADAS 9–15":"MESA ABIERTA"),16,mint);
+            }
+            Label(new(52,440,290,120),table.notice,18,ivory);
+            if(table.phase==TablePhase.Result&&table.winner>=0&&table.winner<table.participants.Length) Label(new(52,573,290,56),"GANA "+RoomName(table.participants[table.winner]),21,mint,FontStyle.Bold);
+            Label(new(52,646,290,55),"En espera: "+table.waiting.Length+" · tiros: "+table.shots,16,muted);
+            if(Button(new(52,691,290,40),"REGLAS · H / X")) ShowTableRules();
+            Box(new(1032,114,376,610),ink);
+            if(table.phase==TablePhase.Preparation||table.phase==TablePhase.Available) {
+                Label(new(1052,137,332,115),"Abrir: 10 fichas del organizador.\nDos personas sentadas.\nSin apuestas en esta entrega.",19,ivory);
+                GUI.enabled=enabled&&table.seated.Length==2&&table.organizer==room.LocalId;
+                if(Button(new(1052,272,332,56),"COMENZAR · ENTER / A",true)) room.Send(LanAction.PoolStart);
+            } else if(table.phase==TablePhase.Result) {
+                Label(new(1052,137,332,90),"La partida terminó.\nNueva apertura: 10 fichas.",20,ivory);
+                GUI.enabled=enabled&&table.hasOrganizer&&table.organizer==room.LocalId;
+                if(Button(new(1052,250,332,56),"PREPARAR REVANCHA · A",true)) room.Send(LanAction.PoolClose);
+            } else if(table.playPhase==EightBallPhase.BreakDecision) {
+                Label(new(1052,137,332,105),"Saque insuficiente.\nElige qué hacer con la mesa.",20,ivory);
+                GUI.enabled=enabled&&mine;
+                if(Button(new(1052,265,332,56),"ACEPTAR · ENTER / A",true)) room.Send(LanAction.PoolAccept);
+                if(Button(new(1052,339,332,56),"REPETIR · RETROCESO / Y")) room.Send(LanAction.PoolRerack);
+            } else {
+                bool placing=table.playPhase==EightBallPhase.Placement;
+                Label(new(1052,137,332,56),placing?(table.headOnly?"BLANCA TRAS LA LÍNEA":"BLANCA EN MANO"):table.breaking?"SAQUE · SIN ANUNCIO":"ANUNCIA BOLA Y TRONERA",18,mint,FontStyle.Bold);
+                GUI.enabled=enabled&&mine&&table.playPhase==EightBallPhase.Aiming&&!table.breaking;
+                if(Button(new(1052,212,332,45),"BOLA "+(table.callBall>0?table.callBall.ToString():"—")+" · TAB / RB")) room.CyclePoolCall(false);
+                if(Button(new(1052,269,332,45),"TRONERA "+(table.callPocket>=0?(table.callPocket+1).ToString():"—")+" · C / LB")) room.CyclePoolCall(true);
+                GUI.enabled=enabled&&mine;
+                Label(new(1052,339,332,28),"POTENCIA · "+Mathf.RoundToInt(g.Pool.Power*100)+" %",18,ivory,FontStyle.Bold);
+                g.Pool.SetPower(GUI.HorizontalSlider(new(1052,387,332,24),g.Pool.Power,.05f,1));
+                bool called=table.breaking||table.callBall>0&&table.callPocket>=0;
+                GUI.enabled=enabled&&mine&&(placing&&g.Pool.CanPlace||g.Pool.CanShoot&&called);
+                if(Button(new(1052,440,332,56),placing?"COLOCAR · CLIC / RT":"TIRAR · CLIC / RT",true)) { if(placing) g.ConfirmPoolPlacement(); else g.QueuePoolShot(); }
+                GUI.enabled=enabled;
+                Label(new(1052,519,332,70),mine?placing?"Busca un hueco libre en el paño.":called?"La guía muestra el primer contacto.":"Selecciona bola y tronera antes de tirar.":"Observa el tiro de tu rival.\nPuedes levantarte y volver.",17,muted);
+            }
+            GUI.enabled=enabled;
+            if(Button(new(1052,652,332,48),"LEVANTARTE · E / B")) room.Send(LanAction.PoolLeave);
+            Label(new(1052,597,332,46),"8 en saque: se repone.\nFuera en tu turno: máximo 60 s.",15,muted);
+            for(int i=0;i<g.Pool.Balls.Count;i++) {
+                var b=g.Pool.Balls[i]; if(!b.gameObject.activeSelf) continue;
+                Vector3 p=Camera.main.WorldToScreenPoint(b.position); float x=(p.x-ox)/scale,y=(Screen.height-p.y-oy)/scale;
+                if(p.z>0&&x>390&&x<1000&&y>106&&y<754) Label(new(x-12,y-11,24,24),i==0?"•":i.ToString(),16,i==0?ink:ivory,FontStyle.Bold,TextAnchor.MiddleCenter);
+            }
+            for(int i=0;i<g.Pool.Pockets.Count;i++) {
+                Vector3 p=Camera.main.WorldToScreenPoint(PoolPractice.Center+g.Pool.Pockets[i]); float x=(p.x-ox)/scale,y=(Screen.height-p.y-oy)/scale;
+                Label(new(x-16,y-14,32,30),(i+1).ToString(),20,table.callPocket==i?orange:mint,FontStyle.Bold,TextAnchor.MiddleCenter);
             }
         }
         private void PoolHUD()
@@ -227,6 +296,7 @@ namespace TavernChaos
         }
         private void Pause()
         {
+            if(tableRules) { TableRulesMenu(); return; }
             Box(new(-ox/scale,-oy/scale,Screen.width/scale,Screen.height/scale),new Color(0,0,0,.65f));
             if(roomRoster&&g.Lan&&g.Lan.Running) { RosterMenu(); return; }
             if(g.Settings) { Settings(new(400,185,640,475)); return; }
@@ -236,6 +306,13 @@ namespace TavernChaos
             if(g.Lan&&g.Lan.Running) { if(Button(new(524,534,392,50),"JUGADORES Y VOTACIÓN")) roomRoster=true; }
             else if(Button(new(524,534,392,50),"REINICIAR DEMO")) { g.ResetSession(); g.SetPause(false); }
             if(Button(new(524,602,392,50),"VOLVER AL INICIO")) g.Menu();
+        }
+        private void TableRulesMenu()
+        {
+            Box(new(175,90,1090,720),ink); Label(new(210,117,1015,45),"BOLA 8 · REGLAS DE ESTA TABERNA",28,mint,FontStyle.Bold);
+            string rules="Dos lados. Anuncia bola y tronera; primer emboque legal asigna lisas o rayadas. Primero toca tu grupo, después debe haber emboque o banda. Limpia tu grupo antes de tirar a la 8.\n\nSaque: embocar o llevar cuatro bolas distintas a banda. Si es insuficiente, el rival acepta o pide repetir al sacador original. Primer saque aleatorio. La 8 en saque se repone siempre.\n\nFalta: blanca en mano; tras falta de saque, detrás de la línea. Una bola de color saltada se repone. La 8 prematura, en otra tronera, con falta o fuera pierde. Mesa abierta: nunca contactar primero la 8.\n\nPuedes levantarte o caer sin abandonar la partida. Solo cuenta ausencia durante tu turno: más de 60 s pierde. Mientras estés sentado no hay reloj. Un tiro ya iniciado se resuelve antes de una desconexión.\n\nReferencia: WPA, Rules of Play 15-09-2025. El azar inicial, las opciones de saque, la reposición de colores y la ausencia son variantes del proyecto. Abrir cuesta 10 al organizador; sin apuestas en esta entrega.";
+            Label(new(210,185,1015,520),rules,18,ivory);
+            if(Button(new(210,735,1015,48),"VOLVER A LA MESA · ESC / B",true)) CloseTableRules();
         }
         private void RosterMenu()
         {

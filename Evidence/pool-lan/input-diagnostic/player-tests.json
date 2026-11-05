@@ -1,0 +1,23 @@
+{
+    "unity": "6000.6.8f1",
+    "platform": "OSXPlayer",
+    "passed": true,
+    "checks": [
+        "UX: Enter starts the session through the real menu actions",
+        "UX: billiards releases the cursor without freeing character movement",
+        "UX: projected target is inside the usable cloth region",
+        "UX: virtual pointer preserves the requested position",
+        "UX: mouse points directly from cue to the selected cloth position",
+        "UX: clicking the power panel does not also shoot",
+        "UX: one wheel step changes power by five percentage points",
+        "UX: one click fires the aimed shot at the selected power (shots=1, phase=Rolling)",
+        "UX: holding the shot button cannot repeat-fire (shots=1)",
+        "UX: Escape pauses a pool shot without leaving the table",
+        "UX: Enter resumes the focused pause action",
+        "UX: leaving pool restores walking controls without an accidental punch or re-entry",
+        "UX: the keyboard-accessible main-menu shortcut opens billiards directly",
+        "No runtime errors or exceptions"
+    ],
+    "failures": [],
+    "runtimeErrors": []
+}

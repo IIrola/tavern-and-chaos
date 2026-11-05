@@ -11,6 +11,7 @@ namespace TavernChaos
         public readonly InputAction Move, Look, Punch, Interact, Drop, Run, Reset, Pause;
         public readonly InputAction Point, Scroll, PoolAim, FineAim, PoolPower, PoolShoot, PoolExit, PoolPause, PoolReset, PoolNext;
         public readonly InputAction Accept, Back, Navigate;
+        public readonly InputAction PoolConfirm,PoolAlternative,PoolPocket,PoolRules;
         public DemoInput()
         {
             Move=game.AddAction("Move",InputActionType.Value);
@@ -25,6 +26,8 @@ namespace TavernChaos
             PoolPower=pool.AddAction("Power",InputActionType.Value); PoolPower.AddCompositeBinding("1DAxis").With("Negative","<Keyboard>/downArrow").With("Positive","<Keyboard>/upArrow"); PoolPower.AddBinding("<Gamepad>/dpad/y");
             PoolShoot=Button(pool,"Shoot","<Mouse>/leftButton","<Gamepad>/rightTrigger"); PoolExit=Button(pool,"Leave","<Keyboard>/e","<Gamepad>/buttonEast");
             PoolPause=Button(pool,"Pause","<Keyboard>/escape","<Gamepad>/start"); PoolReset=Button(pool,"Reset","<Keyboard>/r","<Gamepad>/select"); PoolNext=Button(pool,"Exercise","<Keyboard>/tab","<Gamepad>/rightShoulder");
+            PoolConfirm=Button(pool,"TableConfirm","<Keyboard>/enter","<Gamepad>/buttonSouth"); PoolAlternative=Button(pool,"TableAlternative","<Keyboard>/backspace","<Gamepad>/buttonNorth"); PoolPocket=Button(pool,"CalledPocket","<Keyboard>/c","<Gamepad>/leftShoulder");
+            PoolRules=Button(pool,"TableRules","<Keyboard>/h","<Gamepad>/buttonWest");
             Accept=Button(ui,"Accept","<Keyboard>/enter","<Gamepad>/buttonSouth"); Accept.AddBinding("<Keyboard>/space");
             Back=Button(ui,"Back","<Keyboard>/escape","<Gamepad>/buttonEast");
             Navigate=ui.AddAction("Navigate",InputActionType.Value); Navigate.AddCompositeBinding("2DVector").With("Up","<Keyboard>/upArrow").With("Down","<Keyboard>/downArrow").With("Left","<Keyboard>/leftArrow").With("Right","<Keyboard>/rightArrow"); Navigate.AddBinding("<Gamepad>/dpad"); Navigate.AddBinding("<Gamepad>/leftStick");

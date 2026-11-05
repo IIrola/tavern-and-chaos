@@ -7,6 +7,14 @@ namespace TavernChaos
     {
         public bool IsPlayer { get; private set; }
         public bool Fallen { get; private set; }
+        public bool Seated { get; private set; }
+        public void SetSeated(bool value)
+        {
+            Seated=value; momentum=Vector3.zero;
+            if(replica||Fallen) return;
+            model.localPosition=value?Vector3.down*.28f:Vector3.zero;
+            parts[2].transform.localRotation=parts[3].transform.localRotation=Quaternion.Euler(value?-80:0,0,0);
+        }
         public float RecoverAt { get; private set; }
         public float EffectUntil { get; private set; }
         public float EffectRemaining => Mathf.Max(0, EffectUntil-Time.time);
@@ -38,7 +46,7 @@ namespace TavernChaos
         public void SetReplica(bool value)
         {
             if(replica==value) return;
-            replica=value; replicaReady=false; ReplicaCharge=-1; ToggleRagdoll(false); Fallen=false;
+            replica=value; replicaReady=false; ReplicaCharge=-1; ToggleRagdoll(false); Fallen=Seated=false;
             model.localRotation=Quaternion.identity; model.localPosition=Vector3.zero; controller.enabled=!value;
             momentum=Vector3.zero; EffectUntil=0; replicaEyeOffset=Vector3.up*1.81f; replicaFocusOffset=Vector3.up*1.1f; replicaTarget=null;
             for(int i=0;i<parts.Count;i++) { parts[i].transform.localPosition=poses[i]; parts[i].transform.localRotation=rotations[i]; }
@@ -50,7 +58,7 @@ namespace TavernChaos
             snap|=!replicaReady||state.fallen!=Fallen||state.resetRevision!=(replicaTarget?.resetRevision??state.resetRevision)||Vector3.Distance(transform.position,state.position)>3;
             fromPosition=transform.position; fromRotation=transform.rotation; fromEye=replicaEyeOffset; fromFocus=replicaFocusOffset;
             fromBody.Clear(); fromBody.AddRange(CaptureBodyPose());
-            Fallen=state.fallen; RecoverAt=Time.time+state.recovery; EffectUntil=Time.time+state.effect;
+            Fallen=state.fallen; Seated=state.seated; RecoverAt=Time.time+state.recovery; EffectUntil=Time.time+state.effect;
             replicaTarget=state; blendTime=snap?.05f:0;
             replicaReady=true; ReplicaCharge=state.charge;
             if(snap) RenderReplica(1);
@@ -67,7 +75,7 @@ namespace TavernChaos
             Quaternion renderedRotation=Quaternion.Slerp(fromRotation,targetRotation,t);
             // Only local visual yaw follows the mouse immediately. Position and physics stay authoritative.
             var game=DemoGame.Instance;
-            if(game&&this==game.Player&&!Fallen) renderedRotation=Quaternion.Euler(0,game.Rig.Yaw,0);
+            if(game&&this==game.Player&&!Fallen&&!Seated) renderedRotation=Quaternion.Euler(0,game.Rig.Yaw,0);
             transform.SetPositionAndRotation(Vector3.Lerp(fromPosition,replicaTarget.position,t),renderedRotation);
             replicaEyeOffset=Vector3.Lerp(fromEye,Quaternion.Inverse(targetRotation)*(replicaTarget.eye-replicaTarget.position),t);
             replicaFocusOffset=Vector3.Lerp(fromFocus,Quaternion.Inverse(targetRotation)*(replicaTarget.focus-replicaTarget.position),t);
@@ -141,7 +149,7 @@ namespace TavernChaos
         }
         public void Move(Vector3 direction, bool run)
         {
-            if(replica || Fallen || !controller.enabled) return;
+            if(replica || Fallen || Seated || !controller.enabled) return;
             direction=Vector3.ClampMagnitude(direction,1);
             float speed=run?5.6f:3.5f;
             // Laguna Azul: low friction, with a readable expiry and no permanent parameter changes.
@@ -188,7 +196,7 @@ namespace TavernChaos
         public void Swing() { punchUntil=Time.time+.3f; }
         public void Fall(Vector3 impulse)
         {
-            if(replica||Fallen) return; Fallen=true; RecoverAt=Time.time+3; EffectUntil=0; momentum=Vector3.zero;
+            if(replica||Fallen) return; Seated=false; Fallen=true; RecoverAt=Time.time+3; EffectUntil=0; momentum=Vector3.zero;
             controller.enabled=false; ToggleRagdoll(true);
             foreach(var r in parts) { r.linearVelocity=impulse+Vector3.up*1.5f; r.angularVelocity=new Vector3(2,.4f,1.2f); }
             DemoGame.Instance?.ActorFell(this);
