@@ -20,7 +20,7 @@ namespace TavernChaos.Editor
             new GameObject("Tavern demo | runtime composition").AddComponent<DemoGame>();
             EditorSceneManager.SaveScene(scene,ScenePath);
             EditorBuildSettings.scenes=new[]{new EditorBuildSettingsScene(ScenePath,true)};
-            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.2.0";
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.3.0";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);

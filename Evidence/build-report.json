@@ -3,9 +3,9 @@
     "unity": "6000.6.8f1",
     "platform": "macOS Apple Silicon",
     "backend": "Mono",
-    "version": "0.2.0",
-    "bytes": 71347906,
-    "seconds": 0.898662,
-    "errors": 0,
+    "version": "0.3.0",
+    "bytes": 72771943,
+    "seconds": 2.348759,
+    "errors": 745,
     "warnings": 0
 }

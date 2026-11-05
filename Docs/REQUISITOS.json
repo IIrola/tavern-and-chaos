@@ -1,0 +1,692 @@
+{
+  "source": "GDD_y_plan_de_desarrollo.md",
+  "scope": "GDD completo confirmado por el usuario; arte final diferido, sin reducir requisitos funcionales",
+  "completion_rule": "Todos los criterios deben estar implementados y verificados a su alcance real; una prueba local no demuestra LAN ni Windows.",
+  "requirements": [
+    {
+      "id": "S01",
+      "section": "1. Sala y sesión",
+      "requirement": "Sala privada LAN, anfitrión-jugador, código/dirección de entrada y máximo seis participantes.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Seis procesos reales en una Mac, código y capacidad probados; falta LAN entre equipos."
+    },
+    {
+      "id": "S02",
+      "section": "1. Sala y sesión",
+      "requirement": "Nombre, apariencia y controles antes de entrar; bienvenida y tutorial contextual.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Nombre y panel de conexión; apariencia y configuración completa de controles pendientes."
+    },
+    {
+      "id": "S03",
+      "section": "1. Sala y sesión",
+      "requirement": "Entradas durante sesión, salida segura, reinicio al cambiar de sala, cierre al perder al anfitrión; sin migración.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Salida y cierre de anfitrión comprobados entre procesos; falta ensayo físico multi-equipo."
+    },
+    {
+      "id": "S04",
+      "section": "1. Sala y sesión",
+      "requirement": "Duración seleccionable 20/30/45/60 minutos; cierre y liquidación de acciones/partidas pendientes.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Duración configurada en sala; liquidación de partidas y fin económico pendientes."
+    },
+    {
+      "id": "S05",
+      "section": "1. Sala y sesión",
+      "requirement": "Compatibilidad macOS y Windows con juego cruzado real; teclado/ratón y mando.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "P01",
+      "section": "2. Personaje, cámara e interacción",
+      "requirement": "Caminar, correr, mirar, interactuar, agarrar/soltar, cargar/lanzar, golpear y menú.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Acciones básicas en red; sentarse y módulos de mesa pendientes."
+    },
+    {
+      "id": "P02",
+      "section": "2. Personaje, cámara e interacción",
+      "requirement": "Un objetivo por mira, proximidad y línea de visión; desempate centro, distancia e identificador estable.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "P03",
+      "section": "2. Personaje, cámara e interacción",
+      "requirement": "Estados exclusivos Libre/Agarrando/Cargando/Caído/Recuperándose/Sentado autorizados por servidor.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Movimiento/carga/caída con autoridad del host; contrato completo sentado/recuperándose pendiente."
+    },
+    {
+      "id": "P04",
+      "section": "2. Personaje, cámara e interacción",
+      "requirement": "Caída suelta objeto y cancela carga; recuperación base 3 s, punto libre y restauración de controles/cámara.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Recuperación y liberación probadas; ampliar pruebas de puntos libres y de caída sentado."
+    },
+    {
+      "id": "P05",
+      "section": "2. Personaje, cámara e interacción",
+      "requirement": "Cámara tercera persona, distancia/sensibilidad/inversión ajustables y colisión con entorno.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "P06",
+      "section": "2. Personaje, cámara e interacción",
+      "requirement": "Cápsula verificable, animación de movimiento y aproximación física del ragdoll validada en red.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Réplicas interpoladas y carga visible; falta predicción y medidas de latencia."
+    },
+    {
+      "id": "C01",
+      "section": "3. Golpes y objetos",
+      "requirement": "Golpe cargado hasta 1 s, ventana 0.25 s, validación de orientación/obstáculos/alcance y un impacto.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Carga y ventana resueltas en servidor; ampliar pruebas de obstáculos y coincidencia de golpes."
+    },
+    {
+      "id": "C02",
+      "section": "3. Golpes y objetos",
+      "requirement": "Acierto derriba rival, fallo derriba atacante, golpes simultáneos empatan; sin daño ni muerte.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Acierto/fallo y recuperación en red probados; empate simultáneo aún sin prueba de integración."
+    },
+    {
+      "id": "C03",
+      "section": "3. Golpes y objetos",
+      "requirement": "Personas sentadas pueden recibir golpe y caer; caída termina duelo sin expulsar de sala.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "C04",
+      "section": "3. Golpes y objetos",
+      "requirement": "Un poseedor por objeto; reclamaciones simultáneas, liberación e impulso único limitados por servidor.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Posesión y liberación al salir probadas; reclamación simultánea específica pendiente."
+    },
+    {
+      "id": "C05",
+      "section": "3. Golpes y objetos",
+      "requirement": "Botella y silla de masa/colisión distintas; impacto >5 m/s, CCD y un derribo por trayectoria.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Botella en red; falta silla, reparto de impulsos y ensayos completos de proyectiles."
+    },
+    {
+      "id": "C06",
+      "section": "3. Golpes y objetos",
+      "requirement": "Roturas/reposición acotadas, limpieza y ningún fragmento físico ilimitado.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "C07",
+      "section": "3. Golpes y objetos",
+      "requirement": "NPC ocioso/invitado/preparándose/ataque/caída/recuperación, reacción y puntería configurables en servidor.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B01",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Estación exclusiva, recipiente, hasta cuatro ingredientes con proporciones, agitar, servir, consumir/ofrecer/lanzar.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B02",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Laguna Azul: vodka/curazao/hielo, fricción cero y luz azul.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "B03",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Volcánico: tequila/picante/Tabasco, fuego de boca y onda expansiva sobre NPC próximos.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B04",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Mezcla Inestable: absenta/energética/cerveza, velocidad 150% 5 s y caída hacia atrás.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B05",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Helio: ginebra/carbonatada misterio, gravedad 20% durante 15 s y restauración correcta.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B06",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Cuatro licores fuertes: K.O. inmediato 10 s con humo.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B07",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Bebida consumida o lanzada aplica efecto una sola vez; también sobre sentados y derribo cuando proceda.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B08",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Ebriedad entera 0–5, balanceo y estabilidad por niveles; tropiezos nivel 5 separados al menos 15 s.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "B09",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Efectos con identificador/origen/inicio/duración: renovar mismo, combinar distintos con orden y límites.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "B10",
+      "section": "4. Coctelería y efectos",
+      "requirement": "Restaurar modificadores al caducar/caer/salir/desconectarse; no desplazar voluntariamente a sentados.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "T01",
+      "section": "5. Contrato de mesas",
+      "requirement": "Una mesa por juego, identificador/capacidad/asientos/reglas/partida; Disponible→Preparación→En curso→Resultado.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "T02",
+      "section": "5. Contrato de mesas",
+      "requirement": "Sentarse requiere proximidad, asiento libre y estado elegible; soltar objeto, guardar retorno y cambiar cámara local.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "T03",
+      "section": "5. Contrato de mesas",
+      "requirement": "Entrar a partida solo al comenzar; lista de espera; participante puede levantarse y volver si hay asiento.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "T04",
+      "section": "5. Contrato de mesas",
+      "requirement": "Solo corre ausencia si coincide con turno: >60 s expulsa de mesa, volver cancela y nueva salida reinicia.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "T05",
+      "section": "5. Contrato de mesas",
+      "requirement": "Sin límite de turno sentado; caída no abandona la partida, resuelve primero el tiro ya iniciado.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "T06",
+      "section": "5. Contrato de mesas",
+      "requirement": "Organizador primer asiento y transferencia al siguiente; resultado, revancha y salida.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "T07",
+      "section": "5. Contrato de mesas",
+      "requirement": "Rechazar fase/turno/asiento/parámetros/secuencia indebidos sin mutación; vistas públicas y manos privadas.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "V01",
+      "section": "6. Votación",
+      "requirement": "Cualquier jugador propone expulsión; objetivo no vota, >mitad de participantes originales presentes, plazo 15 s.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Reglas puras de mayoría/objetivo/plazo y panel gráfico con seis; falta votación completa enviada por varios clientes."
+    },
+    {
+      "id": "V02",
+      "section": "6. Votación",
+      "requirement": "Entradas nuevas no votan ni cuentan; salidas invalidan votos y recalculan mayoría; salir objetivo cancela.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Casos puros de entradas/salidas y expiración; integración multicliente pendiente."
+    },
+    {
+      "id": "V03",
+      "section": "6. Votación",
+      "requirement": "Expulsado puede volver; reasignación de victoria al siguiente y casos sin siguiente/empates definidos.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G01",
+      "section": "7. Billar bola 8",
+      "requirement": "Reglamento fuente elegido y diferencias del proyecto visibles; dos lados, quince bolas y blanca, seis troneras.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G02",
+      "section": "7. Billar bola 8",
+      "requirement": "Triángulo con 8 centro, lisa/rayada en esquinas; primer turno aleatorio.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G03",
+      "section": "7. Billar bola 8",
+      "requirement": "Saque legal: color embocado o cuatro bolas en banda; saque inválido permite aceptar o repetir.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G04",
+      "section": "7. Billar bola 8",
+      "requirement": "Blanca en saque: bola en mano tras línea; 8 en saque se repone, con falta se aplica bola en mano tras línea.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G05",
+      "section": "7. Billar bola 8",
+      "requirement": "Mesa abierta tras saque; primer emboque anunciado legal asigna grupos; no contactar primero 8 en mesa abierta.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G06",
+      "section": "7. Billar bola 8",
+      "requirement": "Anunciar bola y tronera; primer contacto propio o 8 al limpiar grupo, luego banda o emboque; conservar/cambiar turno.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G07",
+      "section": "7. Billar bola 8",
+      "requirement": "Faltas de blanca/fuera/primer contacto/ausencia de contacto o banda/fuera de turno; bola en mano y reposición de saltadas.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G08",
+      "section": "7. Billar bola 8",
+      "requirement": "Ganar con 8 legal anunciada tras grupo; perder por 8 prematura/otra tronera/falta/fuera.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G09",
+      "section": "7. Billar bola 8",
+      "requirement": "Servidor simula y replica bolas; solo intenciones, reposo sostenido, límite de recuperación y cortes/desconexiones seguros.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "G10",
+      "section": "7. Billar bola 8",
+      "requirement": "Práctica local separada de partida oficial; físicas verificadas y ebriedad no altera dirección confirmada a escondidas.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "BJ01",
+      "section": "8. Blackjack",
+      "requirement": "2–5 contra crupier, 52 cartas sin comodín, mezcla servidor, dos cartas y carta de crupier oculta.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "BJ02",
+      "section": "8. Blackjack",
+      "requirement": "As 1/11, figuras 10, pedir/plantarse/pasarse; crupier pide ≤16 y planta ≥17 incluido blando.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "BJ03",
+      "section": "8. Blackjack",
+      "requirement": "Natural superior a 21 multicarte, empate de naturales; sin split/doble/seguro/rendición inicial.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "BJ04",
+      "section": "8. Blackjack",
+      "requirement": "Apuesta par ≥26, normal 1:1/natural 3:2/empate devolución; banca infinita y tratamiento de ausencia/desconexión.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "PK01",
+      "section": "9. Póker",
+      "requirement": "2–6, Texas Hold’em, baraja 52, dos privadas/cinco comunitarias y preflop/flop/turn/river.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "PK02",
+      "section": "9. Póker",
+      "requirement": "Evaluación mejor cinco, jerarquías y desempates; ciegas, entrada y saldo cero definidos.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "PK03",
+      "section": "9. Póker",
+      "requirement": "Fold/check/call/bet/raise/all-in solo legales; mínima subida según última completa.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "PK04",
+      "section": "9. Póker",
+      "requirement": "Botes laterales por contribución, empates y ficha indivisible a izquierda del botón; conservación exhaustivamente probada.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "PK05",
+      "section": "9. Póker",
+      "requirement": "Sin apuestas de sesión usa fichas de juego no convertibles; privacidad y liquidación de ausentes/desconectados.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "D01",
+      "section": "10. Dominó",
+      "requirement": "2–4, doble seis 28, siete por persona; pozo solo a dos; inicio doble mayor o mayor suma.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "D02",
+      "section": "10. Dominó",
+      "requirement": "Extremos legales, robar hasta jugar/vaciar y pasar; victoria por mano vacía o bloqueo con menor suma y empate compartido.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "D03",
+      "section": "10. Dominó",
+      "requirement": "Reglamento fuente, disposición no determina legalidad, tratamiento de ausencia/desconexión.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "F01",
+      "section": "11. Ve a Pescar",
+      "requirement": "2–5, 52 cartas, siete con 2/3 o cinco con 4/5; pedir rango propio a rival, entregar todas de ese rango.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "F02",
+      "section": "11. Ve a Pescar",
+      "requirement": "Acierto repite, fallo roba y termina salvo rango pedido; cuatro cartas forman libro público.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "F03",
+      "section": "11. Ve a Pescar",
+      "requirement": "Mano vacía roba al comenzar si hay mazo; final manos/mazo vacíos, mayor libros y empate; ausencia definida.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A01",
+      "section": "12. Pulseadas",
+      "requirement": "Dos aceptan duelo de 15 s, marcador −100..100, victoria por extremo/ventaja y cero empate.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A02",
+      "section": "12. Pulseadas",
+      "requirement": "Ritmo y resistencia con recuperación, alternativa mantener sin machacar; ebriedad duplica coste comunicado.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "A03",
+      "section": "12. Pulseadas",
+      "requirement": "Servidor valida tiempos/límites, levantarse no abandona; desconexiones y liquidación definidos.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "E01",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Libro servidor, 1000 fichas una vez por IP/sala; salida destruye disponible, apuesta sigue en bote; sin recarga.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Grant por IP sin puerto, sin nueva concesión al regresar; botes y apuestas pendientes."
+    },
+    {
+      "id": "E02",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Aperturas: billar 10, blackjack 10, póker 10, dominó 5, pesca 5, pulseadas 5; bebida 20 al servir.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Bebida de prueba cuesta 20 al host; precios y pago de apertura de mesas pendientes."
+    },
+    {
+      "id": "E03",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Organizador paga apertura una vez, apuestas separadas, mínimo participantes antes de cobrar y devolución si falla apertura.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "E04",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Apuesta opcional salvo blackjack; precio/efecto mostrado; botes conservados y emisiones de banca infinita registradas.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "E05",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Fin por tiempo o nadie puede pagar, esperando resoluciones/retornos; bloquear nuevas acciones y liquidar sin fuga de fichas.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "E06",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Estadísticas servidor de victorias/empates/apuestas/fichas/caídas/bebidas, incluidos salidos, una victoria por mesa.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "E07",
+      "section": "13. Economía, sesión y estadísticas",
+      "requirement": "Cinemática compartida de expulsión del bar por insolvencia, fin y opción nueva sala/menú.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "Q01",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Unity y paquetes fijados con licencia y backend; decisión LTS y URP explícita, build repetible con resultado inspeccionado.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "NGO 2.13.3 fijado y build comprobado; sigue pendiente la decisión LTS/URP del GDD."
+    },
+    {
+      "id": "Q02",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Servidor anfitrión autoritativo, propiedad/estado/turno/frecuencia/secuencias; ninguna mano secreta enviada a ajenos.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Intenciones secuenciadas y estados validados por host; cartas privadas y todos los juegos pendientes."
+    },
+    {
+      "id": "Q03",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Replicación/interpolación y validación de entrada; objetos/billar solo simulados en servidor, latencia/jitter/pérdida medidos.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Snapshots públicos de actores/objetos; predicción, física de billar en red y latencia/jitter/pérdidas pendientes."
+    },
+    {
+      "id": "Q04",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Módulos Core/Player/Interactions/Bar/Tables/juegos/Presentation/Content; reglas puras y configuración ScriptableObject.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "Q05",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Ajustes locales versionados, valores por defecto si inválidos, sin guardar secretos ni analíticas por defecto.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "Q06",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Taberna 24×18 aprox., pasillos 2 m y actividades legibles; low poly rockera; modelos finales diferidos por el usuario.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "Q07",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Audio maestro/música/ambiente/efectos/UI separados, variantes y señales visuales; canciones aportadas manualmente después.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "Q08",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "UI responsive, teclado/mando completos, foco, texto ampliable, contraste, sensibilidad, inversión, cámara, reasignación y reducción de efectos.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "Q09",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Probar 16:9, 16:10 y ultrawide; controles temporizados con margen y alternativa mantener.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json"
+      ]
+    },
+    {
+      "id": "Q10",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Pruebas reglas/propiedades/contabilidad/privacidad/red/física/accesibilidad y sesiones sin guía con nuevas personas.",
+      "status": "partial",
+      "evidence": [
+        "Evidence/ux-physics/player-tests.json",
+        "Evidence/lan-foundation/summary.json"
+      ],
+      "remaining": "Regresión local y procesos de red; sesiones humanas, hardware y accesibilidad completa pendientes."
+    },
+    {
+      "id": "Q11",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Medir objetivo 60 FPS en Mac/Windows a cuatro y seis personas; CPU/GPU/cuerpos/red/correcciones registrados.",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "Q12",
+      "section": "14. Arquitectura y calidad",
+      "requirement": "Corte vertical probado 2–4: entrar, moverse, bebida, partida billar completa y salir sin bloqueo ni posesión/asiento duplicados.",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "latest_iteration": "0.3.0 LAN foundation; no criterion with broader unverified scope is marked complete."
+}

@@ -10,7 +10,26 @@ namespace TavernChaos
         private Vector3 rack, previous;
         private Collider hitbox;
         private float resetAt;
-        private bool used;
+        private bool used,replica;
+        private Vector3 replicaPosition;
+        private Quaternion replicaRotation;
+        private TavernActor thrower;
+        public void SetReplica(bool value)
+        {
+            replica=value; if(value) { Body.isKinematic=true; hitbox.enabled=false; transform.SetParent(null,true); }
+            else ResetToRack();
+        }
+        public void ApplyReplica(LanBottleState state)
+        {
+            if(!replica) SetReplica(true);
+            replicaPosition=state.position; replicaRotation=state.rotation; Held=state.held; Flying=state.flying;
+            if(Vector3.Distance(transform.position,replicaPosition)>5) transform.position=replicaPosition;
+        }
+        private void LateUpdate()
+        {
+            if(!replica) return; float t=1-Mathf.Exp(-25*Time.unscaledDeltaTime);
+            transform.position=Vector3.Lerp(transform.position,replicaPosition,t); transform.rotation=Quaternion.Slerp(transform.rotation,replicaRotation,t);
+        }
         public static ThrowableBottle Create(Vector3 p)
         {
             var go=new GameObject("Throwable bottle"); go.layer=9; go.transform.position=p;
@@ -23,7 +42,7 @@ namespace TavernChaos
         public void Grab(TavernActor actor)
         {
             if(Held || Flying) return;
-            Held=true; Body.isKinematic=true; hitbox.enabled=false; transform.SetParent(actor.Hand,false); transform.localPosition=Vector3.zero; transform.localRotation=Quaternion.identity;
+            thrower=actor; Held=true; Body.isKinematic=true; hitbox.enabled=false; transform.SetParent(actor.Hand,false); transform.localPosition=Vector3.zero; transform.localRotation=Quaternion.identity;
         }
         public void Release(Vector3 velocity)
         {
@@ -37,22 +56,22 @@ namespace TavernChaos
         }
         private void FixedUpdate()
         {
-            if(!Flying) return;
+            if(replica||!Flying) return;
             var g=DemoGame.Instance;
             // Swept actor check supplements CCD, including CharacterControllers.
             Vector3 a=previous+Vector3.up*.1f, b=Body.position+Vector3.up*.1f;
-            if(!used && Body.linearVelocity.magnitude>5 && !g.Rival.Fallen) {
-                Vector3 ab=b-a; float t=ab.sqrMagnitude<.0001f?0:Mathf.Clamp01(Vector3.Dot(g.Rival.Focus-a,ab)/ab.sqrMagnitude);
-                if(Vector3.Distance(a+ab*t,g.Rival.Focus)<.62f) Impact(g.Rival);
+            if(!used && Body.linearVelocity.magnitude>5) foreach(var target in g.CombatTargets()) if(target!=thrower&&!target.Fallen) {
+                Vector3 ab=b-a; float t=ab.sqrMagnitude<.0001f?0:Mathf.Clamp01(Vector3.Dot(target.Focus-a,ab)/ab.sqrMagnitude);
+                if(Vector3.Distance(a+ab*t,target.Focus)<.62f) { Impact(target); break; }
             }
             previous=Body.position;
             if(Time.time>=resetAt || transform.position.y < -2) ResetToRack();
         }
         private void OnCollisionEnter(Collision c)
         {
-            if(!Flying || used) return;
+            if(replica||!Flying || used) return;
             var actor=c.collider.GetComponentInParent<TavernActor>();
-            if(actor && !actor.IsPlayer && c.relativeVelocity.magnitude>5) Impact(actor);
+            if(actor && actor!=thrower && c.relativeVelocity.magnitude>5) Impact(actor);
             else if(c.relativeVelocity.magnitude>2) DemoGame.Instance.Audio.Play("clink",.2f);
         }
         private void Impact(TavernActor actor)

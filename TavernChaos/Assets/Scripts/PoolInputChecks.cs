@@ -29,7 +29,8 @@ namespace TavernChaos
             check(Cursor.visible&&Cursor.lockState==CursorLockMode.None,"UX: billiards releases the cursor without freeing character movement");
             Vector2 aim=Camera.main.WorldToScreenPoint(PoolPractice.Center+new Vector3(.7f,0,0));
             MouseStateAt(mouse,aim); yield return null; yield return null;
-            check(Vector3.Dot(g.Pool.Direction,Vector3.right)>.99f,"UX: mouse points directly from cue to the selected cloth position");
+            check(Vector2.Distance(g.Input.Point.ReadValue<Vector2>(),aim)<1,"UX: changing game context does not warp the pool cursor away from its input position");
+            check(Vector3.Dot(g.Pool.Direction,Vector3.right)>.99f,"UX: mouse points directly from cue to the selected cloth position (direction="+g.Pool.Direction+")");
             Vector2 uiPoint=new(Screen.width*.84f,Screen.height*.75f);
             MouseStateAt(mouse,uiPoint,true); yield return null; MouseStateAt(mouse,uiPoint); yield return null;
             check(g.Pool.Shots==0,"UX: clicking the power panel does not also shoot");

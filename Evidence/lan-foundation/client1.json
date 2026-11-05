@@ -1,0 +1,27 @@
+{
+    "role": "client1",
+    "unity": "6000.6.8f1",
+    "passed": true,
+    "checks": [
+        "Client starts a direct LAN connection",
+        "Client receives the complete six-person authoritative snapshot",
+        "Room routes player controls to gameplay instead of table or menu maps",
+        "Attacking client reaches the NPC through open tavern aisles",
+        "Real client intent changes its authoritative position",
+        "Charge telegraph is replicated before the remote strike resolves",
+        "Remote charged punch result reaches the attacking client",
+        "Remote NPC recovers without client-side physics authority",
+        "Client grabs a server-owned throwable through validated interaction",
+        "Client can leave while holding an object",
+        "Returning IP does not receive another starting chip grant (chips=0)",
+        "Returning player has no stale object ownership",
+        "Loss of host closes the client session and returns usable menu controls [El anfitrión cerró la sala o se perdió la conexión.]",
+        "No runtime errors or exceptions in this process"
+    ],
+    "failures": [],
+    "runtimeErrors": [],
+    "snapshots": 310,
+    "maxParticipants": 0,
+    "rejected": 0,
+    "bytesReceived": 1758830
+}

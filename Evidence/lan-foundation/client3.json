@@ -1,0 +1,20 @@
+{
+    "role": "client3",
+    "unity": "6000.6.8f1",
+    "passed": true,
+    "checks": [
+        "Client starts a direct LAN connection",
+        "Client receives the complete six-person authoritative snapshot",
+        "Room routes player controls to gameplay instead of table or menu maps",
+        "Client receives movement applied by the server",
+        "Local pause does not freeze the shared room clock",
+        "Loss of host closes the client session and returns usable menu controls [El anfitrión cerró la sala o se perdió la conexión.]",
+        "No runtime errors or exceptions in this process"
+    ],
+    "failures": [],
+    "runtimeErrors": [],
+    "snapshots": 505,
+    "maxParticipants": 0,
+    "rejected": 0,
+    "bytesReceived": 2874560
+}

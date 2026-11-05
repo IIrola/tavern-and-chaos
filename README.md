@@ -1,6 +1,6 @@
 # Tavern & Chaos · Primera ronda
 
-Demo local 0.2.0 para **macOS Apple Silicon**, creada con **Unity 6000.6.8f1** (la versión instalada). Proyecto: `TavernChaos/`. Ejecutable: `Builds/macOS/Tavern and Chaos.app`. Copia comprimida: `Builds/Tavern-and-Chaos-Demo-0.2.0-macOS-arm64.zip`.
+Rama de desarrollo 0.3.0 con fundación LAN para **macOS Apple Silicon**, creada con **Unity 6000.6.8f1** (la versión instalada). Proyecto: `TavernChaos/`. Ejecutable: `Builds/macOS/Tavern and Chaos.app`. Copia comprimida: `Builds/Tavern-and-Chaos-Demo-0.2.0-macOS-arm64.zip`.
 
 ## Descargar la demo
 
@@ -8,7 +8,11 @@ El repositorio contiene el código, la escena y la configuración de Unity. La a
 
 Para jugar desde una copia descargada del repositorio, compila el proyecto o descomprime el ZIP de la release dentro de `Builds/macOS/`, de modo que exista `Builds/macOS/Tavern and Chaos.app`.
 
-La rama `main` corresponde a la demo local 0.2.0. El diseño completo del juego está en [GDD_y_plan_de_desarrollo.md](GDD_y_plan_de_desarrollo.md); esta demo todavía no cumple todo ese alcance. Los experimentos iniciales de multijugador se conservan en `work/lan-foundation` y no se consideran una versión jugable validada.
+La rama `main` corresponde a la demo local 0.2.0; esta rama `work/lan-foundation` contiene la fundación LAN 0.3.0. El diseño completo del juego está en [GDD_y_plan_de_desarrollo.md](GDD_y_plan_de_desarrollo.md); esta demo todavía no cumple todo ese alcance. El estado exacto de LAN, sus pruebas y límites se documentan en [Docs/LAN_EN_DESARROLLO.md](Docs/LAN_EN_DESARROLLO.md). La revisión de cada iteración está en [Docs/ITERACIONES.md](Docs/ITERACIONES.md) y el alcance completo en [Docs/REQUISITOS.md](Docs/REQUISITOS.md).
+
+## Sala LAN en esta rama
+
+En el menú usa **Crear / unirse a sala LAN**, elige nombre y comparte el código con tu grupo en la misma red. Hay hasta seis participantes contando al anfitrión. Esc abre pausa local; **Jugadores y votación** permite proponer y votar. La sala se cierra si sale el anfitrión. Esta fundación integra movimiento, golpes y botellas; las partidas reglamentarias de mesa y coctelería completa siguen pendientes.
 
 ## Jugar
 
@@ -69,9 +73,9 @@ Las pruebas optativas recorren golpe válido, golpe fallido, recuperación, agar
 
 ## Alcance y decisiones
 
-Esta entrega concreta el primer prototipo del GDD en una demo local ambientada: un jugador, un rival de práctica, caídas articuladas, botellas, una bebida y billar libre. Usa el renderizador integrado de Unity para reducir dependencias y acelerar la primera entrega; URP y la arquitectura de red se evaluarán en el siguiente hito. Paquete de entrada fijado en 1.20.1. Arte geométrico y efectos de sonido sintetizados originales; sin canciones, descargas de assets ni servicios externos.
+Esta entrega concreta el primer prototipo del GDD en una demo local ambientada: un jugador, un rival de práctica, caídas articuladas, botellas, una bebida y billar libre. Usa el renderizador integrado de Unity para reducir dependencias y acelerar la primera entrega; URP sigue pendiente; la arquitectura de sala ya tiene una primera implementación autoritativa con NGO, detallada en Docs. Paquete de entrada fijado en 1.20.1. Arte geométrico y efectos de sonido sintetizados originales; sin canciones, descargas de assets ni servicios externos.
 
-Quedan para los siguientes hitos: LAN y autoridad del anfitrión, partidas de billar con reglas oficiales, seis participantes, otros juegos, recetas completas, animación y arte finales, validación de menús con mando físico, reasignación de controles y validación de Windows/juego cruzado. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. La demo no está firmada ni notarizada para distribución pública.
+Quedan para los siguientes hitos: completar y probar LAN entre máquinas con latencia/pérdidas, partidas de billar con reglas oficiales, seis participantes, otros juegos, recetas completas, animación y arte finales, validación de menús con mando físico, reasignación de controles y validación de Windows/juego cruzado. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. La demo no está firmada ni notarizada para distribución pública.
 
 ## Código principal
 
