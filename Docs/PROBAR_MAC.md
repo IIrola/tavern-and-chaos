@@ -1,6 +1,6 @@
 # Probar Tavern & Chaos 0.8.0 en Mac
 
-Descarga el ZIP de [la release 0.8.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.8.0), extráelo completo y abre Tavern and Chaos.app. El menú debe mostrar 0.8.0. Es universal para Intel y Apple Silicon, con macOS 12.0 como mínimo; se ha probado en Apple Silicon. No necesitas Unity.
+Descarga `Tavern-and-Chaos-0.8.0-macOS-Universal.dmg` desde [la release 0.8.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.8.0). Abre el DMG y arrastra **Tavern and Chaos.app** al acceso **Applications**. Después expulsa la imagen y abre la app desde Aplicaciones. También puedes descargar el ZIP de esa misma release, extraerlo completo y abrir Tavern and Chaos.app. El menú debe mostrar 0.8.0. Es universal para Intel y Apple Silicon, con macOS 12.0 como mínimo; se ha probado en Apple Silicon. No necesitas Unity.
 
 La aplicación de desarrollo no está firmada ni notarizada. Si macOS no verifica al desarrollador, consulta las [instrucciones de Apple](https://support.apple.com/en-us/102445) para abrir una aplicación de origen conocido. No cambies la protección general del sistema.
 

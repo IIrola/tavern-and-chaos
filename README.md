@@ -6,7 +6,7 @@ Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual inte
 
 ## Descargar la demo
 
-El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP para Mac se descarga en [la versión 0.8.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.8.0). La copia local está en `Builds/Tavern-and-Chaos-0.8.0-macOS-Universal.zip`. Es una demo en desarrollo; los otros cuatro juegos, la coctelería completa y la validación entre equipos siguen pendientes.
+El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. Descarga el instalador DMG o el ZIP para Mac desde [la versión 0.8.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.8.0). Para instalar desde el DMG, ábrelo y arrastra **Tavern and Chaos.app** a **Applications**. Consulta [la guía de instalación](Docs/PROBAR_MAC.md). Es una demo en desarrollo; los otros cuatro juegos, la coctelería completa y la validación entre equipos siguen pendientes.
 
 Para jugar desde una copia descargada del repositorio, compila el proyecto o descomprime el ZIP de la release dentro de `Builds/macOS/`, de modo que exista `Builds/macOS/Tavern and Chaos.app`.
 
