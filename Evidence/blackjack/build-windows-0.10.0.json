@@ -1,0 +1,11 @@
+{
+    "result": "Succeeded",
+    "unity": "6000.6.8f1",
+    "platform": "Windows x64",
+    "backend": "Mono",
+    "version": "0.10.0",
+    "bytes": 99827251,
+    "seconds": 14.850608999999999,
+    "errors": 0,
+    "warnings": 0
+}

@@ -4,7 +4,7 @@
 
 - Mesa de blackjack para 2–5 personas contra la banca, con apuesta común (mín. 26, par), confirmación, reparto, turnos, cola de espera y liquidación 1:1 / 3:2 / empate. Ausencia, caída, salida y cierre de sala plantan la mano comprometida.
 - HUD de sala rediseñado para no saturar el campo de visión: pastillas compactas, avisos temporales, ayuda con Tab; cámara de asiento para blackjack.
-- Protocolo de sala 10. Prueba `run-bj-room-checks.py` y capturas en Evidence/blackjack/flow.
+- Compilación Windows x64 (compila y empaqueta; no ejecutada en Windows). Protocolo de sala 10. Prueba `run-bj-room-checks.py` y capturas en Evidence/blackjack/flow.
 
 ## 0.9.0 · Barra jugable en sala LAN
 
