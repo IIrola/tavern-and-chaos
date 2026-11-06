@@ -1,5 +1,11 @@
 # Cambios
 
+## 0.10.0 · Blackjack jugable y HUD aligerado
+
+- Mesa de blackjack para 2–5 personas contra la banca, con apuesta común (mín. 26, par), confirmación, reparto, turnos, cola de espera y liquidación 1:1 / 3:2 / empate. Ausencia, caída, salida y cierre de sala plantan la mano comprometida.
+- HUD de sala rediseñado para no saturar el campo de visión: pastillas compactas, avisos temporales, ayuda con Tab; cámara de asiento para blackjack.
+- Protocolo de sala 10. Prueba `run-bj-room-checks.py` y capturas en Evidence/blackjack/flow.
+
 ## 0.9.0 · Barra jugable en sala LAN
 
 - Estación de coctelería integrada en la sala: recipiente, hasta cuatro ingredientes con proporciones, atajos de receta, agitar y servir (20 fichas solo al servir). Panel con ratón; Esc / B cancela sin cobrar.

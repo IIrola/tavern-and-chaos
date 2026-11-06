@@ -31,13 +31,17 @@ namespace TavernChaos
             }
             lens.farClipPlane=70; lens.clearFlags=normalClearFlags;
             if(wasPool!=g.Pool.Active) { Snap(); wasPool=g.Pool.Active; }
-            bool arm=g.Lan&&g.Lan.LocalArmSeated;
-            bool firstPerson=g.Started&&!g.Pool.Active&&!arm;
-            g.Player.SetFirstPersonView(firstPerson);
+            bool arm=g.Lan&&g.Lan.LocalArmSeated, bj=g.Lan&&g.Lan.Running&&g.Lan.LocalBjSeated;
+            bool firstPerson=g.Started&&!g.Pool.Active&&!arm&&!bj;
+            g.Player.SetFirstPersonView(firstPerson||bj);
             lens.orthographic=g.Pool.Active; lens.orthographicSize=4.1f;
-            lens.fieldOfView=firstPerson?75:arm?50:60;
+            lens.fieldOfView=firstPerson?75:arm?50:bj?58:60;
             Vector3 target, desired;
-            if(arm){target=ArmRoomController.Center+Vector3.up*1.2f;desired=ArmRoomController.Center+new Vector3(0,2.8f,-3.8f);}
+            if(bj){
+                int seat=Mathf.Max(0,g.Lan.View?.bj?.SeatOf(g.Lan.LocalId)??0);Vector3 seatPos=BlackjackRoomController.SeatPosition(seat);Vector3 outward=seatPos-BlackjackRoomController.Center;outward.y=0;outward.Normalize();
+                target=BlackjackRoomController.Center+Vector3.up*1.0f;desired=seatPos+outward*1.1f+Vector3.up*2.2f;
+            }
+            else if(arm){target=ArmRoomController.Center+Vector3.up*1.2f;desired=ArmRoomController.Center+new Vector3(0,2.8f,-3.8f);}
             else if(g.Pool.Active) { target=PoolPractice.Center; desired=target+new Vector3(0,4.1f,-.02f); }
             else if(!g.Started) { target=new Vector3(0,1.9f,3.8f); desired=new Vector3(9.8f,5.7f,-7.3f); }
             else {

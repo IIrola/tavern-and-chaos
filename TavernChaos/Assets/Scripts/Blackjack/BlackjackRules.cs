@@ -113,7 +113,7 @@ namespace TavernChaos
             }
             var view = new BlackjackView { phase = Phase, hasTurn = Turn.HasValue, turn = Turn ?? 0, hands = list, players = ids, dealerRevealed = open };
             if (open) { view.dealer = dealer.ToArray(); view.dealerTotal = BlackjackCard.Total(dealer, out _); }
-            else { view.dealer = new[] { dealer[0] }; view.dealerHidden = dealer.Count - 1; view.dealerTotal = BlackjackCard.Value(dealer[0]); }
+            else { view.dealer = new[] { dealer[0] }; view.dealerHidden = dealer.Count - 1; view.dealerTotal = BlackjackCard.Total(new[] { dealer[0] }, out _); }
             if (open) { view.outcomes = new int[hands.Count]; for (int i = 0; i < hands.Count; i++) view.outcomes[i] = (int)Outcome(hands[i].id).Value; }
             return view;
         }

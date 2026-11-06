@@ -1,0 +1,23 @@
+{
+    "role": "host",
+    "version": "0.10.0",
+    "passed": true,
+    "checks": [
+        "Host opens an actual UDP room",
+        "Three independent processes connect",
+        "Two people sit at the blackjack table through validated interaction",
+        "First seated person organizes",
+        "Odd stake is rejected",
+        "Organizer starts after every confirmation",
+        "A late arrival waits for the next hand without paying",
+        "Hole card is hidden from every client during play",
+        "The round plays out and settles",
+        "Dealer reveals and each player gets an outcome",
+        "Payouts match outcomes, bar keeps the opening fee and the books balance",
+        "Organizer closes the result and the table returns to preparation",
+        "Leaving the seat stands the person up",
+        "No runtime errors in host"
+    ],
+    "failures": [],
+    "errors": []
+}

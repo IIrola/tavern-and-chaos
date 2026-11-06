@@ -86,6 +86,7 @@ namespace TavernChaos
             LightAt(new(0,4,-.8f),new Color(1,.62f,.36f),2,9); LightAt(new(6,3,1),new Color(.13f,.8f,.66f),2.5f,8);
             PoolPractice.BuildTable();
             ArmPresentation.BuildTable();
+            BlackjackPresentation.BuildTable();
         }
         public static void BottleVisual(Vector3 pos, Transform parent, Material mat)
         {

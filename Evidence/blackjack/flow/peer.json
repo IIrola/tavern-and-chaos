@@ -1,0 +1,13 @@
+{
+    "role": "peer",
+    "version": "0.10.0",
+    "passed": true,
+    "checks": [
+        "Peer starts real connection",
+        "Snapshot arrives over UDP",
+        "Peer finished without errors",
+        "No runtime errors in peer"
+    ],
+    "failures": [],
+    "errors": []
+}

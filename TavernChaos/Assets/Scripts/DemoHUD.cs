@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace TavernChaos
@@ -57,6 +58,7 @@ namespace TavernChaos
         private void OnGUI()
         {
             if(text==null) Init();
+            if(!g.Started) helpUntil=-1;
             // Fit a logical safe area, including 16:10 and ultrawide, without stretching the type.
             scale=Mathf.Min(Screen.width/W,Screen.height/H); ox=(Screen.width-W*scale)*.5f; oy=(Screen.height-H*scale)*.5f;
             GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
@@ -120,13 +122,19 @@ namespace TavernChaos
         {
             Box(new(x,y,212,183),ink); Box(new(x,y,212,3),mint); Label(new(x+18,y+20,160,30),num,24,orange,FontStyle.Bold); Label(new(x+18,y+64,180,28),title,14,ivory,FontStyle.Bold); Label(new(x+18,y+106,177,65),desc,16,muted);
         }
+        private float helpUntil=-1;
         private void Game()
         {
-            Box(new(32,28,1376,62),ink); Label(new(52,43,350,35),"TAVERN <color=#FF7947>& CHAOS</color>",22,ivory,FontStyle.Bold);
-            Label(new(480,49,520,30),g.Lan&&g.Lan.Running?(g.Lan.LocalArmSeated?"PULSEADAS EN SALA":g.Pool.Active?"BOLA 8 EN SALA":"SALA LAN · PRIMERA PERSONA"):g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
-            Label(new(1110,49,270,30),g.Pool.Active?"ESC  Pausa     E  Volver":"ESC  Pausa y ajustes",15,muted,FontStyle.Normal,TextAnchor.UpperRight);
+            bool roam=g.Lan&&g.Lan.Running&&!g.Lan.LocalArmSeated&&!g.Lan.LocalBjSeated&&!g.Pool.Active;
+            bool inRoom=g.Lan&&g.Lan.Running;
+            if(helpUntil<0)helpUntil=Time.unscaledTime+25;
+            if(!roam) {
+                Box(new(32,24,1376,42),ink); Label(new(52,33,350,30),"TAVERN <color=#FF7947>& CHAOS</color>",19,ivory,FontStyle.Bold);
+                Label(new(480,36,520,26),inRoom?(g.Lan.LocalBjSeated?"BLACKJACK EN SALA":g.Lan.LocalArmSeated?"PULSEADAS EN SALA":"BOLA 8 EN SALA"):g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",14,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+                Label(new(1110,36,270,26),g.Pool.Active||(inRoom&&g.Lan.LocalBjSeated)?"ESC  Pausa     E  Volver":"ESC  Pausa y ajustes",14,muted,FontStyle.Normal,TextAnchor.UpperRight);
+            }
             if(g.Lan&&g.Lan.Running&&g.Lan.LocalBarOpen) { RoomHUD(); BarPanel(); }
-            else if(g.Lan&&g.Lan.Running) { if(g.Lan.LocalArmSeated)ArmHUD();else if(g.Pool.Active) PoolRoomHUD(); else RoomHUD(); }
+            else if(g.Lan&&g.Lan.Running) { if(g.Lan.LocalBjSeated)BlackjackHUD();else if(g.Lan.LocalArmSeated)ArmHUD();else if(g.Pool.Active) PoolRoomHUD(); else RoomHUD(); }
             else if(!g.Pool.Active) {
                 Box(new(32,114,312,258),ink); Tag(52,137,g.Complete?"RONDA COMPLETADA":"TU PRIMERA RONDA",g.Complete?orange:mint);
                 string[] goals={"Conecta un golpe a Bruno","Falla un golpe y vuelve a pie","Prueba Laguna Azul en la barra","Derriba a Bruno con una botella"};
@@ -144,22 +152,26 @@ namespace TavernChaos
                 Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
             } else { PoolHUD(); }
             if(!g.Pool.Active&&Time.unscaledTime<g.ToastUntil) {
-                float toastY=g.Lan&&g.Lan.LocalArmSeated?114:666;
-                float toastWidth=g.Lan&&g.Lan.LocalArmSeated?630:670;
-                Box(new(385,toastY,toastWidth,76),ink); Label(new(407,toastY+18,toastWidth-44,50),g.Toast,18,ivory,FontStyle.Bold,TextAnchor.UpperCenter);
+                float toastY=g.Lan&&g.Lan.LocalArmSeated?114:(g.Lan&&g.Lan.LocalBjSeated?800:728);
+                float toastWidth=g.Lan&&g.Lan.LocalArmSeated?630:600;
+                Box(new((W-toastWidth)/2,toastY,toastWidth,50),ink); Label(new((W-toastWidth)/2+20,toastY+8,toastWidth-40,38),g.Toast,16,ivory,FontStyle.Bold,TextAnchor.MiddleCenter);
             }
             if(g.Charging) {
                 Box(new(510,590,420,56),ink); Label(new(528,600,380,24),(g.Held?"LANZAMIENTO":g.Pool.Active?"POTENCIA DEL TIRO":"CARGANDO GOLPE")+"  "+Mathf.RoundToInt(g.Charge*100)+"%",14,ivory,FontStyle.Bold);
                 Box(new(528,629,384,5),new Color(.18f,.23f,.25f)); Box(new(528,629,384*g.Charge,5),orange);
             }
-            Box(new(284,763,872,54),ink); Label(new(302,780,836,32),g.Prompt(),16,ivory,FontStyle.Bold,TextAnchor.UpperCenter);
+            string promptText=g.Prompt(); if(promptText.StartsWith("SALA LAN")) promptText="";
+            if(promptText.Length>0) { Box(new((W-860)/2,792,860,36),ink); Label(new((W-860)/2+16,799,828,28),promptText,15,ivory,FontStyle.Bold,TextAnchor.UpperCenter); }
             string controls=g.Pool.Active?(g.Lan&&g.Lan.Running?"RATÓN / STICK apuntar · ↑ ↓ potencia · TAB / RB bola · C / LB tronera · CLIC / RT tirar · ENTER / A confirmar · E / B salir":"RATÓN / STICK apuntar · ↑ ↓ potencia · CLIC / RT tirar · TAB / RB ejercicio · E / B salir"):"WASD / STICK moverse · RATÓN / STICK mirar · CLIC / RT golpe · E / A interactuar · Q / B soltar · ESC menú";
             if(g.Lan&&g.Lan.Running&&g.Pool.Active&&g.Lan.View?.pool?.phase==TablePhase.Preparation) controls="TAB / RB siguiente apuesta · C / LB anterior · ENTER / A confirmar o iniciar · H / X reglas · E / B levantarte";
+            if(g.Lan&&g.Lan.LocalBjSeated)controls="ENTER / A pedir o confirmar · BACKSPACE / Y plantarte · TAB / RB apuesta · E / B levantarte · ESC pausa";
             if(g.Lan&&g.Lan.LocalArmSeated)controls="ESPACIO / RT esfuerzo · M / Y modo · ← → / DPAD fuerza · ENTER / A confirmar · TAB / RB apuesta · H / X reglas · E / B levantarte";
-            Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),controls,14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
+            bool controlsShown=!roam||Time.unscaledTime<helpUntil||g.Input.Scoreboard.IsPressed();
+            if(roam) controls="WASD moverte · RATÓN mirar · CLIC golpear / lanzar · E interactuar · F ofrecer bebida · Q soltar · R recolocarte · TAB mantener: jugadores y ayuda · ESC menú";
+            if(controlsShown) { Box(new(32,846,1376,32),ink); Label(new(52,853,1336,24),controls,13,muted,FontStyle.Normal,TextAnchor.UpperCenter); }
             string effects="";string[] effectNames={"","Laguna Azul","Volcánico","Inestable","Helio","K.O."};
             for(var kind=CocktailKind.Blue;kind<=CocktailKind.Poison;kind++)if(g.Player.HasCocktail(kind))effects+=(effects.Length==0?"EFECTOS · ":" · ")+effectNames[(int)kind]+" "+g.Player.CocktailRemaining(kind).ToString("0.0")+" s";
-            if(effects.Length>0)Label(new(80,817,1280,21),effects,14,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+            if(effects.Length>0&&!roam)Label(new(80,824,1280,21),effects,14,mint,FontStyle.Bold,TextAnchor.UpperCenter);
         }
         internal void ShowLanPanelForCheck(bool show) { lanLobby=show; }
         internal void ShowRosterForCheck() { roomRoster=true; }
@@ -186,40 +198,103 @@ namespace TavernChaos
             Label(new(726,547,616,60),"Mismo equipo: IP 127.0.0.1 y el mismo puerto.\nOtra máquina en tu red: usa el código del anfitrión.",16,muted);
             if(Button(new(726,601,616,36),"VOLVER")) lanLobby=false;
         }
+        private string lastNotice=""; private float noticeAt=-99;
+        private static readonly string[] effectTitles={"","Laguna Azul","Volcánico","Inestable","Helio","K.O."};
         private void RoomHUD()
         {
             var room=g.Lan; var view=room.View;
-            Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
-            float effectY=view?.voteActive==true?285:114;
-            Box(new(1032,effectY,376,160),ink);
-            Label(new(1052,effectY+18,332,130),g.Player.EffectRemaining>0?"LAGUNA AZUL · "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!":"BOLA 8 · E junto a un asiento\nDos personas · apertura "+(view?.pool?.openingFee??10)+"\nBARRA · E para preparar cócteles · "+(view?.drinkPrice??20)+" fichas al servir\nPULSEADAS · E junto a un asiento · apertura 5\nEBRIEDAD "+g.Player.Ebriety+" / 5",16,g.Player.EffectRemaining>0?mint:muted,FontStyle.Bold);
-            Box(new(32,114,330,390),ink); Tag(52,138,room.IsHost?"SALA LAN · ANFITRIÓN":room.Connected?"SALA LAN · CONECTADO":"SALA LAN · CONECTANDO",mint);
-            Label(new(52,175,290,32),"CÓDIGO  "+room.RoomCode,19,ivory,FontStyle.Bold);
-            Label(new(52,216,290,30),(view?.actors?.Length??0)+" / 6 personas",18,mint,FontStyle.Bold);
+            Box(new(W/2-2,H/2-2,4,4),new Color(1,.94f,.8f,.7f));
+            long chips=0; if(view?.actors!=null) foreach(var a in view.actors) if(a.id==room.LocalId) chips=a.chips;
+            int minutes=view!=null?Mathf.CeilToInt(view.secondsRemaining/60):0;
+            Box(new(32,24,330,40),ink); Box(new(32,24,4,40),orange);
+            Label(new(52,33,300,24),chips+" fichas   ·   "+minutes+" min",16,ivory,FontStyle.Bold);
+            string pips=""; for(int i=1;i<=5;i++) pips+=i<=g.Player.Ebriety?"●":"○";
+            Box(new(1100,24,308,40),ink); Label(new(1116,33,276,24),"EBRIEDAD  "+pips,15,g.Player.Ebriety>0?orange:muted,FontStyle.Bold,TextAnchor.UpperRight);
+            float py=70;
+            for(var kind=CocktailKind.Blue;kind<=CocktailKind.Poison;kind++) if(g.Player.HasCocktail(kind)) {
+                Box(new(1100,py,308,32),ink); Box(new(1100,py,4,32),mint);
+                Label(new(1116,py+6,276,22),effectTitles[(int)kind].ToUpper()+" · "+g.Player.CocktailRemaining(kind).ToString("0.0")+" s",14,mint,FontStyle.Bold,TextAnchor.UpperRight); py+=36;
+            }
             if(view?.actors!=null) for(int i=0;i<view.actors.Length;i++) {
-                var actor=view.actors[i]; float y=260+i*32;
-                Label(new(52,y,290,28),(actor.name.Length>18?actor.name.Substring(0,17)+"…":actor.name)+"  ·  "+actor.chips,16,ivory);
-                if(room.ActorFor(actor.id) is TavernActor visual&&actor.id!=room.LocalId) {
+                var actor=view.actors[i];
+                if(actor.id!=room.LocalId&&room.ActorFor(actor.id) is TavernActor visual&&Vector3.Distance(visual.transform.position,Camera.main.transform.position)<11) {
                     Vector3 p=Camera.main.WorldToScreenPoint(visual.Focus+Vector3.up*.6f);
-                    if(p.z>0) Label(new((p.x-ox)/scale-70,(Screen.height-p.y-oy)/scale-18,140,28),actor.name,15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+                    if(p.z>0) Label(new((p.x-ox)/scale-70,(Screen.height-p.y-oy)/scale-18,140,28),actor.name,14,mint,FontStyle.Bold,TextAnchor.UpperCenter);
                 }
             }
             if(view!=null) {
-                Label(new(52,461,290,30),"QUEDAN  "+Mathf.CeilToInt(view.secondsRemaining/60)+" MIN",15,muted);
-                Box(new(32,522,330,110),ink); Label(new(52,541,290,78),view.notice,17,ivory);
+                if(view.notice!=lastNotice) { lastNotice=view.notice??""; noticeAt=Time.unscaledTime; }
+                if(lastNotice.Length>0&&Time.unscaledTime-noticeAt<5&&Time.unscaledTime>=g.ToastUntil) {
+                    Box(new((W-640)/2,728,640,50),ink); Label(new((W-640)/2+20,736,600,36),lastNotice,15,ivory,FontStyle.Bold,TextAnchor.MiddleCenter);
+                }
+                string banner=null;
+                if(view.arm?.phase==TablePhase.Playing&&view.arm.IsParticipant(room.LocalId)&&!view.arm.IsSeated(room.LocalId))
+                    banner="SIGUES EN PULSEADAS · quedan "+Mathf.Max(0,(float)(view.arm.end-room.EstimatedServerTime)).ToString("0")+" s · E para volver";
+                else if(view.pool?.phase==TablePhase.Playing&&view.pool.IsParticipant(room.LocalId)&&!view.pool.IsSeated(room.LocalId))
+                    banner=view.pool.turn==room.LocalId?"ES TU TURNO EN BOLA 8 · vuelve al asiento en "+Mathf.CeilToInt(view.pool.absenceRemaining)+" s":"SIGUES EN BOLA 8 · E junto al billar para volver";
+                else if(view.bj?.phase==TablePhase.Playing&&view.bj.IsParticipant(room.LocalId)&&!view.bj.IsSeated(room.LocalId))
+                    banner=view.bj.round?.hasTurn==true&&view.bj.round.turn==room.LocalId?"ES TU TURNO EN BLACKJACK · vuelve en "+Mathf.CeilToInt(view.bj.absenceRemaining)+" s o te plantas":"SIGUES EN BLACKJACK · E junto a la mesa para volver";
+                if(banner!=null) { Box(new((W-620)/2,74,620,38),ink); Box(new((W-620)/2,74,4,38),orange); Label(new((W-620)/2+20,82,590,26),banner,14,orange,FontStyle.Bold,TextAnchor.UpperCenter); }
                 if(view.voteActive) {
-                    Box(new(1032,114,376,150),ink); Label(new(1052,134,330,55),"VOTACIÓN DE EXPULSIÓN\n"+view.votes+" / "+view.votesNeeded+" votos necesarios",17,ivory,FontStyle.Bold);
-                    Label(new(1052,206,332,40),"ESC → Jugadores para votar",16,mint,FontStyle.Bold);
-                }
-                if(view.arm?.phase==TablePhase.Playing&&view.arm.IsParticipant(room.LocalId)&&!view.arm.IsSeated(room.LocalId)) {
-                    Box(new(1032,445,376,145),ink);
-                    Label(new(1052,463,332,112),"SIGUES EN PULSEADAS\nNo aportas fuerza fuera del asiento.\nQuedan "+Mathf.Max(0,(float)(view.arm.end-room.EstimatedServerTime)).ToString("0.0")+" s. E para volver.",18,orange,FontStyle.Bold);
-                }
-                if(view.pool?.phase==TablePhase.Playing&&view.pool.IsParticipant(room.LocalId)&&!view.pool.IsSeated(room.LocalId)) {
-                    Box(new(1032,445,376,145),ink);
-                    Label(new(1052,463,332,112),view.pool.turn==room.LocalId?"SIGUES EN LA PARTIDA\nEs tu turno: vuelve al asiento en "+Mathf.CeilToInt(view.pool.absenceRemaining)+" s.\nE junto al billar para sentarte.":"SIGUES EN LA PARTIDA\nEl minuto solo contará al llegar tu turno. Puedes volver al asiento.",18,orange,FontStyle.Bold);
+                    Box(new((W-520)/2,120,520,60),ink); Label(new((W-520)/2+20,128,480,48),"VOTACIÓN DE EXPULSIÓN · "+view.votes+" / "+view.votesNeeded+" votos\nESC → Jugadores para votar",15,ivory,FontStyle.Bold,TextAnchor.UpperCenter);
                 }
             }
+            if(g.Input.Scoreboard.IsPressed()&&view?.actors!=null) {
+                float h=150+view.actors.Length*30+170; float x=(W-560)/2,y=110;
+                Box(new(x,y,560,h),new Color(.04f,.06f,.07f,.94f)); Box(new(x,y,560,4),orange);
+                Tag(x+24,y+28,room.IsHost?"SALA LAN · ANFITRIÓN":"SALA LAN · CONECTADO",mint);
+                Label(new(x+24,y+52,512,28),"CÓDIGO  "+room.RoomCode+"   ·   "+view.actors.Length+" / 6 personas",17,ivory,FontStyle.Bold);
+                for(int i=0;i<view.actors.Length;i++) Label(new(x+24,y+92+i*30,512,26),(view.actors[i].id==room.LocalId?"› ":"   ")+view.actors[i].name+"  ·  "+view.actors[i].chips+" fichas",16,view.actors[i].id==room.LocalId?mint:ivory);
+                float hy=y+110+view.actors.Length*30;
+                Label(new(x+24,hy,512,160),"BOLA 8 · E junto a un asiento · apertura "+(view.pool?.openingFee??10)+"\nBLACKJACK · E junto a un asiento · apertura 10 · apuesta mín. 26\nPULSEADAS · E junto a un asiento · apertura 5\nBARRA · E para preparar cócteles · "+view.drinkPrice+" fichas al servir",14,muted);
+            } else if(Time.unscaledTime<helpUntil) {
+                Label(new(32,70,330,22),"TAB · jugadores y ayuda",12,muted);
+            }
+        }
+        private static string CardText(int id){string[] ranks={"A","2","3","4","5","6","7","8","9","10","J","Q","K"};string[] suits={"♠","♥","♦","♣"};return ranks[id%13]+suits[id/13];}
+        private void DrawCard(Rect r,int id,bool back=false)
+        {
+            Box(r,back?new Color(.12f,.3f,.36f):ivory);
+            if(back){Box(new(r.x+4,r.y+4,r.width-8,r.height-8),new Color(.2f,.45f,.5f));return;}
+            bool red=id/13==1||id/13==2; Label(new(r.x,r.y+r.height*.2f,r.width,r.height*.6f),CardText(id),Mathf.RoundToInt(r.width*.38f),red?new Color(.8f,.12f,.12f):ink,FontStyle.Bold,TextAnchor.MiddleCenter);
+        }
+        private void BlackjackHUD()
+        {
+            var room=g.Lan; var t=room.View?.bj; if(t==null) return; bool enabled=GUI.enabled; bool mineSeated=t.IsSeated(room.LocalId);
+            if(t.phase==TablePhase.Preparation) {
+                Box(new(32,80,320,330),ink); Tag(52,104,"BLACKJACK · CONTRA LA BANCA",mint);
+                Label(new(52,132,280,46),"Apertura "+t.openingFee+" (la paga quien organiza). Apuesta igual para todos, par y mínimo "+t.minStake+".",13,muted);
+                GUI.enabled=enabled&&t.organizer==room.LocalId; if(Button(new(52,190,280,42),"APUESTA "+t.stake+" · TAB / RB")) room.CycleBjWager(); GUI.enabled=enabled;
+                for(int i=0;i<t.seated.Length;i++) Label(new(52,244+i*24,280,22),(Array.IndexOf(t.ready,t.seated[i])>=0?"✓ ":"○ ")+RoomName(t.seated[i])+(t.seated[i]==t.organizer?"  · organiza":""),14,Array.IndexOf(t.ready,t.seated[i])>=0?mint:ivory);
+                bool all=t.seated.Length>=2;foreach(ulong id in t.seated)all&=Array.IndexOf(t.ready,id)>=0;bool localReady=Array.IndexOf(t.ready,room.LocalId)>=0;
+                string label=all&&t.organizer==room.LocalId?"REPARTIR · ENTER / A":localReady?"CANCELAR LISTO · ENTER / A":"CONFIRMAR APUESTA · ENTER / A";
+                if(Button(new(52,362,280,40),label,true)) room.BjPrimary();
+                if(t.seated.Length<2) Label(new(52,336,280,22),"Hacen falta 2 personas sentadas.",13,orange);
+            } else if(t.round!=null) {
+                var r=t.round; bool myTurn=r.hasTurn&&r.turn==room.LocalId;
+                float dx=(W-480)/2; Box(new(dx,76,480,138),ink); Label(new(dx+16,84,200,22),"BANCA",13,mint,FontStyle.Bold); Label(new(dx+276,84,188,22),"TOTAL "+r.dealerTotal+(r.dealerRevealed?"":" + ?"),13,ivory,FontStyle.Bold,TextAnchor.UpperRight);
+                for(int i=0;i<r.dealer.Length;i++) DrawCard(new(dx+16+i*62,110,52,76),r.dealer[i]);
+                for(int i=0;i<r.dealerHidden;i++) DrawCard(new(dx+16+(r.dealer.Length+i)*62,110,52,76),0,true);
+                int n=r.hands.Length; float w=170,gap=10,total=n*w+(n-1)*gap,x0=(W-total)/2,y0=596;
+                for(int i=0;i<n;i++) {
+                    var h=r.hands[i]; bool turn=r.hasTurn&&r.turn==h.id; Box(new(x0+i*(w+gap),y0,w,150),ink); if(turn) Box(new(x0+i*(w+gap),y0,w,4),orange);
+                    string nm=RoomName(h.id); Label(new(x0+i*(w+gap)+8,y0+8,w-16,22),(h.id==room.LocalId?"› ":"")+(nm.Length>14?nm.Substring(0,13)+"…":nm),13,h.id==room.LocalId?mint:ivory,FontStyle.Bold);
+                    for(int c=0;c<h.cards.Length;c++) DrawCard(new(x0+i*(w+gap)+8+Mathf.Min(c,4)*32,y0+34,44,62),h.cards[c]);
+                    string status=r.outcomes!=null?new[]{"PIERDE","EMPATE","GANA","NATURAL"}[r.outcomes[i]]:h.bust?"PASADO":h.natural?"NATURAL":h.stood?"PLANTADO":turn?"TURNO":"ESPERA";
+                    Label(new(x0+i*(w+gap)+8,y0+104,w-16,20),h.total+(h.soft?" blando":"")+" · "+status,13,r.outcomes!=null?(r.outcomes[i]>=2?mint:r.outcomes[i]==1?ivory:orange):h.bust?orange:ivory,FontStyle.Bold);
+                    if(r.outcomes!=null&&i<t.payouts.Length) Label(new(x0+i*(w+gap)+8,y0+124,w-16,20),"Recibes "+t.payouts[i]+" fichas",12,muted);
+                }
+                float by=754;
+                if(t.phase==TablePhase.Playing) {
+                    GUI.enabled=enabled&&myTurn&&mineSeated;
+                    if(Button(new((W-420)/2,by,200,40),"PEDIR · ENTER / A",true)) room.BjPrimary();
+                    if(Button(new((W-420)/2+220,by,200,40),"PLANTARSE · Y / ⌫")) room.BjStand(); GUI.enabled=enabled;
+                    Label(new((W-420)/2,by-26,420,22),myTurn?"TU TURNO":"Turno de "+(r.hasTurn?RoomName(r.turn):"la banca")+(t.absenceRemaining<60&&r.hasTurn&&!t.IsSeated(r.turn)?" · ausente "+Mathf.CeilToInt(t.absenceRemaining)+" s":""),14,myTurn?orange:muted,FontStyle.Bold,TextAnchor.UpperCenter);
+                } else {
+                    GUI.enabled=enabled&&t.organizer==room.LocalId&&t.settled; if(Button(new((W-420)/2,by,420,40),t.organizer==room.LocalId?"NUEVA MANO · ENTER / A":"Espera a quien organiza",true)) room.BjPrimary(); GUI.enabled=enabled;
+                }
+            }
+            if(mineSeated&&Button(new(32,H-120,200,36),"LEVANTARTE · E / B")) room.Send(LanAction.BjLeave);
         }
         private string RoomName(ulong id)
         {

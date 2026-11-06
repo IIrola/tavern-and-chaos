@@ -1,0 +1,14 @@
+{
+    "role": "client",
+    "version": "0.10.0",
+    "passed": true,
+    "checks": [
+        "Peer starts real connection",
+        "Snapshot arrives over UDP",
+        "Client sees itself seated",
+        "Peer finished without errors",
+        "No runtime errors in client"
+    ],
+    "failures": [],
+    "errors": []
+}

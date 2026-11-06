@@ -2,7 +2,15 @@
 
 Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se conservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida, la 0.5 apuestas y libro, y la 0.6 cierre de sesión y resultados. Las evidencias anteriores conservan su alcance histórico.
 
-## En desarrollo tras 0.9.0: blackjack (entrega C)
+## Iteración 0.10.0: blackjack jugable y HUD aligerado (entrega C)
+
+Mesa de blackjack en la sala (5 asientos, banca al este del salón): E junto a un asiento; el organizador fija la apuesta (26 mínimo, par: 26/50/100/250), todos confirman y reparte (apertura 10, solo la paga quien organiza). Se juega con ratón o teclado (Enter/A pedir, Backspace/Y plantarse, Tab/RB apuesta, E/B levantarse). Quien llega con la mano en curso espera sin pagar. Cada mano se liquida contra la banca (1:1, 3:2, empate) mediante `SettleHouse`; ausencia >60 s, caída, salida o cierre de sala plantan la mano y se liquida con normalidad. Protocolo de sala 10 (todas las copias 0.10.0). Prueba: `python3 run-bj-room-checks.py` (host + 2 procesos Mac; el tercer proceso comparte IP loopback, por eso no recibe fichas y prueba la cola) y 28 comprobaciones de reglas.
+
+Revisión de UI/UX: el HUD libre ya no ocupa el campo de visión: una pastilla de fichas/tiempo arriba a la izquierda, ebriedad y efectos arriba a la derecha, avisos como toast de cinco segundos, un único aviso contextual abajo y la ayuda de controles solo los primeros 25 s o al mantener **Tab** (que también muestra código de sala, jugadores y actividades). Los paneles laterales fijos de sala desaparecen; las mesas conservan su panel solo durante la preparación. En blackjack la cámara se coloca sobre el asiento mirando la mesa y las cartas se dibujan en la parte inferior/superior sin cubrir el centro. No se ha medido con personas; solo hay capturas en Evidence/blackjack/flow.
+
+Límites: sin sesiones humanas, sin mando físico probado, cartas dibujadas en el HUD (no en la mesa), arte provisional. Hold'em, dominó y Ve a Pescar siguen pendientes.
+
+## (histórico) blackjack: reglas puras
 
 `BlackjackRound` (reglas puras, sin Unity) implementa 2–5 jugadores, baraja de 52 mezclada por el servidor, naturales, as 1/11, pedir/plantarse, crupier que pide hasta 16 y planta en cualquier 17, y resultado por jugador (`HouseOutcome`) para `SessionLedger.SettleHouse` (1:1, 3:2, empate). La vista por jugador nunca incluye el identificador de la carta oculta antes de la liquidación. Decisiones: una mano con natural se planta sola; con todas las manos pasadas el crupier no roba; ausencia, expulsión o desconexión planta la mano comprometida y se liquida con normalidad. 28 comprobaciones (`Tavern → Validate blackjack rules`, también en cada compilación; informe en Evidence/blackjack). Falta la mesa física, comandos de red, UI, turno de 60 s y la apuesta mínima de 26 en la sala.
 

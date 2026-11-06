@@ -10,7 +10,7 @@ namespace TavernChaos
         private readonly InputActionMap ui = new("Menus");
         private readonly InputActionMap arm = new("Arm wrestling");
         public readonly InputAction ArmPush,ArmConfirm,ArmExit,ArmPause,ArmMode,ArmWager,ArmEffort,ArmRules;
-        public readonly InputAction Move, Look, Punch, Interact, Drop, Run, Reset, Pause, Offer;
+        public readonly InputAction Move, Look, Punch, Interact, Drop, Run, Reset, Pause, Offer, Scoreboard;
         public readonly InputAction Point, Scroll, PoolAim, FineAim, PoolPower, PoolShoot, PoolExit, PoolPause, PoolReset, PoolNext;
         public readonly InputAction Accept, Back, Navigate;
         public readonly InputAction PoolConfirm,PoolAlternative,PoolPocket,PoolRules;
@@ -21,7 +21,7 @@ namespace TavernChaos
             Look=game.AddAction("Look",InputActionType.Value); Look.AddBinding("<Mouse>/delta"); Look.AddBinding("<Gamepad>/rightStick").WithProcessor("scaleVector2(x=12,y=12)");
             Punch=Button(game,"Punch","<Mouse>/leftButton","<Gamepad>/rightTrigger"); Interact=Button(game,"Interact","<Keyboard>/e","<Gamepad>/buttonSouth");
             Drop=Button(game,"Drop","<Keyboard>/q","<Gamepad>/buttonEast"); Run=Button(game,"Run","<Keyboard>/leftShift","<Gamepad>/leftStickPress");
-            Reset=Button(game,"Reset","<Keyboard>/r","<Gamepad>/select"); Offer=Button(game,"Offer drink","<Keyboard>/f","<Gamepad>/buttonNorth"); Pause=Button(game,"Pause","<Keyboard>/escape","<Gamepad>/start");
+            Reset=Button(game,"Reset","<Keyboard>/r","<Gamepad>/select"); Offer=Button(game,"Offer drink","<Keyboard>/f","<Gamepad>/buttonNorth"); Scoreboard=Button(game,"Scoreboard","<Keyboard>/tab","<Gamepad>/dpad/up"); Pause=Button(game,"Pause","<Keyboard>/escape","<Gamepad>/start");
             Point=pool.AddAction("Point",InputActionType.Value,"<Mouse>/position"); Scroll=pool.AddAction("PowerWheel",InputActionType.Value,"<Mouse>/scroll/y");
             PoolAim=pool.AddAction("AimStick",InputActionType.Value,"<Gamepad>/rightStick");
             FineAim=pool.AddAction("FineAim",InputActionType.Value); FineAim.AddCompositeBinding("1DAxis").With("Negative","<Keyboard>/leftArrow").With("Positive","<Keyboard>/rightArrow");
