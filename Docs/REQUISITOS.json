@@ -189,8 +189,12 @@
       "id": "B01",
       "section": "4. Coctelería y efectos",
       "requirement": "Estación exclusiva, recipiente, hasta cuatro ingredientes con proporciones, agitar, servir, consumir/ofrecer/lanzar.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Docs/REGLAS_COCTELERIA.md",
+        "Evidence/bar/rules.json"
+      ],
+      "remaining": "Modelo puro de estación, recipiente, hasta cuatro ingredientes/proporciones, agitado, servicio/pago, posesión, oferta/aceptación y uso único implementado. Aún sin coordinador físico/de red ni UI de preparación; no es una estación jugable. Faltan integración, pruebas nativas y aceptación humana."
     },
     {
       "id": "B02",
@@ -253,8 +257,10 @@
       "requirement": "Efectos con identificador/origen/inicio/duración: renovar mismo, combinar distintos con orden y límites.",
       "status": "partial",
       "evidence": [
+        "Evidence/bar/rules.json",
         "Evidence/pool-lan/regression/player-tests.json"
-      ]
+      ],
+      "remaining": "Modelo puro con tipo/origen/inicio/duración, renovación, coexistencia, cancelación selectiva y vencimiento pendiente de inestabilidad probado. Aún sin conectar a TavernActor, física, snapshots y presentación. El player conserva el efecto azul anterior; faltan integración y verificación física de los cinco efectos."
     },
     {
       "id": "B10",

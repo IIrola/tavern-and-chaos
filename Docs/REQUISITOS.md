@@ -39,7 +39,7 @@
 
 | ID | Criterio de aceptación | Estado |
 |---|---|---|
-| B01 | Estación exclusiva, recipiente, hasta cuatro ingredientes con proporciones, agitar, servir, consumir/ofrecer/lanzar. | Pendiente |
+| B01 | Estación exclusiva, recipiente, hasta cuatro ingredientes con proporciones, agitar, servir, consumir/ofrecer/lanzar. | Parcial |
 | B02 | Laguna Azul: vodka/curazao/hielo, fricción cero y luz azul. | Parcial |
 | B03 | Volcánico: tequila/picante/Tabasco, fuego de boca y onda expansiva sobre NPC próximos. | Pendiente |
 | B04 | Mezcla Inestable: absenta/energética/cerveza, velocidad 150% 5 s y caída hacia atrás. | Pendiente |

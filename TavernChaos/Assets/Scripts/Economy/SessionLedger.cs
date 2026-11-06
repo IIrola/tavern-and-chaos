@@ -39,6 +39,7 @@ namespace TavernChaos
         private readonly Dictionary<ulong,Account> accounts=new();
         private readonly Dictionary<string,Round> rounds=new();
         private readonly Dictionary<string,(ulong player,long amount,string service)> services=new();
+        private readonly Dictionary<string,ulong> consumedDrinks=new();
         private readonly HashSet<string> credited=new(),fallEvents=new();
         public IEnumerable<Account> Accounts=>accounts.Values;
         public bool Closed { get; private set; }
@@ -70,6 +71,13 @@ namespace TavernChaos
             a.Balance-=amount; a.Services+=amount; BarRevenue+=amount;
             if(service=="drink") a.Drinks++;
             services.Add(operation,(id,amount,service)); return LedgerResult.Applied;
+        }
+        public LedgerResult RecordDrink(string operation,ulong id)
+        {
+            if(string.IsNullOrEmpty(operation))return LedgerResult.Rejected;
+            if(consumedDrinks.TryGetValue(operation,out ulong recipient))return recipient==id?LedgerResult.Replayed:LedgerResult.Rejected;
+            var account=Find(id);if(Closed||account==null||!account.Connected)return LedgerResult.Rejected;
+            consumedDrinks.Add(operation,id);account.Drinks++;return LedgerResult.Applied;
         }
         public LedgerResult ReserveOpening(string key,string kind,ulong organizer,IReadOnlyList<ulong> players,long fee,long stake,int minimum=2,bool againstHouse=false)
         {

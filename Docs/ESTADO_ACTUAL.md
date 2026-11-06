@@ -2,6 +2,12 @@
 
 Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se conservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida, la 0.5 apuestas y libro, y la 0.6 cierre de sesión y resultados. Las evidencias anteriores conservan su alcance histórico.
 
+## Iteración 0.8 en desarrollo: dominio de coctelería
+
+Están programados y compilados en Unity los modelos de recetas/proporciones, estación exclusiva, catálogo editable congelado por sala, vasos con posesión y uso único, efectos renovables/combinables y servicio conectado al libro. La preparación no cobra; servir compromete un vaso y 20 fichas una vez. El consumo se registra por separado y la aplicación queda en una cola que debe drenar antes de cerrar. Límites, ofertas, desconexión y vuelos pendientes se prueban como reglas puras.
+
+Pasaron 76 comprobaciones del dominio y 38 de regresión del libro en Unity Editor. Esto todavía no añade una estación jugable: falta el coordinador de mundo/red, cuerpos físicos de vasos, interfaz, efectos sobre personajes y pruebas nativas. La demo descargable sigue siendo 0.7.0. Decisiones y límites en [REGLAS_COCTELERIA.md](REGLAS_COCTELERIA.md) y Evidence/bar/VALIDACION.md. El siguiente paso inmediato es conectar BarService al transporte, al mundo y a la presentación, manteniendo las pruebas de las dos mesas.
+
 ## Iteración 0.7.0: segunda actividad compartida
 
 Pulseadas ofrece dos asientos, apertura de 5 y apuesta igual opcional, ambas confirmadas antes del cobro. Tras 3 s de cuenta atrás, el duelo dura 15 s con marcador −100..100: extremo o ventaja gana y cero empata. Mantener y ritmo manual comparten fuerza, coste y recuperación; tres esfuerzos permiten elegir consumo y empuje. El servidor admite un impulso por ventana y resuelve ambos lados juntos.
