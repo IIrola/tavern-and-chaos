@@ -2,6 +2,10 @@
 
 Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se conservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida, la 0.5 apuestas y libro, y la 0.6 cierre de sesión y resultados. Las evidencias anteriores conservan su alcance histórico.
 
+## En desarrollo tras 0.9.0: blackjack (entrega C)
+
+`BlackjackRound` (reglas puras, sin Unity) implementa 2–5 jugadores, baraja de 52 mezclada por el servidor, naturales, as 1/11, pedir/plantarse, crupier que pide hasta 16 y planta en cualquier 17, y resultado por jugador (`HouseOutcome`) para `SessionLedger.SettleHouse` (1:1, 3:2, empate). La vista por jugador nunca incluye el identificador de la carta oculta antes de la liquidación. Decisiones: una mano con natural se planta sola; con todas las manos pasadas el crupier no roba; ausencia, expulsión o desconexión planta la mano comprometida y se liquida con normalidad. 28 comprobaciones (`Tavern → Validate blackjack rules`, también en cada compilación; informe en Evidence/blackjack). Falta la mesa física, comandos de red, UI, turno de 60 s y la apuesta mínima de 26 en la sala.
+
 ## Iteración 0.9.0: barra jugable
 
 La barra deja de ser un fixture. `BarRoomController` (anfitrión) valida cercanía, aptitud (de pie, no sentado) y puntería, y delega dinero y posesión en `BarService`. Intenciones nuevas: `BarContainer/Adjust/Recipe/Shake/Serve/Cancel/PutDown/Grab/Offer/Accept`; E sobre la barra abre la estación, E con vaso bebe, E con oferta acepta, E junto a un vaso apoyado lo recoge, F ofrece al más alineado a menos de 3 m, Q deja, clic mantenido lanza (cono de 20°, hasta 9 m, incluye a Bruno). El snapshot incluye `BarView` (estación y vasos con posición); todas las copias dibujan los vasos. Caer, salir, resetear o alejarse cancelan la preparación sin cobro; un vaso en mano al caer se apoya. La bebida de prueba antigua en la sala se retira: las comprobaciones que la usaban ahora sirven un Laguna Azul real (`BarFlowChecks`).

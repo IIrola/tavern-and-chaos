@@ -89,8 +89,8 @@
 
 | ID | Criterio de aceptación | Estado |
 |---|---|---|
-| BJ01 | 2–5 contra crupier, 52 cartas sin comodín, mezcla servidor, dos cartas y carta de crupier oculta. | Pendiente |
-| BJ02 | As 1/11, figuras 10, pedir/plantarse/pasarse; crupier pide ≤16 y planta ≥17 incluido blando. | Pendiente |
+| BJ01 | 2–5 contra crupier, 52 cartas sin comodín, mezcla servidor, dos cartas y carta de crupier oculta. | Parcial (reglas puras y vistas sin fuga verificadas; sin mesa ni red) |
+| BJ02 | As 1/11, figuras 10, pedir/plantarse/pasarse; crupier pide ≤16 y planta ≥17 incluido blando. | Parcial (reglas puras verificadas; sin mesa ni red) |
 | BJ03 | Natural superior a 21 multicarte, empate de naturales; sin split/doble/seguro/rendición inicial. | Pendiente |
 | BJ04 | Apuesta par ≥26, normal 1:1/natural 3:2/empate devolución; banca infinita y tratamiento de ausencia/desconexión. | Pendiente |
 

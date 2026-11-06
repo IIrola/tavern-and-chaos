@@ -88,6 +88,7 @@ namespace TavernChaos.Editor
             SessionValidation.Run();
             EconomyValidation.Run();
             PoolRulesValidation.Run();
+            BlackjackValidation.Run();
             ConfigureMacArchitecture(); Configure(); Directory.CreateDirectory("../Builds/macOS");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.CleanBuildCache });
             var summary=report.summary;
@@ -114,6 +115,7 @@ namespace TavernChaos.Editor
             SessionValidation.Run();
             EconomyValidation.Run();
             PoolRulesValidation.Run();
+            BlackjackValidation.Run();
             Configure(); Directory.CreateDirectory("../Builds/Windows");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/Windows/Tavern and Chaos.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.CleanBuildCache });
             var summary=report.summary;
