@@ -65,7 +65,7 @@ namespace TavernChaos
             controls=0;
             if(!g.Lan||!g.Lan.LocalArmSeated)ArmPointerHeld=false;
             if(g.Lan&&g.Lan.BlocksPlay) SessionEndScreen();
-            else if(!g.Started) Menu(); else { GUI.enabled=!g.Paused; Game(); GUI.enabled=true; if(g.Paused) Pause(); }
+            else if(!g.Started) { Menu(); if(g.Lan&&g.Lan.LastError.Length>0) { Box(new((W-900)/2,800,900,56),ink); Box(new((W-900)/2,800,4,56),orange); Label(new((W-900)/2+20,808,860,44),"La última sala se cerró: "+g.Lan.LastError+"\nVersión "+Application.version+" · el anfitrión y todos los equipos deben tener la misma.",14,orange,FontStyle.Bold,TextAnchor.MiddleLeft); } } else { GUI.enabled=!g.Paused; Game(); GUI.enabled=true; if(g.Paused) Pause(); }
             lastControls=controls;
             editingLanField=lanLobby&&GUI.GetNameOfFocusedControl().StartsWith("lan-");
             GUI.matrix=Matrix4x4.identity;

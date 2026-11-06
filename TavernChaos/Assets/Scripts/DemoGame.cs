@@ -59,6 +59,7 @@ namespace TavernChaos
             if(!Economy||!Economy.Valid) { Economy=ScriptableObject.CreateInstance<EconomySettings>(); ownsEconomySettings=true; }
             Lan=gameObject.AddComponent<LanSession>();
             gameObject.AddComponent<SessionEndPresentation>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-room-soak")) gameObject.AddComponent<RoomSoak>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests")) gameObject.AddComponent<DemoSmokeTests>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-lan-check")) gameObject.AddComponent<LanProcessChecks>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-pool-room-check")) gameObject.AddComponent<PoolRoomChecks>();

@@ -66,6 +66,7 @@ namespace TavernChaos
         internal void ExpireForCheck() { if(g.SmokeMode&&IsHost) Lifecycle.Expire(Time.realtimeSinceStartupAsDouble); }
         public bool CanLocalPoolAct=>Connected&&!BlocksPlay&&View?.pool is PoolRoomView table&&table.phase==TablePhase.Playing&&table.hasTurn&&table.turn==LocalId&&table.IsSeated(LocalId);
         public string Status { get; private set; }="";
+        public string LastError { get; set; }="";
         public string Address { get; private set; }
         public string RoomCode { get; private set; }
         public int SnapshotsReceived { get; private set; }
@@ -98,7 +99,7 @@ namespace TavernChaos
         {
             if(manager) return false;
             if(!RoomLifecycle.ValidMinutes(minutes)) { Status="Duración: elige 20, 30, 45 o 60 minutos."; return false; }
-            Minutes=minutes;
+            Minutes=minutes; LastError="";
             g.Begin(); Prepare(name,port,"127.0.0.1",true); Address=FindAddress();
             RoomCode=EncodeCode(Address,port); Roster=new RoomRoster(new SessionLedger(g.Economy.StartingChips)); startedAt=Time.realtimeSinceStartupAsDouble; endsAt=startedAt+minutes*60; Lifecycle=new RoomLifecycle(endsAt);
             PoolTable=new PoolRoomController(g.Pool,Roster,ActorFor,ChangePoolSeat,g.Economy);
@@ -118,7 +119,7 @@ namespace TavernChaos
             if(manager) return false;
             if(TryDecodeCode(addressOrCode,out string decoded,out ushort codePort)) { addressOrCode=decoded; port=codePort; }
             if(!IPAddress.TryParse(addressOrCode,out var ip)||ip.AddressFamily!=AddressFamily.InterNetwork) { Status="Introduce una dirección IPv4 o un código de sala válido."; return false; }
-            g.Begin(); Prepare(name,port,addressOrCode,false); Address=addressOrCode; RoomCode=EncodeCode(Address,port); connectAt=Time.realtimeSinceStartupAsDouble;
+            LastError=""; g.Begin(); Prepare(name,port,addressOrCode,false); Address=addressOrCode; RoomCode=EncodeCode(Address,port); connectAt=Time.realtimeSinceStartupAsDouble;
             SetClientSimulation(true); Status="Conectando a la sala…"; Application.runInBackground=true;
             if(!manager.StartClient()) { Fail("No se pudo iniciar la conexión."); return false; } RegisterMessages(); return true;
         }
@@ -207,7 +208,8 @@ namespace TavernChaos
         }
         private void Fail(string reason)
         {
-            Leave(); Status=reason; g.Menu(); g.Notify(reason);
+            Debug.Log("[LAN] Salida de la sala: "+reason+" (rol="+(IsHost?"anfitrión":"cliente")+", v"+Application.version+", protocolo 10)");
+            Leave(); Status=reason; LastError=reason; g.Menu(); g.Notify(reason);
         }
         private void Update()
         {
@@ -606,7 +608,7 @@ namespace TavernChaos
         }
         private void PresentReceipt(MatchReceipt receipt)
         {
-            if(receipt==null||!seenReceipts.Add(receipt.id)) return;
+            if(receipt==null||string.IsNullOrEmpty(receipt.id)||!seenReceipts.Add(receipt.id)) return;
             int side=Array.IndexOf(receipt.players,LocalId); string own=side>=0?" Recibes: "+receipt.payouts[side]+" fichas.":"";
             g.Notify((receipt.hasWinner?receipt.game+": gana "+receipt.winnerName+".":receipt.game+": ronda liquidada sin ganador.")+own); g.Audio.Play("ui",.6f);
         }
