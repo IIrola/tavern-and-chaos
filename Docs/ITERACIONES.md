@@ -35,3 +35,21 @@ Se conserva la validación previa y la aceptación del usuario de dos copias en 
 El ensayo virtual también detectó selección del cursor físico; se restringen sus mapas a los dispositivos virtuales y se comprueba la acción resultante. En la revancha, el coordinador esperaba ahora la revisión exacta de la propuesta antes de enviar la apuesta cero. Estas correcciones conservan las protecciones del juego, en vez de permitir clics sobre UI o confirmaciones antiguas.
 
 **Resultado final:** 38 comprobaciones del libro, 48 de reglas/asientos, 162 entre procesos (dos salas de tres), 86 de regresión y 14 de entrada aislada aprobadas; cero errores de ejecución. Construcción y pasos con cero errores, una advertencia de soporte Intel futuro. Referencias/GUID: 72 archivos sin incidencias. Cobertura y límites en `Evidence/economy/VALIDACION.md`.
+
+## 0.6.0 — cierre y resultados compartidos
+
+**Problema:** al agotarse el tiempo se abandonaba al menú y no había cierre colectivo por falta de fichas. Esto podía ocultar resultados y dejar sin explicación el destino de una apuesta o de un tiro ya lanzado.
+
+**Cambio:** reloj puro con fases abiertas, resolución, expulsión y resultados. El servidor corta acciones antes de procesarlas al límite, espera los objetos/tiros soltados, paga resultados alcanzados y cancela con devolución las partidas inconclusas. La insolvencia espera los premios. El registro final se congela antes de borrar fondos; las páginas se conservan en cliente, incluidos salidos/retornos, y una nueva sala reinicia estado. La presentación tiene seis segundos por reloj de servidor y alternativa de movimiento reducido.
+
+**Criterio de aceptación:** un cierre con bote pendiente termina sin fuga ni premio inventado; una 8 legal durante el cierre paga una vez; saldo recuperado evita la expulsión; solo después de agotarse vuelve a empezar la cinemática. Nuevos intentos de entrada y comandos crudos quedan rechazados. Pausa/ajustes no congelan el reloj ni absorben la navegación final. Historial de ocho conexiones se comparte en dos páginas y sigue accesible al salir host. Crear sala y Escape funcionan mediante entrada real cuando hay interfaz.
+
+**Evaluación senior:** el final deja de romper la experiencia social: cada persona puede leer lo ocurrido y conservar el registro recibido. Separar el cierre de la pausa evita que el anfitrión congele o pierda un pago por estar en un menú. La cámara fija y la opción reducida permiten usar el mismo reloj sin imponer giros de cámara a todos. El humor y la duración todavía requieren sesiones humanas; una prueba programada no demuestra que la espera de seis segundos resulte agradable.
+
+La revisión visual corrigió encabezados partidos y el encuadre que mostraba otro escenario detrás. El ensayo de capturas ahora espera un fotograma dibujado y el archivo antes de pedir otra imagen; así se conserva cada página que se está verificando. La navegación final no modifica ajustes que quedaron abiertos detrás.
+
+**Límites relevantes:** solo el billar ofrece todavía una partida de mesa integrada. El umbral del GDD contempla aperturas de 5 que aún no tienen actividad, por lo que falta cerrar ese hueco funcional con pulseadas y las otras mesas. Las pruebas de cierre usan reloj acelerado y, para la 8 ganadora, un historial de reglas preparado antes del tiro físico final. Faltan redes entre equipos, seis personas, host perdido durante la cinemática, controles físicos y aceptación humana. No se declara completo el fin económico de todas las actividades ni el GDD.
+
+**Prioridad siguiente:** pulseadas con apertura 5 y el mismo contrato de sesión; después cócteles y los restantes juegos. Mantener las pruebas de cierre al añadir cada módulo para que ninguna mesa nueva quede fuera de la espera de pagos.
+
+**Resultado final:** 20 comprobaciones de cierre, 38 del libro, 48 de reglas/asientos, 140 en recorridos de cierre, 80 de partida completa y 86 de regresión local aprobadas. Construcción con cero errores en resumen/pasos; referencia/GUID sin incidencias en 83 archivos. Evidencia en Evidence/session-end/VALIDACION.md.

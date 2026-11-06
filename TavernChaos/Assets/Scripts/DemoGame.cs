@@ -41,7 +41,7 @@ namespace TavernChaos
         private readonly List<(GameObject obj,float end)> sparks=new();
         private void Awake()
         {
-            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
+            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"||x=="-session-end-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
             Physics.defaultSolverIterations=10; Physics.defaultSolverVelocityIterations=4;
             TavernWorld.Build();
             Player=CreateActor("You | Mica",true,new(0,.08f,-4)); Rival=CreateActor("Rival | Bruno",false,new(0,.08f,-.1f));
@@ -58,9 +58,11 @@ namespace TavernChaos
             Economy=Resources.Load<EconomySettings>("EconomySettings");
             if(!Economy||!Economy.Valid) { Economy=ScriptableObject.CreateInstance<EconomySettings>(); ownsEconomySettings=true; }
             Lan=gameObject.AddComponent<LanSession>();
+            gameObject.AddComponent<SessionEndPresentation>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests")) gameObject.AddComponent<DemoSmokeTests>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-lan-check")) gameObject.AddComponent<LanProcessChecks>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-pool-room-check")) gameObject.AddComponent<PoolRoomChecks>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-session-end-check")) gameObject.AddComponent<SessionEndChecks>();
         }
         internal TavernActor CreateRoomActor(string name,Vector3 home)=>CreateActor(name,true,home);
         internal void SetRoomHeld(ThrowableBottle bottle) { Held=bottle; }
@@ -89,6 +91,12 @@ namespace TavernChaos
         {
             Begin(); Player.Teleport(new Vector3(3.7f,.08f,.4f),Quaternion.Euler(0,90,0)); Pool.Enter(); Rig.Snap();
         }
+        public IEnumerator CreateRoomAfterEnding(ushort? newPort=null)
+        {
+            string name=Lan.LocalName; ushort port=newPort??Lan.Port; int minutes=Lan.Minutes;
+            Menu(); yield return null; yield return null;
+            Lan.Host(name,port,minutes);
+        }
         public void SetPause(bool value)
         {
             if(!Started) return; Paused=value; Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; move=Vector2.zero; run=false; interactRequest=dropRequest=false;
@@ -99,6 +107,7 @@ namespace TavernChaos
         public void Menu()
         {
             if(Lan) Lan.Leave();
+            if(Lan) Lan.ClearEnding();
             Time.timeScale=1; Started=false; Paused=false; Settings=false; Pool.Exit(); Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; move=Vector2.zero;
             if(Held) { Held.ResetToRack(); Held=null; } Player.ClearEffect(); SetCursor(false); Rig.Snap(); RefreshInputContext();
         }
@@ -124,7 +133,7 @@ namespace TavernChaos
         private bool lastPlaying, lastBilliards;
         public void RefreshInputContext()
         {
-            bool playing=Started&&!Paused, billiards=playing&&Pool.Active;
+            bool playing=Started&&!Paused&&(!Lan||!Lan.BlocksPlay), billiards=playing&&Pool.Active;
             if(playing!=lastPlaying || billiards!=lastBilliards) { Input.SetContext(playing,billiards); lastPlaying=playing; lastBilliards=billiards; poolPointerSeen=false; }
             SetCursor(playing&&!billiards);
         }
@@ -132,6 +141,7 @@ namespace TavernChaos
         {
             for(int i=sparks.Count-1;i>=0;i--) if(Time.time>sparks[i].end) { Destroy(sparks[i].obj); sparks.RemoveAt(i); }
             if(SmokeMode&&!TestDriveInput) { Pool.UpdateGuide(); return; }
+            if(Lan&&Lan.BlocksPlay) { hud.HandleMenuInput(); return; }
             if(!Started || Paused) { hud.HandleMenuInput(); return; }
             if(Lan&&Lan.Running) { if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); } else { UpdateRoomInput(); Pool.UpdateGuide(); } return; }
             if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); return; }
@@ -221,6 +231,7 @@ namespace TavernChaos
         private void FixedUpdate()
         {
             if(Lan&&Lan.Running) { Lan.FixedTick(); return; }
+            if(Lan&&Lan.BlocksPlay) return;
             if(!Started || Paused) return;
             Player.TickRecovery(); Rival.TickRecovery();
             if(!Pool.Active) { Player.Aim(Rig.Forward); Player.Move(Rig.Right*move.x+Rig.Forward*move.y,run); }

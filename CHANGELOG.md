@@ -1,5 +1,13 @@
 # Cambios
 
+## 0.6.0 · Cierre compartido de sesión
+
+- Fin por tiempo sin cortar el tiro ni una botella ya lanzada: resultado alcanzado pagado, apuesta inconclusa devuelta y apertura conservada.
+- Insolvencia evaluada después de pagos pendientes; un premio que devuelve saldo mantiene la sala abierta. Expulsión compartida de seis segundos con movimiento reducido.
+- Resultados finales inmutables, incluidos salidos y saldo antes de borrar fondos, descargados por páginas y conservados tras desconectarse el anfitrión.
+- Crear otra sala o volver al menú desde resultados; corte de nuevas entradas y acciones en servidor. Protocolo 6, versiones anteriores rechazadas.
+- Evidencia y límites en Evidence/session-end/VALIDACION.md; el GDD completo y la validación entre equipos siguen pendientes.
+
 ## 0.5.0 · Apuestas y cuentas de sala
 
 - Libro autoritativo de fichas con reservas, devoluciones, botes y pagos únicos; separa ingresos del bar, beneficios de banca y fichas destruidas.

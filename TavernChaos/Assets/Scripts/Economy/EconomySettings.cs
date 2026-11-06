@@ -11,6 +11,7 @@ namespace TavernChaos
         public long StartingChips=>startingChips;
         public long Drink=>drink;
         public long BlackjackMinimum=>blackjackMinimum;
+        public long MinimumPurchase { get { long price=Drink; foreach(TavernActivity activity in System.Enum.GetValues(typeof(TavernActivity))) price=System.Math.Min(price,Opening(activity)); return price; } }
         public long Opening(TavernActivity kind)=>kind switch { TavernActivity.Pool=>pool,TavernActivity.Blackjack=>blackjack,TavernActivity.Poker=>poker,TavernActivity.Domino=>domino,TavernActivity.GoFish=>goFish,_=>armWrestle };
         public bool Valid=>startingChips>=0&&pool>0&&blackjack>0&&poker>0&&domino>0&&goFish>0&&armWrestle>0&&drink>0&&blackjackMinimum>=2&&blackjackMinimum%2==0;
     }

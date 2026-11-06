@@ -25,8 +25,10 @@ namespace TavernChaos
         public LanActorState[] actors; public LanActorState rival; public LanBottleState[] bottles; public PoolRoomView pool;
         public string notice; public bool voteActive; public ulong voteTarget; public int votes,votesNeeded;
         public long drinkPrice;
+        public SessionEndingView ending;
     }
-    [Serializable] public sealed class LanHello { public int protocol=5; public string name; }
+    [Serializable] public sealed class LanHello { public int protocol=6; public string name; }
+    [Serializable] public sealed class SessionEndingView { public RoomPhase phase; public RoomEndReason reason; public double phaseStarted; public string reportId; public int pages,participants; }
     [Serializable] public sealed class PoolBallView { public int number; public bool active; public Vector3 position; public Quaternion rotation; }
     [Serializable] public sealed class PoolRoomView
     {
@@ -48,6 +50,6 @@ namespace TavernChaos
     }
     [Serializable] public sealed class LanStatsPage
     {
-        public int page,pages; public string issued,bankIssued,barRevenue,destroyed,audit; public LedgerStatsView[] players;
+        public int page,pages; public string issued,bankIssued,barRevenue,destroyed,audit,reportId; public bool final; public LedgerStatsView[] players;
     }
 }

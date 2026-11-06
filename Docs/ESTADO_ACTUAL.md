@@ -1,23 +1,25 @@
 # Estado y siguiente trabajo
 
-Rama de trabajo: `main`. Base recibida `b89a6d1` (0.3.1), conservando primera persona, reinicio individual, puntos libres, posturas físicas replicadas y eventos de impacto. El trabajo anterior a esa base permanece en `work/lan-foundation`, commit `c79d8cb`.
+Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se preservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida y la 0.5 añadió apuestas y el libro. Sus evidencias permanecen por versión, sin convertir pruebas locales en aceptación entre equipos.
 
-## Iteración 0.5.0: apuestas y cuentas de sala
+## Iteración 0.6.0: terminar una sesión sin perder resultados
 
-La bola 8 de 0.4 mantiene asientos, cola, reglas, física autoritativa y participación al caer. Ahora el organizador propone una apuesta igual por lado, incluido cero. Ambos confirman un desglose; cambiar propuesta o asientos cancela esas confirmaciones. Solo se cobra al empezar correctamente: apertura de 10 al organizador y apuesta a cada lado. Una apertura fallida devuelve todo lo reservado.
+La sala admite duraciones de 20/30/45/60 minutos. Al llegar al límite rechaza nuevas entradas y acciones, termina el tiro/golpe/botella ya soltados y después paga las partidas terminadas o devuelve apuestas inconclusas. La apertura consumida permanece en el bar. Un resultado cancelado no inventa victoria o empate.
 
-El libro del servidor separa saldos, reservas, botes, gastos de servicios, beneficios de banca y fichas destruidas. No acepta saldo negativo ni pagos repetidos. Una salida destruye disponible y mantiene la apuesta comprometida hasta resolver. El resultado muestra bote, pago y beneficio neto. Las estadísticas bajo demanda incluyen conexiones que salieron, con seis filas por página; las IP no se publican.
+La insolvencia se evalúa después de resolver: una apuesta pendiente y una partida sin apuesta en curso impiden la expulsión; un premio que devuelve saldo mantiene la sala abierta. Cuando nadie puede pagar, empieza una cinemática compartida de seis segundos, con personal y participantes provisionales, cámara fija y movimiento reducido.
 
-`Assets/Resources/EconomySettings.asset` permite editar los precios previstos del GDD sin guardar en él el estado de partida. La banca de blackjack se ha probado como contabilidad pura; el juego sigue pendiente. Las reglas y decisiones económicas se describen en [ECONOMIA_DE_SESION.md](ECONOMIA_DE_SESION.md).
+Los resultados son inmutables y tienen páginas que incluyen salidos/retornos. Conservan el saldo previo al borrado; después el libro elimina fondos y botes. Los clientes descargan las páginas y conservan las recibidas si sale el anfitrión. Crear otra sala reinicia cuentas, reloj, historial, asientos y entrada. Escape sale de resultados sin dejar el juego bloqueado. La política está en [CIERRE_DE_SESION.md](CIERRE_DE_SESION.md).
 
-Las evidencias actuales están en `Evidence/economy/`; las de 0.4 se conservan en `Evidence/pool-lan/`. Las partidas automáticas usan tres procesos Mac, UDP loopback y posiciones preparadas que aíslan tiros físicos reales. No acreditan una sesión humana, una sala de seis ni una red entre equipos. Windows de 0.3.1 conserva evidencia histórica; esta entrega requiere nueva validación allí.
+La evidencia actual está en Evidence/session-end. Se usa Mac, tres participantes conectados y un cuarto intento rechazado, UDP loopback y reloj acelerado. El ensayo de 8 ganadora prepara su historial de reglas de forma controlada; el tiro final, tronera, pago y cierre son reales. No se presenta como partida humana ni red entre equipos.
+
+El umbral económico usa los precios completos del GDD, cuyo mínimo es 5. Las actividades de 5 fichas aún faltan; con saldos entre 5 y 9 la demo conserva interacción libre, pero no ofrece todavía esas mesas. Esto es una carencia de contenido pendiente, no una economía terminada.
 
 ## Lo que sigue, en orden
 
-1. Cierre por tiempo e insolvencia: bloquear nuevas entradas/inicios, resolver tiros/pagos pendientes, mostrar estadísticas finales y cinemática compartida. Hoy el cierre por tiempo todavía vuelve al menú; no se declara fin económico completo.
-2. Sesiones libres de billar entre 2–4 personas/equipos: comodidad de apuntado, descubrimiento de controles, latencia/pérdida, ausencia real de un minuto, continuidad de revancha y equilibrio de potencia/fricción. Probar también una sala real de seis y paginación con historial largo.
-3. Preparación de cócteles con ingredientes, oferta/lanzamiento, cinco recetas, ebriedad 0–5 y acumulación/restauración de efectos, incluidos sentados.
-4. Blackjack, Hold’em con botes laterales, dominó, Ve a Pescar y pulseadas. Fijar fuente oficial/variante antes de cada implementación. Reutilizar asientos y libro, preservando reglas y vistas privadas propias.
-5. Accesibilidad y configuración: inversión, reasignación, tamaño de texto, navegación completa, canales de audio, interfaz responsive y ajustes versionados. Medir Mac/Windows con cuatro/seis personas y decidir LTS/URP con evidencia.
+1. Incorporar una actividad de apertura 5: pulseadas con aceptación, ritmo/resistencia, alternativa de mantener, duración 15 s, reloj/entradas en servidor e integración de cierre y apuestas. Cierra además el hueco del catálogo entre 5 y 9 fichas, manteniendo el alcance de las demás actividades.
+2. Cócteles: estación, hasta cuatro ingredientes, oferta/lanzamiento, las cinco recetas, ebriedad y restauración de efectos, incluidos sentados.
+3. Blackjack, Hold'em con botes laterales, dominó y Ve a Pescar; fijar fuente/variante antes de implementar y conservar manos privadas.
+4. Sesiones humanas de billar y actividades entre 2–4 equipos; ausencia real de un minuto, latencia/jitter/pérdida, sala de seis y desconexiones durante cierre. Validar Windows actual y juego cruzado.
+5. Accesibilidad y configuración completas: texto ampliable, contraste, reasignación, inversión, audio por canales y ajustes versionados. Medir cuatro/seis personas y decidir LTS/URP.
 
-El alcance íntegro permanece en los [85 criterios](REQUISITOS.md) y [su registro de evidencias](REQUISITOS.json). El arte final sigue diferido; el GDD no está terminado.
+El alcance íntegro permanece en los [85 criterios](REQUISITOS.md) y [sus evidencias](REQUISITOS.json). El arte final sigue diferido y el GDD no está terminado.

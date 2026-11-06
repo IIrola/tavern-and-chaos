@@ -29,9 +29,10 @@
       "requirement": "Entradas durante sesión, salida segura, reinicio al cambiar de sala, cierre al perder al anfitrión; sin migración.",
       "status": "partial",
       "evidence": [
-        "Evidence/pre-hito1/run-20261104-225520/summary.json"
+        "Evidence/session-end/time-win/summary.json",
+        "Evidence/session-end/time-cancel/summary.json"
       ],
-      "remaining": "Salida y cierre de anfitrión comprobados entre procesos; falta ensayo físico multi-equipo."
+      "remaining": "Salida de host después del cierre conserva páginas finales recibidas; retorno y sala nueva reinician estado. La pérdida anterior a resultados vuelve al menú; faltan redes físicas entre equipos y pruebas de pérdida durante la cinemática."
     },
     {
       "id": "S04",
@@ -39,9 +40,11 @@
       "requirement": "Duración seleccionable 20/30/45/60 minutos; cierre y liquidación de acciones/partidas pendientes.",
       "status": "partial",
       "evidence": [
-        "Evidence/pre-hito1/run-20261104-225520/summary.json"
+        "Evidence/session-end/lifecycle.json",
+        "Evidence/session-end/time-cancel/summary.json",
+        "Evidence/session-end/time-win/summary.json"
       ],
-      "remaining": "Duración configurada en sala; liquidación de partidas y fin económico pendientes."
+      "remaining": "Admite 20/30/45/60; reloj autoritativo bloquea nuevas acciones/entradas, termina tiro y objetos lanzados, paga resultado alcanzado o devuelve apuestas. Comprobado con límite acelerado en Mac y billar; faltan duración real completa, redes entre equipos y otros cinco juegos."
     },
     {
       "id": "S05",
@@ -52,7 +55,7 @@
         "Evidence/pre-hito1/VALIDACION.md",
         "Evidence/pool-lan/build-macos.json"
       ],
-      "remaining": "0.3.1 tiene evidencia Windows y macOS por separado. 0.5.0 está probada en Mac; falta Windows actual, juego cruzado entre equipos y mando físico."
+      "remaining": "0.3.1 conserva evidencia histórica Windows. 0.6 se verifica en Mac; falta Windows actual, juego cruzado y mando físico."
     },
     {
       "id": "P01",
@@ -687,8 +690,13 @@
       "id": "E05",
       "section": "13. Economía, sesión y estadísticas",
       "requirement": "Fin por tiempo o nadie puede pagar, esperando resoluciones/retornos; bloquear nuevas acciones y liquidar sin fuga de fichas.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/session-end/lifecycle.json",
+        "Evidence/session-end/time-cancel/summary.json",
+        "Evidence/session-end/insolvency/summary.json"
+      ],
+      "remaining": "Cierre de billar integrado: dinero pendiente protege de insolvencia, corte por tiempo, cancelación/reembolso y libro cerrado sin fuga. El umbral usa precios del GDD completo (mínimo 5); otras actividades y su integración de cierre siguen pendientes."
     },
     {
       "id": "E06",
@@ -696,18 +704,24 @@
       "requirement": "Estadísticas servidor de victorias/empates/apuestas/fichas/caídas/bebidas, incluidos salidos, una victoria por mesa.",
       "status": "partial",
       "evidence": [
-        "Evidence/economy/processes/04-statistics.png",
-        "Evidence/economy/processes/summary.json",
-        "Evidence/economy/ledger.json"
+        "Evidence/session-end/time-cancel/summary.json",
+        "Evidence/session-end/time-win/summary.json",
+        "Evidence/session-end/insolvency/summary.json"
       ],
-      "remaining": "Historial por conexión, páginas bajo demanda, victorias/empates/apuestas ganadas/beneficio/pérdida/gastos/caídas/bebidas, incluidos salidos. Falta pantalla final de sesión e integración de otras actividades."
+      "remaining": "Registro final inmutable y paginado con conexiones reales que salieron/volvieron; balances previos al borrado, victorias/empates/apuestas/beneficios/gastos/caídas/bebidas. Clientes conservan páginas recibidas tras salir host. Faltan otras actividades, historial largo y aceptación humana."
     },
     {
       "id": "E07",
       "section": "13. Economía, sesión y estadísticas",
       "requirement": "Cinemática compartida de expulsión del bar por insolvencia, fin y opción nueva sala/menú.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/session-end/insolvency/summary.json",
+        "Evidence/session-end/insolvency/02-ejection.png",
+        "Evidence/session-end/insolvency/03-reduced-motion.png",
+        "Evidence/session-end/time-win/summary.json"
+      ],
+      "remaining": "Cinemática procedural de seis segundos por reloj del host, cámara fija, movimiento reducido, resultados y crear otra sala/menú. Probada con tres procesos y un cuarto rechazado; falta sala de seis, red entre equipos y revisión humana del ritmo/humor."
     },
     {
       "id": "Q01",
@@ -715,8 +729,8 @@
       "requirement": "Unity y paquetes fijados con licencia y backend; decisión LTS y URP explícita, build repetible con resultado inspeccionado.",
       "status": "partial",
       "evidence": [
-        "Evidence/economy/build-macos.json",
-        "Evidence/economy/build-macos-steps.json",
+        "Evidence/session-end/build-macos.json",
+        "Evidence/session-end/build-macos-steps.json",
         "Evidence/economy/build-investigation.json"
       ],
       "remaining": "Unity y paquetes fijados, Mono y construcción limpia validada por resumen/pasos. Metadatos duplicados detectados y regenerados por el script, con copia conservada. LTS/URP y validación Windows actual pendientes."
@@ -803,12 +817,14 @@
       "requirement": "Pruebas reglas/propiedades/contabilidad/privacidad/red/física/accesibilidad y sesiones sin guía con nuevas personas.",
       "status": "partial",
       "evidence": [
-        "Evidence/economy/ledger.json",
-        "Evidence/economy/pool-rules.json",
-        "Evidence/economy/processes/summary.json",
-        "Evidence/economy/regression/player-tests.json"
+        "Evidence/session-end/lifecycle.json",
+        "Evidence/session-end/ledger.json",
+        "Evidence/session-end/pool-rules.json",
+        "Evidence/session-end/time-cancel/summary.json",
+        "Evidence/session-end/insolvency/summary.json",
+        "Evidence/session-end/regression/player-tests.json"
       ],
-      "remaining": "Pruebas de reglas, contabilidad, red y regresión física/entrada. Faltan manos privadas, otras actividades, accesibilidad completa y sesiones humanas sin guía."
+      "remaining": "Reglas puras, cuentas, fases, cierre, historial y entrada probados en player Mac. Faltan manos privadas, otras actividades, accesibilidad completa, seis personas y sesiones humanas sin guía."
     },
     {
       "id": "Q11",

@@ -10,9 +10,11 @@ namespace TavernChaos
         private float trauma;
         private Vector3 smooth, velocity;
         private Camera lens;
+        private CameraClearFlags normalClearFlags;
         private bool wasPool;
         private bool snapPending=true;
-        private void Awake() { lens=GetComponent<Camera>(); }
+        private SessionEndPresentation ending;
+        private void Awake() { lens=GetComponent<Camera>(); normalClearFlags=lens.clearFlags; }
         public Vector3 Forward => Quaternion.Euler(0,Yaw,0)*Vector3.forward;
         public Vector3 Right => Quaternion.Euler(0,Yaw,0)*Vector3.right;
         public Vector3 ViewForward => Quaternion.Euler(Pitch,Yaw,0)*Vector3.forward;
@@ -21,6 +23,12 @@ namespace TavernChaos
         private void LateUpdate()
         {
             var g=DemoGame.Instance; if(!g || !g.Player) return;
+            if(!ending) ending=g.GetComponent<SessionEndPresentation>();
+            if(ending&&ending.TryCamera(out var endPosition,out var endTarget)) {
+                g.Player.SetFirstPersonView(false); lens.orthographic=false; lens.fieldOfView=60; lens.farClipPlane=20; lens.clearFlags=CameraClearFlags.SolidColor;
+                transform.SetPositionAndRotation(endPosition,Quaternion.LookRotation(endTarget-endPosition)); return;
+            }
+            lens.farClipPlane=70; lens.clearFlags=normalClearFlags;
             if(wasPool!=g.Pool.Active) { Snap(); wasPool=g.Pool.Active; }
             bool firstPerson=g.Started&&!g.Pool.Active;
             g.Player.SetFirstPersonView(firstPerson);

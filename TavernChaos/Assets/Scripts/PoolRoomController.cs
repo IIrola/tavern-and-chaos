@@ -22,6 +22,20 @@ namespace TavernChaos
         private double now;
         internal int? FirstSideForCheck;
         internal bool FailOpeningForCheck;
+        internal bool PrepareClosingEightForCheck()
+        {
+            if(!DemoGame.Instance.SmokeMode||Rules==null||Rules.Phase!=EightBallPhase.Placement||pool.Moving) return false;
+            int side=Rules.Turn; Rules.Place(side); Rules.Shoot(side,0,-1);
+            var opening=new EightBallEvents(); opening.Contact(1,1); opening.Pockets[1]=3; Rules.Resolve(opening);
+            // Controlled rule history only. The closing shot itself must use the real physical table.
+            for(int ball=2;ball<=7;ball++) {
+                if(!Rules.Shoot(side,ball,3)) return false;
+                var shot=new EightBallEvents(); shot.Contact(ball,1); shot.Pockets[ball]=3; Rules.Resolve(shot);
+            }
+            // Break pot leaves table open; the first later called pot assigned the group.
+            for(int ball=1;ball<=7;ball++) pool.Balls[ball].gameObject.SetActive(false);
+            CallBall=8; CallPocket=3; Sync(); pool.ArrangeMatchCheck(8); return Rules.CanCall(side,8,3);
+        }
         private readonly HashSet<ulong> ready=new();
         private readonly long openingFee;
         private long stake;
@@ -182,6 +196,15 @@ namespace TavernChaos
         public void CancelRound()
         {
             if(roundKey!=null&&!roster.Ledger.IsSettled(roundKey)) roster.Ledger.CancelMatch(roundKey);
+        }
+        public bool FinishSession()
+        {
+            if(pool.Moving) return false;
+            SettleResult(); CancelRound();
+            if(roundKey!=null&&!roster.Ledger.IsSettled(roundKey)) return false;
+            for(int seat=0;seat<Table.Capacity;seat++) if(Table.Occupant(seat).HasValue) Leave(Table.Occupant(seat).Value,now);
+            Table.Close(); Rules=null; sides=null; roundKey=null; InvalidateSetup(); pool.EndMatch();
+            Notice="Sesión terminada. Partidas inconclusas: apuestas devueltas, apertura consumida."; return true;
         }
         private int? winnerOverride;
         public PoolRoomView Capture(double time)

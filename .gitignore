@@ -46,6 +46,9 @@ Evidence/lan-project-check.json
 Evidence/**/*.ready
 __pycache__/
 *.pyc
+# Keep canonical generated reports/captures, excluding numbered filesystem copies.
+/Evidence/**/* [0-9]*.json
+/Evidence/**/* [0-9]*.png
 Evidence/pre-hito1/**/*.ready
 /.validation/
 

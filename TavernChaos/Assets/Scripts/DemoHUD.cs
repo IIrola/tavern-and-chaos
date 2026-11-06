@@ -27,14 +27,16 @@ namespace TavernChaos
         {
             if(!g) g=DemoGame.Instance;
             string screen=(g.Started?"pause":"menu")+(g.Settings?"settings":lanLobby?"lan":roomRoster?"roster":roomStats?"stats":tableRules?"rules":"");
+            if(g.Lan&&g.Lan.BlocksPlay) screen="session-"+g.Lan.Ending.phase;
             if(menuScreen!=screen) { menuScreen=screen; focus=0; accept=-1; nextNavigate=0; }
+            if(g.Lan&&g.Lan.BlocksPlay&&g.Input.Back.WasPressedThisFrame()) { if(g.Lan.Ending.phase==RoomPhase.Results) g.Menu(); return; }
             if(g.Input.Back.WasPressedThisFrame()) { if(roomStats) roomStats=false; else if(tableRules) { tableRules=false; g.SetPause(false); } else if(roomRoster) roomRoster=false; else if(lanLobby) lanLobby=false; else if(g.Settings) { g.SaveSettings(); g.Settings=false; } else if(g.Paused) g.SetPause(false); return; }
             if(lanLobby&&editingLanField) return;
             Vector2 nav=g.Input.Navigate.ReadValue<Vector2>();
-            if(roomStats&&Mathf.Abs(nav.x)>.5f&&Time.unscaledTime>=nextStatsPage&&g.Lan.StatsPage!=null) { g.Lan.RequestStats(g.Lan.StatsPage.page+(nav.x>0?1:-1)); nextStatsPage=Time.unscaledTime+.3f; }
+            if((roomStats||g.Lan&&g.Lan.BlocksPlay)&&Mathf.Abs(nav.x)>.5f&&Time.unscaledTime>=nextStatsPage&&g.Lan.StatsPage!=null) { g.Lan.RequestStats(Mathf.Clamp(g.Lan.StatsPage.page+(nav.x>0?1:-1),0,g.Lan.StatsPage.pages-1)); nextStatsPage=Time.unscaledTime+.3f; }
             if(Mathf.Abs(nav.y)>.5f && Time.unscaledTime>=nextNavigate && lastControls>0) { focus=(focus+(nav.y>0?-1:1)+lastControls)%lastControls; nextNavigate=Time.unscaledTime+.2f; }
             if(Mathf.Abs(nav.y)<.2f) nextNavigate=0;
-            if(g.Settings&&Mathf.Abs(nav.x)>.2f) { if(focus==0) g.Audio.Volume=Mathf.Clamp01(g.Audio.Volume+nav.x*Time.unscaledDeltaTime*.5f); if(focus==1) g.Rig.Sensitivity=Mathf.Clamp(g.Rig.Sensitivity+nav.x*Time.unscaledDeltaTime*.15f,.04f,.3f); }
+            if(g.Settings&&(!g.Lan||!g.Lan.BlocksPlay)&&Mathf.Abs(nav.x)>.2f) { if(focus==0) g.Audio.Volume=Mathf.Clamp01(g.Audio.Volume+nav.x*Time.unscaledDeltaTime*.5f); if(focus==1) g.Rig.Sensitivity=Mathf.Clamp(g.Rig.Sensitivity+nav.x*Time.unscaledDeltaTime*.15f,.04f,.3f); }
             if(g.Input.Accept.WasPressedThisFrame()) accept=focus;
         }
         public static bool PoolUIContains(Vector2 screenPoint)
@@ -57,7 +59,8 @@ namespace TavernChaos
             scale=Mathf.Min(Screen.width/W,Screen.height/H); ox=(Screen.width-W*scale)*.5f; oy=(Screen.height-H*scale)*.5f;
             GUI.matrix=Matrix4x4.TRS(new Vector3(ox,oy,0),Quaternion.identity,Vector3.one*scale);
             controls=0;
-            if(!g.Started) Menu(); else { GUI.enabled=!g.Paused; Game(); GUI.enabled=true; if(g.Paused) Pause(); }
+            if(g.Lan&&g.Lan.BlocksPlay) SessionEndScreen();
+            else if(!g.Started) Menu(); else { GUI.enabled=!g.Paused; Game(); GUI.enabled=true; if(g.Paused) Pause(); }
             lastControls=controls;
             editingLanField=lanLobby&&GUI.GetNameOfFocusedControl().StartsWith("lan-");
             GUI.matrix=Matrix4x4.identity;
@@ -69,7 +72,7 @@ namespace TavernChaos
         }
         private int FocusControl(Rect r)
         {
-            if(!GUI.enabled || (g.Started&&!g.Paused)) return -1;
+            if(!GUI.enabled || (g.Started&&!g.Paused&&(!g.Lan||!g.Lan.BlocksPlay))) return -1;
             int index=controls++;
             if(index==focus) { Box(new(r.x-4,r.y-4,r.width+8,3),mint); Box(new(r.x-4,r.y+r.height+1,r.width+8,3),mint); }
             return index;
@@ -328,18 +331,32 @@ namespace TavernChaos
             if(g.Lan&&g.Lan.Running) { if(Button(new(524,602,392,50),"ESTADÍSTICAS")) ShowStats(); }
             if(Button(new(524,670,392,50),"VOLVER AL INICIO")) g.Menu();
         }
-        private void StatsMenu()
+        private void SessionEndScreen()
         {
-            var page=g.Lan.StatsPage; Box(new(130,130,1180,650),ink); Label(new(165,164,1110,42),"ESTADÍSTICAS DE ESTA SALA",30,mint,FontStyle.Bold);
-            Label(new(165,221,1110,42),"Mesa / empates / apuestas ganadas · beneficio/pérdida neta · gastos de servicios. Incluye a quienes salieron.",17,muted);
+            var ending=g.Lan.Ending;
+            if(ending.phase==RoomPhase.Results) { StatsMenu(true); return; }
+            if(ending.phase==RoomPhase.Ejecting) {
+                Box(new(W*.12f,H*.06f,W*.76f,110),ink);
+                Label(new(W*.15f,H*.075f,W*.7f,42),"SE ACABÓ EL CRÉDITO",32,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+                Label(new(W*.15f,H*.13f,W*.7f,38),"La casa invita… a salir. Los resultados vienen enseguida.",20,ivory,FontStyle.Normal,TextAnchor.UpperCenter);
+                return;
+            }
+            Box(new(W*.15f,H*.3f,W*.7f,H*.35f),ink);
+            Label(new(W*.18f,H*.34f,W*.64f,55),"ÚLTIMO TIRO. CERRAMOS LA TABERNA.",30,mint,FontStyle.Bold,TextAnchor.UpperCenter);
+            Label(new(W*.22f,H*.43f,W*.56f,110),"Se termina lo que ya estaba en movimiento.\nSe pagan los resultados alcanzados y se devuelven las apuestas de partidas inconclusas.",21,ivory,FontStyle.Normal,TextAnchor.UpperCenter);
+        }
+        private void StatsMenu(bool final=false)
+        {
+            var page=g.Lan.StatsPage; Box(new(130,130,1180,650),ink); Label(new(165,164,1110,42),final?"LA ÚLTIMA RONDA · RESULTADOS":"ESTADÍSTICAS DE ESTA SALA",30,mint,FontStyle.Bold);
+            Label(new(165,221,1110,42),final?(g.Lan.ResultsDisconnected?g.Lan.Status:g.Lan.Ending.reason==RoomEndReason.Time?"Tiempo agotado. Partidas terminadas pagadas; apuestas inconclusas devueltas. Las fichas eran de esta sala.":"Nadie podía pagar otra apertura o bebida. Las fichas pertenecían solo a esta sala."):"Mesa / empates / apuestas ganadas · beneficio/pérdida neta · gastos de servicios. Incluye a quienes salieron.",17,muted);
             Label(new(165,278,300,30),"PERSONA",17,mint,FontStyle.Bold);
-            Label(new(465,278,170,40),"MESA / EMP. / AP.",16,mint,FontStyle.Bold);
+            Label(new(465,278,170,40),"GANADAS / EMPATES\nAPUESTAS GANADAS",14,mint,FontStyle.Bold);
             Label(new(642,278,210,30),"+ / − FICHAS",17,mint,FontStyle.Bold);
             Label(new(890,278,130,30),"GASTOS",17,mint,FontStyle.Bold);
             Label(new(1080,278,190,30),"BEBIDAS / CAÍDAS",16,mint,FontStyle.Bold);
             if(page?.players!=null) for(int i=0;i<page.players.Length;i++) {
                 var a=page.players[i]; float y=326+i*49;
-                Label(new(165,y,300,44),a.name+(a.connected?"":" · salió"),17,a.connected?ivory:muted);
+                Label(new(165,y,300,44),a.name+(a.connected?"":" · salió")+(final?"\nSaldo al cerrar: "+a.balance:""),final?16:17,a.connected?ivory:muted);
                 Label(new(482,y,150,40),a.wins+" / "+a.draws+" / "+a.wagersWon,18,ivory);
                 Label(new(642,y,210,40),"+"+a.won+" / −"+a.lost,18,ivory);
                 Label(new(890,y,130,40),a.spent,18,ivory);
@@ -348,10 +365,13 @@ namespace TavernChaos
             else Label(new(165,345,1110,50),"Recibiendo las estadísticas del anfitrión…",21,ivory);
             if(page!=null) {
                 Label(new(585,645,280,32),"PÁGINA "+(page.page+1)+" / "+page.pages,18,muted,FontStyle.Bold,TextAnchor.UpperCenter);
-                GUI.enabled=page.page>0; if(Button(new(165,640,240,42),"ANTERIOR · ←")) g.Lan.RequestStats(page.page-1);
-                GUI.enabled=page.page+1<page.pages; if(Button(new(1025,640,240,42),"SIGUIENTE · →")) g.Lan.RequestStats(page.page+1); GUI.enabled=true;
+                GUI.enabled=page.page>0&&g.Lan.CanReadStatsPage(page.page-1); if(Button(new(165,640,240,42),"ANTERIOR · ←")) g.Lan.RequestStats(page.page-1);
+                GUI.enabled=page.page+1<page.pages&&g.Lan.CanReadStatsPage(page.page+1); if(Button(new(1025,640,240,42),"SIGUIENTE · →")) g.Lan.RequestStats(page.page+1); GUI.enabled=true;
             }
-            if(Button(new(165,708,1100,48),"VOLVER · ESC / B",true)) roomStats=false;
+            if(final) {
+                if(Button(new(165,708,530,48),"CREAR SALA · "+g.Lan.Minutes+" MIN",true)) StartCoroutine(g.CreateRoomAfterEnding());
+                if(Button(new(735,708,530,48),"VOLVER AL INICIO · ESC / B")) g.Menu();
+            } else if(Button(new(165,708,1100,48),"VOLVER · ESC / B",true)) roomStats=false;
         }
         private void TableRulesMenu()
         {
