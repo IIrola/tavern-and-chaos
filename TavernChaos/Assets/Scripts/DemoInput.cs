@@ -8,6 +8,8 @@ namespace TavernChaos
         private readonly InputActionMap game = new("Tavern");
         private readonly InputActionMap pool = new("Billiards");
         private readonly InputActionMap ui = new("Menus");
+        private readonly InputActionMap arm = new("Arm wrestling");
+        public readonly InputAction ArmPush,ArmConfirm,ArmExit,ArmPause,ArmMode,ArmWager,ArmEffort,ArmRules;
         public readonly InputAction Move, Look, Punch, Interact, Drop, Run, Reset, Pause;
         public readonly InputAction Point, Scroll, PoolAim, FineAim, PoolPower, PoolShoot, PoolExit, PoolPause, PoolReset, PoolNext;
         public readonly InputAction Accept, Back, Navigate;
@@ -31,14 +33,23 @@ namespace TavernChaos
             Accept=Button(ui,"Accept","<Keyboard>/enter","<Gamepad>/buttonSouth"); Accept.AddBinding("<Keyboard>/space");
             Back=Button(ui,"Back","<Keyboard>/escape","<Gamepad>/buttonEast");
             Navigate=ui.AddAction("Navigate",InputActionType.Value); Navigate.AddCompositeBinding("2DVector").With("Up","<Keyboard>/upArrow").With("Down","<Keyboard>/downArrow").With("Left","<Keyboard>/leftArrow").With("Right","<Keyboard>/rightArrow"); Navigate.AddBinding("<Gamepad>/dpad"); Navigate.AddBinding("<Gamepad>/leftStick");
+            ArmPush=Button(arm,"Push","<Keyboard>/space","<Gamepad>/rightTrigger");
+            ArmPush.wantsInitialStateCheck=true;
+            ArmConfirm=Button(arm,"Confirm","<Keyboard>/enter","<Gamepad>/buttonSouth");
+            ArmExit=Button(arm,"Leave","<Keyboard>/e","<Gamepad>/buttonEast");
+            ArmPause=Button(arm,"Pause","<Keyboard>/escape","<Gamepad>/start");
+            ArmMode=Button(arm,"Input mode","<Keyboard>/m","<Gamepad>/buttonNorth");
+            ArmWager=Button(arm,"Wager","<Keyboard>/tab","<Gamepad>/rightShoulder");
+            ArmRules=Button(arm,"Rules","<Keyboard>/h","<Gamepad>/buttonWest");
+            ArmEffort=arm.AddAction("Effort",InputActionType.Value);ArmEffort.AddCompositeBinding("1DAxis").With("Negative","<Keyboard>/leftArrow").With("Positive","<Keyboard>/rightArrow");ArmEffort.AddBinding("<Gamepad>/dpad/x");
             SetContext(false,false);
         }
         private static InputAction Button(InputActionMap map,string n,string key,string pad) { var a=map.AddAction(n,InputActionType.Button); a.AddBinding(key); a.AddBinding(pad); return a; }
-        public void SetContext(bool playing,bool billiards)
+        public void SetContext(bool playing,bool billiards,bool wrestling=false)
         {
-            game.Disable(); pool.Disable(); ui.Disable();
-            if(!playing) ui.Enable(); else if(billiards) pool.Enable(); else game.Enable();
+            game.Disable(); pool.Disable(); ui.Disable();arm.Disable();
+            if(!playing) ui.Enable(); else if(wrestling)arm.Enable(); else if(billiards) pool.Enable(); else game.Enable();
         }
-        public void Dispose() { game.Dispose(); pool.Dispose(); ui.Dispose(); }
+        public void Dispose() { game.Dispose(); pool.Dispose(); ui.Dispose();arm.Dispose(); }
     }
 }

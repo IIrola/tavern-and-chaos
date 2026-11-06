@@ -1,0 +1,87 @@
+{
+    "phase": 3,
+    "gamePhase": 2,
+    "seated": [
+        0,
+        1
+    ],
+    "participants": [
+        0,
+        1
+    ],
+    "ready": [
+        0,
+        1
+    ],
+    "waiting": [
+        2
+    ],
+    "seats": [
+        0,
+        1
+    ],
+    "names": [
+        "Host",
+        "Client"
+    ],
+    "organizer": 1,
+    "proposal": 4,
+    "openingFee": 5,
+    "stake": 25,
+    "pot": 50,
+    "heldPot": 0,
+    "settled": true,
+    "winner": -1,
+    "position": 0,
+    "beat": 20,
+    "start": 9.613943131519274,
+    "end": 24.613943131519274,
+    "feedbackTime": [
+        24.388943131519273,
+        24.388943131519273
+    ],
+    "stamina": [
+        4.900000095367432,
+        4.900000095367432
+    ],
+    "payouts": [
+        25,
+        25
+    ],
+    "modes": [
+        0,
+        1
+    ],
+    "efforts": [
+        1,
+        1
+    ],
+    "feedback": [
+        1,
+        1
+    ],
+    "pulses": [
+        20,
+        20
+    ],
+    "drunk": [
+        false,
+        false
+    ],
+    "notice": "Empate: cada apuesta devuelta.",
+    "receipt": {
+        "id": "arm-1/1",
+        "winnerName": "",
+        "game": "Pulseadas",
+        "hasWinner": false,
+        "players": [
+            0,
+            1
+        ],
+        "payouts": [
+            25,
+            25
+        ],
+        "pot": 50
+    }
+}

@@ -1,0 +1,30 @@
+{
+    "role": "host",
+    "scenario": "closing",
+    "version": "0.7.0",
+    "passed": true,
+    "checks": [
+        "Host opens an actual UDP room",
+        "Three independent processes connect",
+        "Confirmed arm seats select their camera and input map",
+        "Each person takes the nearby seat",
+        "Stale consent and premature start never charge either participant",
+        "Arrow input changes the visible effort",
+        "Mode key selects rhythm",
+        "Rules block only local input while shared simulation continues",
+        "Returning from rules restores arm controls",
+        "Quote exposes normal or doubled resistance cost before consent",
+        "Enter confirms the displayed quote without starting the duel",
+        "Both participants accept the current revision",
+        "Start charges opening five once, reserves both stakes and starts a three-second countdown",
+        "Spectator waits without a grant or a charge",
+        "An active arm duel and pending pot prevent insolvency eviction",
+        "Authority has admitted an impulse before closure",
+        "Deadline resolves the admitted impulse and cancels unfinished play before final accounting",
+        "Cancelled duel returns both stakes, keeps service fees and invents no winner or draw",
+        "Both remote peers receive the immutable final report",
+        "No runtime errors in host"
+    ],
+    "failures": [],
+    "errors": []
+}

@@ -3,7 +3,7 @@
 import json,pathlib,subprocess,sys,time
 root=pathlib.Path(__file__).resolve().parent
 case=next((x for x in sys.argv[1:] if x in ('time-cancel','time-win','insolvency')),'time-cancel')
-out=root/'Evidence/session-end'/case;out.mkdir(parents=True,exist_ok=True)
+out=root/'Evidence/armwrestling'/case;out.mkdir(parents=True,exist_ok=True)
 for p in list(out.glob('*.json'))+list(out.glob('*.png'))+list(out.glob('*.ready')):p.unlink()
 player=root/'Builds/macOS/Tavern and Chaos.app/Contents/MacOS/Tavern and Chaos'
 port={'time-cancel':7794,'time-win':7795,'insolvency':7796}[case]

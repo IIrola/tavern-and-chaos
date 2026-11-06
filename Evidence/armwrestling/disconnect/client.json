@@ -1,0 +1,13 @@
+{
+    "role": "client",
+    "scenario": "disconnect",
+    "version": "0.7.0",
+    "passed": true,
+    "checks": [
+        "Peer starts real connection",
+        "Arm snapshot arrives over UDP",
+        "No runtime errors in client"
+    ],
+    "failures": [],
+    "errors": []
+}

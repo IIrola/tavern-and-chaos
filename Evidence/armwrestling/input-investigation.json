@@ -1,0 +1,17 @@
+{
+  "attempt": "-batchmode -nographics full regression",
+  "passed": false,
+  "checks_passed": 78,
+  "failures": [
+    "UX: Enter starts the session through the real menu actions",
+    "UX: virtual pointer exclusively owns the point action at the requested position",
+    "UX: one wheel step changes power by five percentage points",
+    "UX: one click fires the aimed shot at the selected power (shots=0, phase=Aiming)",
+    "UX: holding the shot button cannot repeat-fire (shots=0)",
+    "UX: Escape pauses a pool shot without leaving the table",
+    "UX: leaving pool restores walking controls without an accidental punch or re-entry",
+    "UX: the keyboard-accessible main-menu shortcut opens billiards directly"
+  ],
+  "runtimeErrors": [],
+  "finding": "The suite starts menus through GUI buttons; without graphics OnGUI does not dispatch those actions. Subsequent pointer/shot checks depend on that start. Repeat this suite with a visible native player; headless arm checks avoid GUI dispatch except where explicitly testing it."
+}

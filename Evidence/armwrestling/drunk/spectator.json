@@ -1,0 +1,17 @@
+{
+    "role": "spectator",
+    "scenario": "drunk",
+    "version": "0.7.0",
+    "passed": true,
+    "checks": [
+        "Peer starts real connection",
+        "Arm snapshot arrives over UDP",
+        "Exact paid receipt reaches peer",
+        "Peer observes the active duel through completion",
+        "Peer receives the settled result",
+        "Independent intoxication modifier is replicated",
+        "No runtime errors in spectator"
+    ],
+    "failures": [],
+    "errors": []
+}

@@ -30,12 +30,14 @@ namespace TavernChaos
             }
             lens.farClipPlane=70; lens.clearFlags=normalClearFlags;
             if(wasPool!=g.Pool.Active) { Snap(); wasPool=g.Pool.Active; }
-            bool firstPerson=g.Started&&!g.Pool.Active;
+            bool arm=g.Lan&&g.Lan.LocalArmSeated;
+            bool firstPerson=g.Started&&!g.Pool.Active&&!arm;
             g.Player.SetFirstPersonView(firstPerson);
             lens.orthographic=g.Pool.Active; lens.orthographicSize=4.1f;
-            lens.fieldOfView=firstPerson?75:60;
+            lens.fieldOfView=firstPerson?75:arm?50:60;
             Vector3 target, desired;
-            if(g.Pool.Active) { target=PoolPractice.Center; desired=target+new Vector3(0,4.1f,-.02f); }
+            if(arm){target=ArmRoomController.Center+Vector3.up*1.2f;desired=ArmRoomController.Center+new Vector3(0,2.8f,-3.8f);}
+            else if(g.Pool.Active) { target=PoolPractice.Center; desired=target+new Vector3(0,4.1f,-.02f); }
             else if(!g.Started) { target=new Vector3(0,1.9f,3.8f); desired=new Vector3(9.8f,5.7f,-7.3f); }
             else {
                 desired=g.Player.EyePosition;
@@ -46,7 +48,8 @@ namespace TavernChaos
             else smooth=Vector3.SmoothDamp(smooth,desired,ref velocity,g.Pool.Active?.18f:.08f,Mathf.Infinity,Time.unscaledDeltaTime);
             trauma=Mathf.Max(0,trauma-Time.unscaledDeltaTime*2.8f);
             Vector3 shake=ReduceMotion?Vector3.zero:new Vector3(Mathf.Sin(Time.unscaledTime*43),Mathf.Sin(Time.unscaledTime*57),0)*trauma*trauma*.1f;
-            transform.position=smooth+shake;
+            Vector3 sway=firstPerson&&!ReduceMotion&&g.Player.Ebriety>0?new Vector3(Mathf.Sin(Time.unscaledTime*1.7f),Mathf.Sin(Time.unscaledTime*2.1f),0)*(.008f*g.Player.Ebriety):Vector3.zero;
+            transform.position=smooth+shake+sway;
             // Keep the horizon stable while the ragdoll tumbles; mouse look remains available.
             transform.rotation=firstPerson?Quaternion.Euler(Pitch,Yaw,0):Quaternion.LookRotation(target-transform.position);
         }

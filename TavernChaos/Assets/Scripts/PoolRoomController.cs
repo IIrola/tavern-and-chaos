@@ -5,7 +5,7 @@ using UnityEngine;
 namespace TavernChaos
 {
     // Host-only coordinator: seats, payments and rules surround the shared physical table.
-    public sealed class PoolRoomController : IDisposable
+    public sealed class PoolRoomController : IRoomTable
     {
         public TableSession Table { get; }=new("pool-1",2);
         public EightBallRules Rules { get; private set; }
@@ -42,7 +42,7 @@ namespace TavernChaos
         private uint proposal=1;
         private ulong roundSerial;
         private string roundKey;
-        private PoolReceipt receipt;
+        private MatchReceipt receipt;
         public PoolRoomController(PoolPractice pool,RoomRoster roster,Func<ulong,TavernActor> actor,Action<ulong,bool,int> changeSeat,EconomySettings prices)
         {
             this.pool=pool; this.roster=roster; this.actor=actor; this.changeSeat=changeSeat; openingFee=prices.Opening(TavernActivity.Pool); pool.ShotSettled+=Resolve;
@@ -191,14 +191,15 @@ namespace TavernChaos
             var result=roster.Ledger.SettleMatch(roundKey,winners);
             if(result==LedgerResult.Rejected) { Notice="Resultado registrado; liquidación pendiente. No se volverá a cobrar la apertura."; return; }
             Notice=Rules.Notice+(stake>0?" Bote de "+(stake*2)+" liquidado una vez.":" Sin apuesta: la victoria cuenta, sin premio en fichas.");
-            receipt=new PoolReceipt{id=roundKey,winnerName=winner>=0?roster.Ledger.Find(sides[winner]).Name:"",hasWinner=winner>=0,players=(ulong[])sides.Clone(),payouts=new[]{roster.Ledger.Payout(roundKey,sides[0]),roster.Ledger.Payout(roundKey,sides[1])},pot=stake*2};
+            receipt=new MatchReceipt{id=roundKey,winnerName=winner>=0?roster.Ledger.Find(sides[winner]).Name:"",hasWinner=winner>=0,players=(ulong[])sides.Clone(),payouts=new[]{roster.Ledger.Payout(roundKey,sides[0]),roster.Ledger.Payout(roundKey,sides[1])},pot=stake*2};
         }
         public void CancelRound()
         {
             if(roundKey!=null&&!roster.Ledger.IsSettled(roundKey)) roster.Ledger.CancelMatch(roundKey);
         }
-        public bool FinishSession()
+        public bool FinishSession(double now)
         {
+            this.now=now;
             if(pool.Moving) return false;
             SettleResult(); CancelRound();
             if(roundKey!=null&&!roster.Ledger.IsSettled(roundKey)) return false;

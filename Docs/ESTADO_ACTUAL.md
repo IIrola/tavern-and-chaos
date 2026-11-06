@@ -1,25 +1,24 @@
 # Estado y siguiente trabajo
 
-Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se preservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida y la 0.5 añadió apuestas y el libro. Sus evidencias permanecen por versión, sin convertir pruebas locales en aceptación entre equipos.
+Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se conservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida, la 0.5 apuestas y libro, y la 0.6 cierre de sesión y resultados. Las evidencias anteriores conservan su alcance histórico.
 
-## Iteración 0.6.0: terminar una sesión sin perder resultados
+## Iteración 0.7.0: segunda actividad compartida
 
-La sala admite duraciones de 20/30/45/60 minutos. Al llegar al límite rechaza nuevas entradas y acciones, termina el tiro/golpe/botella ya soltados y después paga las partidas terminadas o devuelve apuestas inconclusas. La apertura consumida permanece en el bar. Un resultado cancelado no inventa victoria o empate.
+Pulseadas ofrece dos asientos, apertura de 5 y apuesta igual opcional, ambas confirmadas antes del cobro. Tras 3 s de cuenta atrás, el duelo dura 15 s con marcador −100..100: extremo o ventaja gana y cero empata. Mantener y ritmo manual comparten fuerza, coste y recuperación; tres esfuerzos permiten elegir consumo y empuje. El servidor admite un impulso por ventana y resuelve ambos lados juntos.
 
-La insolvencia se evalúa después de resolver: una apuesta pendiente y una partida sin apuesta en curso impiden la expulsión; un premio que devuelve saldo mantiene la sala abierta. Cuando nadie puede pagar, empieza una cinemática compartida de seis segundos, con personal y participantes provisionales, cámara fija y movimiento reducido.
+La ebriedad 0–5 se separa del efecto azul temporal. La bebida de prueba añade un nivel y se recupera uno cada 30 s. Su coste doble de resistencia se comunica antes de confirmar, se replica y continúa tras expirar Laguna Azul. Cambio de coste invalida el consentimiento. La base incluye balanceo visual reducible e intervalo mínimo de 15 s para tropiezos al moverse en nivel 5; faltan las recetas y su validación física completa.
 
-Los resultados son inmutables y tienen páginas que incluyen salidos/retornos. Conservan el saldo previo al borrado; después el libro elimina fondos y botes. Los clientes descargan las páginas y conservan las recibidas si sale el anfitrión. Crear otra sala reinicia cuentas, reloj, historial, asientos y entrada. Escape sale de resultados sin dejar el juego bloqueado. La política está en [CIERRE_DE_SESION.md](CIERRE_DE_SESION.md).
+Levantarse conserva la participación y el reloj, impide jugar en otra mesa y permite volver. La desconexión concede victoria al rival elegible antes de liquidar; un resultado pagado permanece fijo. La espera no cobra. El cierre consulta billar y pulseadas, resuelve el impulso admitido y devuelve apuestas del duelo inconcluso conservando la apertura. Las reglas y decisiones están en [REGLAS_PULSEADAS.md](REGLAS_PULSEADAS.md).
 
-La evidencia actual está en Evidence/session-end. Se usa Mac, tres participantes conectados y un cuarto intento rechazado, UDP loopback y reloj acelerado. El ensayo de 8 ganadora prepara su historial de reglas de forma controlada; el tiro final, tronera, pago y cierre son reales. No se presenta como partida humana ni red entre equipos.
+La cámara, resistencia, señal de ritmo, feedback, pausa local, reglas y resultado económico están integrados. Movimiento reducido elimina sacudida y pop del agarre sin alterar la simulación. Los brazos y muebles son provisionales.
 
-El umbral económico usa los precios completos del GDD, cuyo mínimo es 5. Las actividades de 5 fichas aún faltan; con saldos entre 5 y 9 la demo conserva interacción libre, pero no ofrece todavía esas mesas. Esto es una carencia de contenido pendiente, no una economía terminada.
+La apertura de 5 ya permite jugar con saldos entre 5 y 9. Cuatro actividades del catálogo siguen pendientes. La evidencia actual está en Evidence/armwrestling; son pruebas programadas con procesos Mac en loopback, no aceptación humana o LAN entre equipos.
 
 ## Lo que sigue, en orden
 
-1. Incorporar una actividad de apertura 5: pulseadas con aceptación, ritmo/resistencia, alternativa de mantener, duración 15 s, reloj/entradas en servidor e integración de cierre y apuestas. Cierra además el hueco del catálogo entre 5 y 9 fichas, manteniendo el alcance de las demás actividades.
-2. Cócteles: estación, hasta cuatro ingredientes, oferta/lanzamiento, las cinco recetas, ebriedad y restauración de efectos, incluidos sentados.
-3. Blackjack, Hold'em con botes laterales, dominó y Ve a Pescar; fijar fuente/variante antes de implementar y conservar manos privadas.
-4. Sesiones humanas de billar y actividades entre 2–4 equipos; ausencia real de un minuto, latencia/jitter/pérdida, sala de seis y desconexiones durante cierre. Validar Windows actual y juego cruzado.
-5. Accesibilidad y configuración completas: texto ampliable, contraste, reasignación, inversión, audio por canales y ajustes versionados. Medir cuatro/seis personas y decidir LTS/URP.
+1. Cócteles: estación exclusiva, hasta cuatro ingredientes y proporciones, servir/consumir/ofrecer/lanzar; cinco recetas y coexistencia/restauración de efectos, incluidos sentados. Mantener las pruebas de cierre y pago único.
+2. Blackjack, Hold'em con botes laterales, dominó y Ve a Pescar; fijar fuente/variante antes de implementar y conservar manos privadas.
+3. Sesiones humanas de billar y pulseadas entre 2–4 equipos; medir comprensión, diversión, latencia/jitter/pérdida, esfuerzo/descanso y resultado. Validar seis participantes, Windows actual y juego cruzado; caída/expulsión durante pulseadas y pérdida del anfitrión durante cierre.
+4. Accesibilidad y configuración completas: texto ampliable, contraste, reasignación, inversión, intensidad de ebriedad, audio por canales y ajustes versionados. Medir cuatro/seis personas y decidir LTS/URP.
 
 El alcance íntegro permanece en los [85 criterios](REQUISITOS.md) y [sus evidencias](REQUISITOS.json). El arte final sigue diferido y el GDD no está terminado.

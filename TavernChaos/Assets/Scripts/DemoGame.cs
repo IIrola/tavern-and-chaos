@@ -41,7 +41,7 @@ namespace TavernChaos
         private readonly List<(GameObject obj,float end)> sparks=new();
         private void Awake()
         {
-            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"||x=="-session-end-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
+            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"||x=="-session-end-check"||x=="-arm-room-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
             Physics.defaultSolverIterations=10; Physics.defaultSolverVelocityIterations=4;
             TavernWorld.Build();
             Player=CreateActor("You | Mica",true,new(0,.08f,-4)); Rival=CreateActor("Rival | Bruno",false,new(0,.08f,-.1f));
@@ -63,6 +63,7 @@ namespace TavernChaos
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-lan-check")) gameObject.AddComponent<LanProcessChecks>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-pool-room-check")) gameObject.AddComponent<PoolRoomChecks>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-session-end-check")) gameObject.AddComponent<SessionEndChecks>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-arm-room-check")) gameObject.AddComponent<ArmRoomChecks>();
         }
         internal TavernActor CreateRoomActor(string name,Vector3 home)=>CreateActor(name,true,home);
         internal void SetRoomHeld(ThrowableBottle bottle) { Held=bottle; }
@@ -130,12 +131,13 @@ namespace TavernChaos
             if(!Pool.Active) { pendingPower=-1; Charging=false; Charge=0; }
             RefreshInputContext();
         }
-        private bool lastPlaying, lastBilliards;
+        private bool lastPlaying, lastBilliards,lastArm;
         public void RefreshInputContext()
         {
             bool playing=Started&&!Paused&&(!Lan||!Lan.BlocksPlay), billiards=playing&&Pool.Active;
-            if(playing!=lastPlaying || billiards!=lastBilliards) { Input.SetContext(playing,billiards); lastPlaying=playing; lastBilliards=billiards; poolPointerSeen=false; }
-            SetCursor(playing&&!billiards);
+            bool arm=playing&&Lan&&Lan.LocalArmSeated;
+            if(playing!=lastPlaying || billiards!=lastBilliards||arm!=lastArm) { Input.SetContext(playing,billiards,arm); lastPlaying=playing; lastBilliards=billiards;lastArm=arm; poolPointerSeen=false; }
+            SetCursor(playing&&!billiards&&!arm);
         }
         private void Update()
         {
@@ -143,7 +145,7 @@ namespace TavernChaos
             if(SmokeMode&&!TestDriveInput) { Pool.UpdateGuide(); return; }
             if(Lan&&Lan.BlocksPlay) { hud.HandleMenuInput(); return; }
             if(!Started || Paused) { hud.HandleMenuInput(); return; }
-            if(Lan&&Lan.Running) { if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); } else { UpdateRoomInput(); Pool.UpdateGuide(); } return; }
+            if(Lan&&Lan.Running) { if(Lan.LocalArmSeated)UpdateArmInput();else if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); } else { UpdateRoomInput(); Pool.UpdateGuide(); } return; }
             if(Pool.Active) { UpdatePoolInput(); Pool.UpdateGuide(); return; }
             if(Input.Pause.WasPressedThisFrame()) { Settings=false; SetPause(true); return; }
             if(Input.Reset.WasPressedThisFrame()) { ResetSession(); return; }
@@ -171,6 +173,25 @@ namespace TavernChaos
             if(Input.Punch.WasPressedThisFrame()&&!Player.Fallen) { Charging=true; Charge=0; Lan.Send(LanAction.Charge,yaw:Rig.Yaw,pitch:Rig.Pitch); }
             if(Charging) { Charge=Mathf.Min(1,Charge+Time.deltaTime); if(Input.Punch.WasReleasedThisFrame()) { Lan.Send(LanAction.Release,yaw:Rig.Yaw,pitch:Rig.Pitch); Charging=false; Charge=0; } }
             if(Player.Fallen) { Charging=false; Charge=0; }
+        }
+        private double armSendAt,armEffortAt;
+        private void UpdateArmInput()
+        {
+            var table=Lan.View?.arm;if(table==null)return;
+            if(Input.ArmPause.WasPressedThisFrame()){SetPause(true);return;}
+            if(Input.ArmExit.WasPressedThisFrame()){Lan.Send(LanAction.ArmLeave);return;}
+            if(Input.ArmRules.WasPressedThisFrame()){hud.ShowArmRules();return;}
+            int side=table.phase==TablePhase.Preparation?table.SeatOf(Lan.LocalId):System.Array.IndexOf(table.participants,Lan.LocalId);
+            if(Input.ArmConfirm.WasPressedThisFrame())Lan.ConfirmArmSetup();
+            if(Input.ArmWager.WasPressedThisFrame())Lan.CycleArmWager();
+            if(side<0||side>1)return;
+            if(Input.ArmMode.WasPressedThisFrame())Lan.Send(LanAction.ArmMode,choice:1-table.modes[side]);
+            float effort=Input.ArmEffort.ReadValue<float>();double now=Time.realtimeSinceStartupAsDouble;
+            if(Mathf.Abs(effort)>.5f&&now>=armEffortAt){armEffortAt=now+.25;Lan.Send(LanAction.ArmEffort,choice:Mathf.Clamp(table.efforts[side]+(effort>0?1:-1),0,2));}
+            if(table.phase!=TablePhase.Playing)return;
+            if(table.modes[side]==(int)ArmMode.Hold) {
+                if(now>=armSendAt){armSendAt=now+.08;Lan.Send(LanAction.ArmHold,run:Input.ArmPush.IsPressed()||hud.ArmPointerHeld);}
+            } else if(Input.ArmPush.WasPressedThisFrame())Lan.Send(LanAction.ArmTap);
         }
         private void UpdatePoolInput()
         {
@@ -324,7 +345,9 @@ namespace TavernChaos
         {
             if(Lan&&Lan.Running) {
                 if(Player.Fallen) return "RECUPERÁNDOTE · "+Mathf.CeilToInt(Player.RecoverAt-Time.time)+" s";
+                if(Lan.LocalArmSeated)return "PULSEADAS · E / B levantarte · el reloj continúa · ESC pausa local";
                 if(Pool.Active) return "BOLA 8 · E / B levantarte · la partida continúa · ESC pausa local";
+                if(ArmRoomController.Near(Player.transform.position))return "E / A · Sentarte a pulseadas o esperar siguiente duelo";
                 if(PoolRoomController.Near(Player.transform.position)) return "E / A · Sentarte a bola 8 o apuntarte a la espera";
                 return "SALA LAN · E interactuar   CLIC cargar   Q soltar   R recolocarte   ESC menú";
             }
@@ -347,7 +370,7 @@ namespace TavernChaos
             foreach(var spark in sparks) Destroy(spark.obj); sparks.Clear();
             Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; cooldown=0; move=Vector2.zero; run=false; interactRequest=dropRequest=false;
             if(Held) { Held.ResetToRack(); Held=null; } foreach(var b in Bottles) b.ResetToRack();
-            Pool.Exit(); Player.ClearEffect(); Player.Teleport(Player.Home,Quaternion.identity); Rival.Teleport(Rival.Home,Quaternion.Euler(0,180,0)); Pool.Reset();
+            Pool.Exit(); Player.ClearEffect(); Player.ClearIntoxication();Rival.ClearIntoxication(); Player.Teleport(Player.Home,Quaternion.identity); Rival.Teleport(Rival.Home,Quaternion.Euler(0,180,0)); Pool.Reset();
             Hits=Misses=Throws=0; Goals=new bool[4]; Rig.Yaw=0; Rig.Pitch=0; Rig.Snap(); RefreshInputContext();
         }
         private void OnApplicationFocus(bool focus) { if(!focus&&Started&&!Paused&&!SmokeMode) SetPause(true); }

@@ -1,0 +1,30 @@
+{
+    "role": "host",
+    "scenario": "drunk",
+    "version": "0.7.0",
+    "passed": true,
+    "checks": [
+        "Host opens an actual UDP room",
+        "Three independent processes connect",
+        "Actual bar interaction charges twenty and adds independent intoxication",
+        "Confirmed arm seats select their camera and input map",
+        "Each person takes the nearby seat",
+        "Stale consent and premature start never charge either participant",
+        "Arrow input changes the visible effort",
+        "Mode key selects rhythm",
+        "Rules block only local input while shared simulation continues",
+        "Returning from rules restores arm controls",
+        "Quote exposes normal or doubled resistance cost before consent",
+        "Enter confirms the displayed quote without starting the duel",
+        "Both participants accept the current revision",
+        "Start charges opening five once, reserves both stakes and starts a three-second countdown",
+        "Spectator waits without a grant or a charge",
+        "Authoritative duel reaches a paid result with balanced accounting",
+        "Winning side receives fifty with net gain/loss twenty-five exactly once",
+        "Duel still uses intoxication after the eight-second cocktail effect expires",
+        "Late input cannot duplicate a paid result",
+        "No runtime errors in host"
+    ],
+    "failures": [],
+    "errors": []
+}

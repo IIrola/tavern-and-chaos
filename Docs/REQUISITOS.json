@@ -42,9 +42,10 @@
       "evidence": [
         "Evidence/session-end/lifecycle.json",
         "Evidence/session-end/time-cancel/summary.json",
-        "Evidence/session-end/time-win/summary.json"
+        "Evidence/session-end/time-win/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Admite 20/30/45/60; reloj autoritativo bloquea nuevas acciones/entradas, termina tiro y objetos lanzados, paga resultado alcanzado o devuelve apuestas. Comprobado con límite acelerado en Mac y billar; faltan duración real completa, redes entre equipos y otros cinco juegos."
+      "remaining": "Admite 20/30/45/60; reloj autoritativo bloquea nuevas acciones/entradas, termina tiro y objetos lanzados, paga resultado alcanzado o devuelve apuestas. Comprobado con límite acelerado en Mac con billar y pulseadas; faltan duración real completa, redes entre equipos y otros cuatro juegos."
     },
     {
       "id": "S05",
@@ -239,8 +240,12 @@
       "id": "B08",
       "section": "4. Coctelería y efectos",
       "requirement": "Ebriedad entera 0–5, balanceo y estabilidad por niveles; tropiezos nivel 5 separados al menos 15 s.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/armwrestling/rules.json",
+        "Evidence/armwrestling/drunk/summary.json"
+      ],
+      "remaining": "Base independiente 0–5, +1 por bebida de prueba, sobriedad 1/30 s, coste doble y réplica probados; movimiento visual reducible y puerta de tropiezo nivel 5 cada ≥15 s. Faltan todas las recetas, ajuste de intensidad continuo y tropiezos reales de nivel 5 entre equipos."
     },
     {
       "id": "B09",
@@ -269,9 +274,11 @@
         "Docs/REGLAS_BOLA8.md",
         "Evidence/pool-lan/rules.json",
         "Evidence/pool-lan/processes/summary.json",
-        "Evidence/pool-lan/processes-side1/summary.json"
+        "Evidence/pool-lan/processes-side1/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Contrato común aplicado al billar; las otras cinco mesas siguen pendientes."
+      "remaining": "Contrato común aplicado a billar y pulseadas. Faltan las otras cuatro actividades."
     },
     {
       "id": "T02",
@@ -282,9 +289,11 @@
         "Docs/REGLAS_BOLA8.md",
         "Evidence/pool-lan/rules.json",
         "Evidence/pool-lan/processes/summary.json",
-        "Evidence/pool-lan/processes-side1/summary.json"
+        "Evidence/pool-lan/processes-side1/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Proximidad, exclusividad, liberación del objeto y cámara integradas en billar; faltan recorridos humanos y en otras mesas."
+      "remaining": "Proximidad, exclusividad, liberación de objeto y cámara integradas en billar y pulseadas; faltan recorridos humanos y otras mesas."
     },
     {
       "id": "T03",
@@ -295,9 +304,11 @@
         "Docs/REGLAS_BOLA8.md",
         "Evidence/pool-lan/rules.json",
         "Evidence/pool-lan/processes/summary.json",
-        "Evidence/pool-lan/processes-side1/summary.json"
+        "Evidence/pool-lan/processes-side1/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Participación al comienzo, retorno tras caída y cola de siguiente ronda probados con tres procesos; falta sesión humana."
+      "remaining": "Participación inicial, retorno y espera probados en ambas mesas con tres procesos; falta caída durante pulseadas y sesión humana."
     },
     {
       "id": "T04",
@@ -334,9 +345,11 @@
         "Docs/REGLAS_BOLA8.md",
         "Evidence/pool-lan/rules.json",
         "Evidence/pool-lan/processes/summary.json",
-        "Evidence/pool-lan/processes-side1/summary.json"
+        "Evidence/pool-lan/processes-side1/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Organizador, transferencia, resultado y preparación de revancha integrados en billar; otras mesas pendientes."
+      "remaining": "Organizador, transferencia, resultado y preparación siguiente integrados en billar y pulseadas; otras mesas pendientes."
     },
     {
       "id": "T07",
@@ -623,22 +636,38 @@
       "id": "A01",
       "section": "12. Pulseadas",
       "requirement": "Dos aceptan duelo de 15 s, marcador −100..100, victoria por extremo/ventaja y cero empate.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/armwrestling/rules.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/drunk/summary.json"
+      ],
+      "remaining": "Dos aceptan apertura/apuesta, cuenta atrás 3 s y duelo de 15 s, empate o extremo/ventaja autoritativos. Falta aceptación humana y validación entre equipos."
     },
     {
       "id": "A02",
       "section": "12. Pulseadas",
       "requirement": "Ritmo y resistencia con recuperación, alternativa mantener sin machacar; ebriedad duplica coste comunicado.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/armwrestling/rules.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/drunk/summary.json"
+      ],
+      "remaining": "Ritmo, mantener, tres esfuerzos y resistencia con recuperación; coste doble visible y replicado tras expirar Laguna Azul. Faltan ajuste con personas, mando físico y latencia/jitter."
     },
     {
       "id": "A03",
       "section": "12. Pulseadas",
       "requirement": "Servidor valida tiempos/límites, levantarse no abandona; desconexiones y liquidación definidos.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Docs/REGLAS_PULSEADAS.md",
+        "Evidence/armwrestling/closing/summary.json",
+        "Evidence/armwrestling/disconnect/summary.json",
+        "Evidence/armwrestling/draw/summary.json"
+      ],
+      "remaining": "Servidor valida ventanas/límites y resuelve lados simultáneamente. Salir no abandona ni permite otra mesa; retorno, desconexión, cola y cierre con apuesta probados en loopback. Faltan caída/expulsión durante duelo, pérdida real y pruebas entre equipos."
     },
     {
       "id": "E01",
@@ -650,7 +679,7 @@
         "Evidence/economy/processes/summary.json",
         "Evidence/economy/processes-side1/summary.json"
       ],
-      "remaining": "Libro autoritativo implementado: concesión por IP, historial de salidos, saldo destruido y apuestas retenidas/liquidadas. Probado puro y en dos salas de tres procesos. Falta integración de los otros cinco juegos y red entre equipos."
+      "remaining": "Libro autoritativo implementado: concesión por IP, historial de salidos, saldo destruido y apuestas retenidas/liquidadas. Probado puro y en dos salas de tres procesos. Falta integración de los otros cuatro juegos y red entre equipos."
     },
     {
       "id": "E02",
@@ -659,9 +688,11 @@
       "status": "partial",
       "evidence": [
         "TavernChaos/Assets/Resources/EconomySettings.asset",
-        "Evidence/economy/ledger.json"
+        "Evidence/economy/ledger.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Precios del GDD editables en ScriptableObject, congelados por sala; billar y bebida de prueba cobran. Otras cinco mesas y servicio de coctelería completo pendientes."
+      "remaining": "Precios completos editables y congelados por sala. Billar cobra 10, pulseadas 5 y bebida de prueba 20. Faltan cuatro mesas y cobro al servir coctelería completa."
     },
     {
       "id": "E03",
@@ -670,9 +701,11 @@
       "status": "partial",
       "evidence": [
         "Evidence/economy/ledger.json",
-        "Evidence/economy/processes/summary.json"
+        "Evidence/economy/processes/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Reserva atómica de apertura/apuestas, mínimo de dos, confirmación por revisión y devolución ante fallo de apertura integrados en billar. Falta aplicar el contrato a otras mesas."
+      "remaining": "Reserva atómica, mínimo dos, consentimiento por revisión y cancelación con devolución en ambas mesas. Reversión ante fallo físico probada en billar; faltan fallo de apertura de pulseadas y otras mesas."
     },
     {
       "id": "E04",
@@ -682,9 +715,11 @@
       "evidence": [
         "Evidence/economy/ledger.json",
         "Evidence/economy/processes/00-confirmation.png",
-        "Evidence/economy/processes/02-result.png"
+        "Evidence/economy/processes/02-result.png",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Apuesta opcional de billar, desglose y consentimiento, bote y premio exacto. Pagos de banca 1:1/3:2 comprobados solo en el libro puro; blackjack y otros juegos pendientes."
+      "remaining": "Apuesta opcional, desglose y pago exacto en billar y pulseadas. Pagos de banca 1:1/3:2 comprobados solo en el libro puro; blackjack y otros juegos pendientes."
     },
     {
       "id": "E05",
@@ -694,9 +729,11 @@
       "evidence": [
         "Evidence/session-end/lifecycle.json",
         "Evidence/session-end/time-cancel/summary.json",
-        "Evidence/session-end/insolvency/summary.json"
+        "Evidence/session-end/insolvency/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Cierre de billar integrado: dinero pendiente protege de insolvencia, corte por tiempo, cancelación/reembolso y libro cerrado sin fuga. El umbral usa precios del GDD completo (mínimo 5); otras actividades y su integración de cierre siguen pendientes."
+      "remaining": "Cierre integrado de billar y pulseadas: bote/actividad protege de insolvencia; corte por tiempo, cancelación/reembolso y libro sin fuga. Mínimo 5 ya tiene actividad jugable. Faltan otras actividades y pruebas entre equipos."
     },
     {
       "id": "E06",
@@ -706,9 +743,11 @@
       "evidence": [
         "Evidence/session-end/time-cancel/summary.json",
         "Evidence/session-end/time-win/summary.json",
-        "Evidence/session-end/insolvency/summary.json"
+        "Evidence/session-end/insolvency/summary.json",
+        "Evidence/armwrestling/draw/summary.json",
+        "Evidence/armwrestling/closing/summary.json"
       ],
-      "remaining": "Registro final inmutable y paginado con conexiones reales que salieron/volvieron; balances previos al borrado, victorias/empates/apuestas/beneficios/gastos/caídas/bebidas. Clientes conservan páginas recibidas tras salir host. Faltan otras actividades, historial largo y aceptación humana."
+      "remaining": "Registro final inmutable y paginado de ambas mesas, incluidos salidos/retornos y balances previos al borrado. Clientes conservan páginas recibidas tras salir host. Faltan otras actividades, historial mayor y aceptación humana."
     },
     {
       "id": "E07",
@@ -766,7 +805,7 @@
         "TavernChaos/Assets/Resources/EconomySettings.asset",
         "Evidence/economy/ledger.json"
       ],
-      "remaining": "Reglas y libro puros, contrato de mesa y configuración estática ScriptableObject. Falta división completa de módulos y otros cinco juegos."
+      "remaining": "Reglas y libro puros, contrato de mesa y configuración estática ScriptableObject. Falta división completa de módulos y otros cuatro juegos."
     },
     {
       "id": "Q05",

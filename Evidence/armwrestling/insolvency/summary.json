@@ -1,0 +1,92 @@
+{
+  "passed": true,
+  "case": "insolvency",
+  "scope": "Three connected macOS processes and a fourth denied entrant on loopback. Accelerated authoritative time boundary. Winning-eight setup uses controlled rule history; final shot/pocket and payment are real. Not a human or multi-machine test.",
+  "results": [
+    {
+      "role": "host",
+      "scenario": "insolvency",
+      "version": "0.7.0",
+      "passed": true,
+      "checks": [
+        "Host creates a twenty-minute room",
+        "Three independent participants connect before closure",
+        "Server confirms both seats and organizer",
+        "Both sides confirm the same fifty-chip wager",
+        "Opening commits fee and stakes into a real held pot",
+        "Controlled rule history prepares the eight; final outcome still requires a physical pot",
+        "Empty wallets do not evict an active round with a pending prize",
+        "Closing scenario starts an actual host-physics shot",
+        "Physical legal eight pays the pending pot exactly once",
+        "Recovered winnings prevent premature insolvency closure",
+        "All unaffordable wallets start shared eviction after settlement",
+        "Shared cinematic remains active before six seconds",
+        "Reduced motion removes guest spins; cinematic has no physical colliders",
+        "Eviction ends only after six authority seconds",
+        "Every closure reaches a frozen final report instead of dropping to menu",
+        "Closing clears all balances and pots with balanced accounting",
+        "Final screen releases seats and routes input only to menus",
+        "Frozen report retains exact balances before room funds are destroyed",
+        "Report records a physical winner once, or no invented winner for cancelled play",
+        "Both remote peers receive all final pages",
+        "Authority rejects raw gameplay intents during closing and results",
+        "Closing room rejects a late fourth participant without a grant",
+        "Remote final results survive the host leaving",
+        "No runtime errors in host"
+      ],
+      "failures": [],
+      "errors": [],
+      "exit": 0
+    },
+    {
+      "role": "client",
+      "scenario": "insolvency",
+      "version": "0.7.0",
+      "passed": true,
+      "checks": [
+        "Peer starts actual loopback connection",
+        "Closing peer cannot drive gameplay action maps",
+        "Peer receives authoritative final balanced report",
+        "Host loss preserves complete received final history and usable result screen",
+        "Escape leaves offline results and clears personal room state",
+        "Peer completes closure and remains usable until explicit exit",
+        "No runtime errors in client"
+      ],
+      "failures": [],
+      "errors": [],
+      "exit": 0
+    },
+    {
+      "role": "watcher",
+      "scenario": "insolvency",
+      "version": "0.7.0",
+      "passed": true,
+      "checks": [
+        "Peer starts actual loopback connection",
+        "Closing peer cannot drive gameplay action maps",
+        "Peer receives authoritative final balanced report",
+        "Host loss preserves complete received final history and usable result screen",
+        "Peer completes closure and remains usable until explicit exit",
+        "No runtime errors in watcher"
+      ],
+      "failures": [],
+      "errors": [],
+      "exit": 0
+    },
+    {
+      "role": "late",
+      "scenario": "insolvency",
+      "version": "0.7.0",
+      "passed": true,
+      "checks": [
+        "Late entrant waits for actual closing phase",
+        "Late entry request reaches the transport",
+        "Late entrant sees explicit room-ending rejection and usable menu",
+        "No runtime errors in late"
+      ],
+      "failures": [],
+      "errors": [],
+      "exit": 0
+    }
+  ]
+}

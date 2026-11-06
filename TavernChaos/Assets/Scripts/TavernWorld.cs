@@ -85,6 +85,7 @@ namespace TavernChaos
             Text("01  /  EL RING",new(0,.065f,-.8f),.2f,Color.white); var floorText=Root.GetChild(Root.childCount-1); floorText.localRotation=Quaternion.Euler(90,0,0);
             LightAt(new(0,4,-.8f),new Color(1,.62f,.36f),2,9); LightAt(new(6,3,1),new Color(.13f,.8f,.66f),2.5f,8);
             PoolPractice.BuildTable();
+            ArmPresentation.BuildTable();
         }
         public static void BottleVisual(Vector3 pos, Transform parent, Material mat)
         {

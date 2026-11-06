@@ -53,3 +53,19 @@ La revisión visual corrigió encabezados partidos y el encuadre que mostraba ot
 **Prioridad siguiente:** pulseadas con apertura 5 y el mismo contrato de sesión; después cócteles y los restantes juegos. Mantener las pruebas de cierre al añadir cada módulo para que ninguna mesa nueva quede fuera de la espera de pagos.
 
 **Resultado final:** 20 comprobaciones de cierre, 38 del libro, 48 de reglas/asientos, 140 en recorridos de cierre, 80 de partida completa y 86 de regresión local aprobadas. Construcción con cero errores en resumen/pasos; referencia/GUID sin incidencias en 83 archivos. Evidencia en Evidence/session-end/VALIDACION.md.
+
+## 0.7.0 — pulseadas y segunda mesa
+
+**Problema:** solo billar ofrecía una actividad compartida; los saldos de 5–9 no tenían una apertura jugable. Ampliar mesas también podía romper un cierre que solo consultara billar.
+
+**Cambio:** reglas puras de pulseadas, dos asientos con consentimiento revisado, apuestas y apertura 5; cuenta atrás 3 s y duelo 15 s. Mantener y ritmo tienen igual fuerza/coste/recuperación y tres esfuerzos. La autoridad valida la recepción, admite un intento por ventana y resuelve ambos lados simultáneamente. Ebriedad independiente del efecto azul, coste doble previo al consentimiento y réplica. El contrato de cierre consulta todas las mesas.
+
+**Criterio de aceptación:** ambos aceptan el total; mantener y ritmo completan veinte ventanas y empatan con devolución exacta. Una bebida real altera resistencia tras expirar el efecto azul y el ganador recibe el bote una vez. Levantarse conserva reloj/participación, bloquea otra mesa y permite regresar; desconexión paga al rival y la persona en espera entra después desde un asiento próximo. Cerrar con saldo disponible agotado y bote pendiente espera la resolución, devuelve apuestas y entrega informes sin victoria inventada.
+
+**Hallazgos:** una petición tardía podía cambiar modo/esfuerzo si era la primera llamada que hacía avanzar el reloj más allá del final; se volvió a comprobar la fase después de avanzar y se añadieron dos casos. El cierre usa el límite de sala al drenar, evitando convertir el pequeño retraso del paso siguiente en victoria por tiempo. El resultado distingue devolución de beneficio y el aviso no tapa el marcador. Una prueba de cola situaba a la persona junto al asiento ocupado: se corrigió el ensayo, manteniendo la proximidad exigida en juego.
+
+**Evaluación senior:** hay un segundo bucle social completo y una actividad de bajo coste; el consentimiento y las cuentas siguen siendo comprensibles. Mantener evita machacar y no impone una desventaja de fuerza frente al ritmo. Eso no demuestra que la elección de fuerza y descanso sea divertida ni que el ritmo manual resulte atractivo: requiere personas nuevas y medición. La ventana usa tiempo de recepción del servidor; la equidad bajo latencia no está acreditada. Los modelos siguen provisionales y las cuatro actividades restantes y recetas no se recortan.
+
+El primer arranque visible no avanzó y tuvo que terminar por plazo; otro recorrido visible empató, pero no alcanzó la comprobación conjunta de veinte impulsos y cuentas. Se separaron datos de pulsos/saldo para diagnosticar el ensayo; el siguiente recorrido verificó veinte impulsos por lado y saldos 995/1000. No se atribuye un origen al bloqueo gráfico ni se presenta esta repetición como prueba de tolerancia a redes reales. Las comprobaciones finales y sus límites se detallan en Evidence/armwrestling/VALIDACION.md.
+
+**Resultado final:** 136 comprobaciones puras, 134 de pulseadas entre procesos, 80 de billar, 129 de cierre y 86 de regresión local aprobadas; cero errores de ejecución. Construcción y pasos con cero errores, una advertencia Intel futura y 101 archivos verificados sin incidencias de referencias. La revisión visual cubre 1440×900, 1280×720 y 1920×900. La siguiente iteración aborda coctelería manteniendo el contrato de dos mesas.

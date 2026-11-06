@@ -1,0 +1,15 @@
+{
+    "role": "spectator",
+    "scenario": "closing",
+    "version": "0.7.0",
+    "passed": true,
+    "checks": [
+        "Peer starts real connection",
+        "Arm snapshot arrives over UDP",
+        "Final report blocks arm input and enables menu navigation",
+        "Peer observes the active duel through completion",
+        "No runtime errors in spectator"
+    ],
+    "failures": [],
+    "errors": []
+}

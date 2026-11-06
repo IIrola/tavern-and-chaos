@@ -1,0 +1,17 @@
+{
+    "role": "client",
+    "scenario": "insolvency",
+    "version": "0.7.0",
+    "passed": true,
+    "checks": [
+        "Peer starts actual loopback connection",
+        "Closing peer cannot drive gameplay action maps",
+        "Peer receives authoritative final balanced report",
+        "Host loss preserves complete received final history and usable result screen",
+        "Escape leaves offline results and clears personal room state",
+        "Peer completes closure and remains usable until explicit exit",
+        "No runtime errors in client"
+    ],
+    "failures": [],
+    "errors": []
+}

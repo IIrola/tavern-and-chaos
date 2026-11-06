@@ -18,6 +18,10 @@ namespace TavernChaos
         public float RecoverAt { get; private set; }
         public float EffectUntil { get; private set; }
         public float EffectRemaining => Mathf.Max(0, EffectUntil-Time.time);
+        private readonly IntoxicationState intoxication=new();
+        private int replicaEbriety;
+        public int Ebriety=>replica?replicaEbriety:intoxication.Level;
+        public void ClearIntoxication(){intoxication.Clear(Time.time);replicaEbriety=0;}
         public Vector3 Home { get; private set; }
         public Transform Hand { get; private set; }
         public Vector3 Focus => replica ? transform.TransformPoint(replicaFocusOffset) : Fallen ? parts[0].position : transform.position+Vector3.up*1.1f;
@@ -48,7 +52,7 @@ namespace TavernChaos
             if(replica==value) return;
             replica=value; replicaReady=false; ReplicaCharge=-1; ToggleRagdoll(false); Fallen=Seated=false;
             model.localRotation=Quaternion.identity; model.localPosition=Vector3.zero; controller.enabled=!value;
-            momentum=Vector3.zero; EffectUntil=0; replicaEyeOffset=Vector3.up*1.81f; replicaFocusOffset=Vector3.up*1.1f; replicaTarget=null;
+            momentum=Vector3.zero; EffectUntil=0; ClearIntoxication(); replicaEyeOffset=Vector3.up*1.81f; replicaFocusOffset=Vector3.up*1.1f; replicaTarget=null;
             for(int i=0;i<parts.Count;i++) { parts[i].transform.localPosition=poses[i]; parts[i].transform.localRotation=rotations[i]; }
         }
         public void ApplyReplica(LanActorState state,bool snap=false)
@@ -59,6 +63,7 @@ namespace TavernChaos
             fromPosition=transform.position; fromRotation=transform.rotation; fromEye=replicaEyeOffset; fromFocus=replicaFocusOffset;
             fromBody.Clear(); fromBody.AddRange(CaptureBodyPose());
             Fallen=state.fallen; Seated=state.seated; RecoverAt=Time.time+state.recovery; EffectUntil=Time.time+state.effect;
+            replicaEbriety=Mathf.Clamp(state.ebriety,0,5);
             replicaTarget=state; blendTime=snap?.05f:0;
             replicaReady=true; ReplicaCharge=state.charge;
             if(snap) RenderReplica(1);
@@ -151,9 +156,10 @@ namespace TavernChaos
         {
             if(replica || Fallen || Seated || !controller.enabled) return;
             direction=Vector3.ClampMagnitude(direction,1);
+            if(intoxication.ShouldTrip(Time.time,direction.sqrMagnitude>.05f)){Fall(-direction*2);return;}
             float speed=run?5.6f:3.5f;
             // Laguna Azul: low friction, with a readable expiry and no permanent parameter changes.
-            float response=EffectRemaining>0?1.5f:14f;
+            float response=EffectRemaining>0?1.5f:Ebriety>=3?10f:14f;
             momentum=Vector3.Lerp(momentum,direction*speed,1-Mathf.Exp(-response*Time.fixedDeltaTime));
             slipCollision=false;
             controller.Move((momentum+Vector3.down*3)*Time.fixedDeltaTime);
@@ -201,7 +207,7 @@ namespace TavernChaos
             foreach(var r in parts) { r.linearVelocity=impulse+Vector3.up*1.5f; r.angularVelocity=new Vector3(2,.4f,1.2f); }
             DemoGame.Instance?.ActorFell(this);
         }
-        public void TickRecovery() { if(Fallen && Time.time>=RecoverAt) Recover(); }
+        public void TickRecovery() { if(!replica)intoxication.Tick(Time.time); if(Fallen && Time.time>=RecoverAt) Recover(); }
         public void Recover()
         {
             if(replica) return;
@@ -233,7 +239,7 @@ namespace TavernChaos
             // The controller must see the new pose before held movement can call Move again.
             Physics.SyncTransforms(); controller.enabled=!replica;
         }
-        public void Drink() { EffectUntil=Time.time+8; }
+        public void Drink() { EffectUntil=Time.time+8; intoxication.Add(1,Time.time); }
         public void ClearEffect() { EffectUntil=0; }
     }
 }

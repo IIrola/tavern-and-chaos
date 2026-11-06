@@ -3,7 +3,7 @@
 import json, pathlib, subprocess, sys, time
 root=pathlib.Path(__file__).resolve().parent
 first=1 if '--first-side-1' in sys.argv else 0
-out=root/('Evidence/session-end/pool-processes-side1' if first else 'Evidence/session-end/pool-processes'); out.mkdir(parents=True,exist_ok=True)
+out=root/('Evidence/armwrestling/pool-processes-side1' if first else 'Evidence/armwrestling/pool-processes'); out.mkdir(parents=True,exist_ok=True)
 for path in list(out.glob('*.json'))+list(out.glob('*.ready'))+list(out.glob('*.png')): path.unlink()
 player=root/'Builds/macOS/Tavern and Chaos.app/Contents/MacOS/Tavern and Chaos'
 processes=[]

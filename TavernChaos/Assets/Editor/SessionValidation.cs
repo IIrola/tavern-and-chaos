@@ -10,8 +10,8 @@ namespace TavernChaos.Editor
         public static void Run()
         {
             var report=new Report(); RoomLifecycleChecks.Run((ok,name)=>{(ok?report.checks:report.failures).Add(name);});
-            report.passed=report.failures.Count==0; Directory.CreateDirectory("../Evidence/session-end");
-            File.WriteAllText("../Evidence/session-end/lifecycle.json",JsonUtility.ToJson(report,true));
+            report.passed=report.failures.Count==0; Directory.CreateDirectory("../Evidence/armwrestling");
+            File.WriteAllText("../Evidence/armwrestling/lifecycle.json",JsonUtility.ToJson(report,true));
             if(!report.passed) throw new Exception(string.Join("\n",report.failures)); Debug.Log("SESSION_CHECKS_OK: "+report.checks.Count);
         }
     }

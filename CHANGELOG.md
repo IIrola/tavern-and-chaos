@@ -1,5 +1,14 @@
 # Cambios
 
+## 0.7.0 · Pulseadas, resistencia y segunda mesa
+
+- Dos participantes confirman apertura 5 y apuesta antes de jugar; cuenta atrás 3 s, duelo 15 s y resolución simultánea del marcador.
+- Mantener y ritmo manual con igual fuerza, coste y recuperación; tres esfuerzos, resistencia visible y feedback de acierto/fallo/cansancio.
+- Ebriedad 0–5 independiente de Laguna Azul: coste doble comunicado antes de consentir, réplica y sobriedad de base. La coctelería completa sigue pendiente.
+- Salir conserva participación y reloj, se impide jugar dos mesas; desconexión, cola y pago único. Cierre de sala consulta billar y pulseadas.
+- Cámara propia, reglas accesibles, movimiento reducido y resultado económico desglosado. Protocolo 7: todas las copias deben actualizarse.
+- Evidencia y límites en Evidence/armwrestling/VALIDACION.md. Cuatro juegos, recetas, accesibilidad completa y aceptación entre equipos permanecen pendientes.
+
 ## 0.6.0 · Cierre compartido de sesión
 
 - Fin por tiempo sin cortar el tiro ni una botella ya lanzada: resultado alcanzado pagado, apuesta inconclusa devuelta y apertura conservada.

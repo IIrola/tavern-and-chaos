@@ -1,0 +1,26 @@
+{
+    "passed": true,
+    "checks": [
+        "Session: exactly the four GDD durations are admitted",
+        "Session: deadline rejects new intents before the next clock transition",
+        "Session: an active round protects zero available balances",
+        "Session: deadline enters draining instead of discarding the active round",
+        "Session: pending payouts block the final report",
+        "Session: already-released physical action must finish",
+        "Session: drained time closure shows results without an insolvency cinematic",
+        "Session: a finished room cannot resume or reopen on a late balance change",
+        "Session: a single connected person able to pay prevents collective eviction",
+        "Session: zero-bet active rounds still prevent eviction",
+        "Session: pending return protects a temporarily empty wallet",
+        "Session: a released bottle or attack prevents premature eviction",
+        "Session: insolvency starts one shared six-second timeline after all pending work",
+        "Session: cinematic cannot finish before its server deadline",
+        "Session: cinematic finishes exactly at six server seconds",
+        "Session: time has explicit priority when both end conditions coincide",
+        "Session: opt-in accelerated test uses the same deadline gate",
+        "Session: a pending winner replenishes the room before insolvency evaluation",
+        "Session: only settled, genuinely unaffordable wallets trigger eviction",
+        "Session: unfinished round refunds stakes before clearing balances, without inventing a win"
+    ],
+    "failures": []
+}

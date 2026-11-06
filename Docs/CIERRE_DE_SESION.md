@@ -11,3 +11,5 @@ Política definida antes de implementar la iteración 0.6, conforme al GDD compl
 - Los clientes reciben páginas finales bajo demanda y las conservan; descargan las restantes en segundo plano. Si el anfitrión se va después de recibir resultados, se mantienen las páginas recibidas y se informa de la desconexión. No se inventan páginas ausentes. La pérdida de anfitrión antes de un resultado verificable sigue cerrando la sala e informando; no hay migración.
 
 El transporte puede permanecer abierto solo para distribuir/consultar resultados: no admite nuevas personas ni juego. El registro personal se limpia al salir explícitamente o crear otra sala. Las pruebas con reloj acelerado no equivalen a esperar 20–60 minutos reales ni validan una red entre equipos.
+
+En 0.7 el contrato consulta billar y pulseadas. El límite de tiempo se comunica al módulo de pulseadas antes de avanzar el paso siguiente: solo resuelve el impulso ya admitido, cancela el duelo inconcluso y devuelve sus apuestas. La apertura consumida queda en el bar. Una partida de pulseadas activa o su bote pendiente impiden expulsar por insolvencia.

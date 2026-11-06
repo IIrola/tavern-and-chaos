@@ -46,7 +46,7 @@
 | B05 | Helio: ginebra/carbonatada misterio, gravedad 20% durante 15 s y restauración correcta. | Pendiente |
 | B06 | Cuatro licores fuertes: K.O. inmediato 10 s con humo. | Pendiente |
 | B07 | Bebida consumida o lanzada aplica efecto una sola vez; también sobre sentados y derribo cuando proceda. | Pendiente |
-| B08 | Ebriedad entera 0–5, balanceo y estabilidad por niveles; tropiezos nivel 5 separados al menos 15 s. | Pendiente |
+| B08 | Ebriedad entera 0–5, balanceo y estabilidad por niveles; tropiezos nivel 5 separados al menos 15 s. | Parcial |
 | B09 | Efectos con identificador/origen/inicio/duración: renovar mismo, combinar distintos con orden y límites. | Parcial |
 | B10 | Restaurar modificadores al caducar/caer/salir/desconectarse; no desplazar voluntariamente a sentados. | Parcial |
 
@@ -124,9 +124,9 @@
 
 | ID | Criterio de aceptación | Estado |
 |---|---|---|
-| A01 | Dos aceptan duelo de 15 s, marcador −100..100, victoria por extremo/ventaja y cero empate. | Pendiente |
-| A02 | Ritmo y resistencia con recuperación, alternativa mantener sin machacar; ebriedad duplica coste comunicado. | Pendiente |
-| A03 | Servidor valida tiempos/límites, levantarse no abandona; desconexiones y liquidación definidos. | Pendiente |
+| A01 | Dos aceptan duelo de 15 s, marcador −100..100, victoria por extremo/ventaja y cero empate. | Parcial |
+| A02 | Ritmo y resistencia con recuperación, alternativa mantener sin machacar; ebriedad duplica coste comunicado. | Parcial |
+| A03 | Servidor valida tiempos/límites, levantarse no abandona; desconexiones y liquidación definidos. | Parcial |
 
 ## 13. Economía, sesión y estadísticas
 
