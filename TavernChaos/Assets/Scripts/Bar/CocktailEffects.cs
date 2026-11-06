@@ -48,6 +48,11 @@ namespace TavernChaos
         public double SpeedMultiplier => Has(CocktailKind.Unstable) ? 1.5 : 1;
         public double GravityMultiplier => Has(CocktailKind.Helium) ? .2 : 1;
         public bool Frictionless => Has(CocktailKind.Blue);
+        public void Remove(CocktailKind kind, double now)
+        {
+            if (!Valid(now)) return;
+            Tick(now); active.Remove(kind);
+        }
         public void OnFall(double now)
         {
             if (!Valid(now)) return;

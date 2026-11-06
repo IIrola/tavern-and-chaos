@@ -1,5 +1,13 @@
 # Cambios
 
+## 0.8.0 · Base física de cócteles y plan de hitos
+
+- Efectos conectados a personajes y réplica: inercia sin fricción, velocidad ×1,5, gravedad ×0,2, caída a los 5 s, onda sobre NPC y K.O. de 10 s.
+- Luz azul y fuego/humo provisionales; intensidad visual hasta cero y duraciones visibles sin alterar reglas. Limpieza completa al cerrar/salir y restauración selectiva al caer.
+- Dominio probado de preparación, recetas, vasos exclusivos y servicio de 20 separado del consumo; la estación, los vasos físicos y su UI/red siguen pendientes.
+- Documento de hitos con alcance original, puertas de aceptación, dependencias y revisión senior. Protocolo 8: todas las copias deben actualizarse.
+- Pruebas nativas con recetas y posiciones controladas, además de regresiones. Evidencia en Evidence/effects/VALIDACION.md; cuatro juegos y aceptación entre equipos permanecen abiertos.
+
 ## 0.7.0 · Pulseadas, resistencia y segunda mesa
 
 - Dos participantes confirman apertura 5 y apuesta antes de jugar; cuenta atrás 3 s, duelo 15 s y resolución simultánea del marcador.

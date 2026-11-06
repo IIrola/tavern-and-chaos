@@ -1,0 +1,43 @@
+{
+    "role": "host",
+    "version": "0.8.0",
+    "passed": true,
+    "checks": [
+        "Host opens a real room with the current protocol",
+        "Two independent native processes connect",
+        "Actual capsule travel increases to 150 percent under instability",
+        "Blue preserves running momentum after releasing both movement and run without hidden friction",
+        "Clearing blue restores normal braking without permanent drift",
+        "Helium produces real capsule lift under reduced gravity",
+        "Movement effects do not translate a seated actor",
+        "Gravity measurement has no environment contacts",
+        "Mass-weighted ragdoll acceleration measures full versus twenty-percent gravity [-9.810 / -1.962]",
+        "Helium leaves global world gravity unchanged",
+        "Volcano wave knocks down nearby NPC while leaving nearby player standing",
+        "Capture completes: 00-volcano",
+        "Both actual arm seats confirm before an effect interruption",
+        "Five-second instability releases a real seat while preserving match participation",
+        "K.O. extends an already-fallen actor beyond ordinary recovery",
+        "K.O. permits recovery only after ten actual simulation seconds",
+        "Peer confirms all five authoritative effect snapshots and local visibility controls",
+        "Capture completes: 01-combined-effects",
+        "Zero visual intensity hides presentation without cancelling physics rules",
+        "Capture completes: 02-zero-intensity",
+        "Capture completes: 03-settings",
+        "Finishing the room restores every actor's effect modifiers before freezing results",
+        "Client receives cleared effects and the immutable final report",
+        "Host and client clear all effect types on room exit",
+        "No runtime errors in host"
+    ],
+    "failures": [],
+    "errors": [],
+    "gravityContacts": [],
+    "highProbeContacts": [
+        "Ceiling beam"
+    ],
+    "baselineDistance": 3.367971181869507,
+    "unstableDistance": 4.841592311859131,
+    "normalGravity": -9.809993743896484,
+    "heliumGravity": -1.9619948863983154,
+    "highProbeGravity": -2.8186240196228027
+}

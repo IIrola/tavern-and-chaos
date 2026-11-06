@@ -38,7 +38,7 @@ namespace TavernChaos
             if((roomStats||g.Lan&&g.Lan.BlocksPlay)&&Mathf.Abs(nav.x)>.5f&&Time.unscaledTime>=nextStatsPage&&g.Lan.StatsPage!=null) { g.Lan.RequestStats(Mathf.Clamp(g.Lan.StatsPage.page+(nav.x>0?1:-1),0,g.Lan.StatsPage.pages-1)); nextStatsPage=Time.unscaledTime+.3f; }
             if(Mathf.Abs(nav.y)>.5f && Time.unscaledTime>=nextNavigate && lastControls>0) { focus=(focus+(nav.y>0?-1:1)+lastControls)%lastControls; nextNavigate=Time.unscaledTime+.2f; }
             if(Mathf.Abs(nav.y)<.2f) nextNavigate=0;
-            if(g.Settings&&(!g.Lan||!g.Lan.BlocksPlay)&&Mathf.Abs(nav.x)>.2f) { if(focus==0) g.Audio.Volume=Mathf.Clamp01(g.Audio.Volume+nav.x*Time.unscaledDeltaTime*.5f); if(focus==1) g.Rig.Sensitivity=Mathf.Clamp(g.Rig.Sensitivity+nav.x*Time.unscaledDeltaTime*.15f,.04f,.3f); }
+            if(g.Settings&&(!g.Lan||!g.Lan.BlocksPlay)&&Mathf.Abs(nav.x)>.2f) { if(focus==0) g.Audio.Volume=Mathf.Clamp01(g.Audio.Volume+nav.x*Time.unscaledDeltaTime*.5f); if(focus==1) g.Rig.Sensitivity=Mathf.Clamp(g.Rig.Sensitivity+nav.x*Time.unscaledDeltaTime*.15f,.04f,.3f); if(focus==3)g.Rig.EffectIntensity=Mathf.Clamp01(g.Rig.EffectIntensity+nav.x*Time.unscaledDeltaTime*.5f); }
             if(g.Input.Accept.WasPressedThisFrame()) accept=focus;
         }
         public static bool PoolUIContains(Vector2 screenPoint)
@@ -156,6 +156,9 @@ namespace TavernChaos
             if(g.Lan&&g.Lan.Running&&g.Pool.Active&&g.Lan.View?.pool?.phase==TablePhase.Preparation) controls="TAB / RB siguiente apuesta · C / LB anterior · ENTER / A confirmar o iniciar · H / X reglas · E / B levantarte";
             if(g.Lan&&g.Lan.LocalArmSeated)controls="ESPACIO / RT esfuerzo · M / Y modo · ← → / DPAD fuerza · ENTER / A confirmar · TAB / RB apuesta · H / X reglas · E / B levantarte";
             Box(new(32,838,1376,40),ink); Label(new(52,850,1336,28),controls,14,muted,FontStyle.Normal,TextAnchor.UpperCenter);
+            string effects="";string[] effectNames={"","Laguna Azul","Volcánico","Inestable","Helio","K.O."};
+            for(var kind=CocktailKind.Blue;kind<=CocktailKind.Poison;kind++)if(g.Player.HasCocktail(kind))effects+=(effects.Length==0?"EFECTOS · ":" · ")+effectNames[(int)kind]+" "+g.Player.CocktailRemaining(kind).ToString("0.0")+" s";
+            if(effects.Length>0)Label(new(80,817,1280,21),effects,14,mint,FontStyle.Bold,TextAnchor.UpperCenter);
         }
         internal void ShowLanPanelForCheck(bool show) { lanLobby=show; }
         internal void ShowRosterForCheck() { roomRoster=true; }
@@ -209,7 +212,7 @@ namespace TavernChaos
                 }
                 if(view.arm?.phase==TablePhase.Playing&&view.arm.IsParticipant(room.LocalId)&&!view.arm.IsSeated(room.LocalId)) {
                     Box(new(1032,445,376,145),ink);
-                    Label(new(1052,463,332,112),"SIGUES EN PULSEADAS\\nNo aportas fuerza fuera del asiento.\\nQuedan "+Mathf.Max(0,(float)(view.arm.end-room.EstimatedServerTime)).ToString("0.0")+" s. E para volver.",18,orange,FontStyle.Bold);
+                    Label(new(1052,463,332,112),"SIGUES EN PULSEADAS\nNo aportas fuerza fuera del asiento.\nQuedan "+Mathf.Max(0,(float)(view.arm.end-room.EstimatedServerTime)).ToString("0.0")+" s. E para volver.",18,orange,FontStyle.Bold);
                 }
                 if(view.pool?.phase==TablePhase.Playing&&view.pool.IsParticipant(room.LocalId)&&!view.pool.IsSeated(room.LocalId)) {
                     Box(new(1032,445,376,145),ink);
@@ -482,10 +485,11 @@ namespace TavernChaos
         {
             Box(panel,ink); float x=panel.x+36,y=panel.y+30;
             Label(new(x,y,560,55),"A TU MANERA",32,ivory,FontStyle.Bold);
-            Label(new(x,y+79,560,28),"Volumen de efectos",18,ivory); FocusControl(new(x,y+115,550,28)); g.Audio.Volume=GUI.HorizontalSlider(new(x,y+118,550,22),g.Audio.Volume,0,1);
-            Label(new(x,y+155,560,28),"Sensibilidad de cámara",18,ivory); FocusControl(new(x,y+191,550,28)); g.Rig.Sensitivity=GUI.HorizontalSlider(new(x,y+194,550,22),g.Rig.Sensitivity,.04f,.3f);
-            if(Button(new(x,y+239,550,48),g.Rig.ReduceMotion?"MOVIMIENTO REDUCIDO: ACTIVADO":"MOVIMIENTO REDUCIDO: DESACTIVADO")) g.Rig.ReduceMotion=!g.Rig.ReduceMotion;
-            Label(new(x,y+305,550,44),"Desactiva las sacudidas de impacto.\n↑ ↓ elegir · ← → ajustar · Enter aceptar",15,muted);
+            Label(new(x,y+66,560,28),"Volumen de efectos",18,ivory); FocusControl(new(x,y+96,550,28)); g.Audio.Volume=GUI.HorizontalSlider(new(x,y+99,550,22),g.Audio.Volume,0,1);
+            Label(new(x,y+130,560,28),"Sensibilidad de cámara",18,ivory); FocusControl(new(x,y+160,550,28)); g.Rig.Sensitivity=GUI.HorizontalSlider(new(x,y+163,550,22),g.Rig.Sensitivity,.04f,.3f);
+            if(Button(new(x,y+199,550,44),g.Rig.ReduceMotion?"MOVIMIENTO REDUCIDO: ACTIVADO":"MOVIMIENTO REDUCIDO: DESACTIVADO")) g.Rig.ReduceMotion=!g.Rig.ReduceMotion;
+            Label(new(x,y+258,560,28),"Intensidad visual · "+Mathf.RoundToInt(g.Rig.EffectIntensity*100)+" %",18,ivory);FocusControl(new(x,y+288,550,28));g.Rig.EffectIntensity=GUI.HorizontalSlider(new(x,y+291,550,22),g.Rig.EffectIntensity,0,1);
+            Label(new(x,y+329,550,36),"0 % oculta luces, fuego, humo, balanceo y sacudidas.\n↑ ↓ elegir · ← → ajustar · Enter aceptar",14,muted);
             if(Button(new(x,y+369,550,46),"GUARDAR Y VOLVER",true)) { g.SaveSettings(); g.Settings=false; }
         }
     }

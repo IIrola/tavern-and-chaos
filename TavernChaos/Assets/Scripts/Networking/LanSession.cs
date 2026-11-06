@@ -14,7 +14,7 @@ namespace TavernChaos
     // NGO/UTP is the transport. The application sends intents and public snapshots, never client transforms.
     public sealed class LanSession : MonoBehaviour
     {
-        private const string IntentMessage="tavern.intent.7", SnapshotMessage="tavern.snapshot.7", FeedbackMessage="tavern.feedback.7", StatsMessage="tavern.stats.7";
+        private const string IntentMessage="tavern.intent.8", SnapshotMessage="tavern.snapshot.8", FeedbackMessage="tavern.feedback.8", StatsMessage="tavern.stats.8";
         private const int PacketLimit=24000;
         private sealed class Controlled
         {
@@ -135,7 +135,7 @@ namespace TavernChaos
             string reason=""; LanHello hello=null;
             if(request.Payload==null||request.Payload.Length>256) reason="Solicitud de entrada inválida.";
             else { try { hello=JsonUtility.FromJson<LanHello>(Encoding.UTF8.GetString(request.Payload)); } catch { reason="Solicitud de entrada inválida."; } }
-            if(hello==null||hello.protocol!=7) reason="Las versiones del juego no coinciden.";
+            if(hello==null||hello.protocol!=8) reason="Las versiones del juego no coinciden.";
             if(Roster!=null&&Roster.Members.Count+approvedNames.Count>=RoomRoster.Capacity) reason="Sala llena: máximo seis personas.";
             if(Lifecycle!=null&&!Lifecycle.Accepting(Time.realtimeSinceStartupAsDouble)) reason="La sala está terminando; no admite nuevas entradas.";
             response.Approved=reason.Length==0; response.CreatePlayerObject=false; response.Pending=false; response.Reason=reason;
@@ -190,7 +190,7 @@ namespace TavernChaos
             manager.OnClientConnectedCallback-=OnConnected; manager.OnClientDisconnectCallback-=OnDisconnected;
             manager.Shutdown(); Destroy(manager.gameObject); manager=null;
             foreach(var actor in replicas.Values) if(actor&&actor!=g.Player) Destroy(actor.gameObject); replicas.Clear();
-            SetClientSimulation(false); g.SetRoomHeld(null); g.Player.ClearEffect();g.Player.ClearIntoxication(); g.Rival.ClearEffect();g.Rival.ClearIntoxication(); View=null; Roster=null; localResetRevision=-1; Application.runInBackground=g.SmokeMode; Status="Fuera de la sala";
+            SetClientSimulation(false); g.SetRoomHeld(null); g.Player.ClearAllEffects();g.Player.ClearIntoxication(); g.Rival.ClearAllEffects();g.Rival.ClearIntoxication(); View=null; Roster=null; localResetRevision=-1; Application.runInBackground=g.SmokeMode; Status="Fuera de la sala";
         }
         private void Fail(string reason)
         {
@@ -282,6 +282,8 @@ namespace TavernChaos
             if(!tableDrained) tableDrained=FinishTables(now);
             if(!tableDrained||Roster.Ledger.HasPending) return;
             Roster.CancelVote();
+            foreach(var participant in controlled.Values)participant.actor.ClearAllEffects();
+            g.Rival.ClearAllEffects();
             var first=MakeStatsPage(0); finalPages[0]=first;
             for(int page=1;page<first.pages;page++) finalPages[page]=MakeStatsPage(page);
             Roster.Ledger.Close();
@@ -512,7 +514,7 @@ namespace TavernChaos
         }
         private LanActorState State(ulong id,string name,TavernActor actor,long chips,int held=-1) => new() {
             id=id,name=name,position=actor.transform.position,focus=actor.Focus,eye=actor.EyePosition,yaw=actor.transform.eulerAngles.y,
-            fallen=actor.Fallen,seated=actor.Seated,ebriety=actor.Ebriety,recovery=actor.Fallen?Mathf.Max(0,actor.RecoverAt-Time.time):0,effect=actor.EffectRemaining,chips=chips,held=held,body=actor.CaptureBodyPose()
+            fallen=actor.Fallen,seated=actor.Seated,ebriety=actor.Ebriety,recovery=actor.Fallen?Mathf.Max(0,actor.RecoverAt-Time.time):0,effect=actor.EffectRemaining,chips=chips,held=held,body=actor.CaptureBodyPose(),effects=actor.CaptureEffects()
         };
         private void Publish(double now)
         {

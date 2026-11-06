@@ -7,6 +7,7 @@ namespace TavernChaos
     {
         public float Yaw=0, Pitch=0, Sensitivity=.13f;
         public bool ReduceMotion;
+        public float EffectIntensity=1;
         private float trauma;
         private Vector3 smooth, velocity;
         private Camera lens;
@@ -47,8 +48,8 @@ namespace TavernChaos
             if(snapPending || (firstPerson&&!g.Player.Fallen)) { smooth=desired; velocity=Vector3.zero; snapPending=false; }
             else smooth=Vector3.SmoothDamp(smooth,desired,ref velocity,g.Pool.Active?.18f:.08f,Mathf.Infinity,Time.unscaledDeltaTime);
             trauma=Mathf.Max(0,trauma-Time.unscaledDeltaTime*2.8f);
-            Vector3 shake=ReduceMotion?Vector3.zero:new Vector3(Mathf.Sin(Time.unscaledTime*43),Mathf.Sin(Time.unscaledTime*57),0)*trauma*trauma*.1f;
-            Vector3 sway=firstPerson&&!ReduceMotion&&g.Player.Ebriety>0?new Vector3(Mathf.Sin(Time.unscaledTime*1.7f),Mathf.Sin(Time.unscaledTime*2.1f),0)*(.008f*g.Player.Ebriety):Vector3.zero;
+            Vector3 shake=ReduceMotion?Vector3.zero:new Vector3(Mathf.Sin(Time.unscaledTime*43),Mathf.Sin(Time.unscaledTime*57),0)*trauma*trauma*.1f*EffectIntensity;
+            Vector3 sway=firstPerson&&!ReduceMotion&&g.Player.Ebriety>0?new Vector3(Mathf.Sin(Time.unscaledTime*1.7f),Mathf.Sin(Time.unscaledTime*2.1f),0)*(.008f*g.Player.Ebriety*EffectIntensity):Vector3.zero;
             transform.position=smooth+shake+sway;
             // Keep the horizon stable while the ragdoll tumbles; mouse look remains available.
             transform.rotation=firstPerson?Quaternion.Euler(Pitch,Yaw,0):Quaternion.LookRotation(target-transform.position);

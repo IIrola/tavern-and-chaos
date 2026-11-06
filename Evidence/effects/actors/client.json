@@ -1,0 +1,27 @@
+{
+    "role": "client",
+    "version": "0.8.0",
+    "passed": true,
+    "checks": [
+        "Peer starts a real UDP connection",
+        "Peer receives current-protocol snapshots",
+        "Each replicated effect retains kind, origin, start, duration and remaining time",
+        "Replica ragdoll remains kinematic under helium",
+        "Replicated effects activate client light, fire and smoke",
+        "Client can hide effects without altering the server state",
+        "Final authoritative snapshot clears every active effect on the client",
+        "Host departure retains the cleared final report",
+        "Explicit exit returns to usable menu and clears old-room modifiers",
+        "Effect integration scenario completes",
+        "No runtime errors in client"
+    ],
+    "failures": [],
+    "errors": [],
+    "gravityContacts": [],
+    "highProbeContacts": [],
+    "baselineDistance": 0.0,
+    "unstableDistance": 0.0,
+    "normalGravity": 0.0,
+    "heliumGravity": 0.0,
+    "highProbeGravity": 0.0
+}

@@ -1,0 +1,7 @@
+{
+    "messages": 2,
+    "errors": [],
+    "warnings": [
+        "Prepare For Build: Intel (x86_64) architecture support for macOS is deprecated and will be removed in a future version of Unity."
+    ]
+}

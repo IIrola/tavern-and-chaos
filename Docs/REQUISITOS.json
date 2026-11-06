@@ -202,43 +202,66 @@
       "requirement": "Laguna Azul: vodka/curazao/hielo, fricción cero y luz azul.",
       "status": "partial",
       "evidence": [
-        "Evidence/pool-lan/regression/player-tests.json"
-      ]
+        "Evidence/bar/rules.json",
+        "Evidence/effects/actors/summary.json"
+      ],
+      "remaining": "Laguna Azul de prueba aplica fricción cero con conservación de inercia, luz y expiración; cápsula real e intensidad cero verificadas. La receta está en catálogo. Falta prepararla/servirla en estación, el vaso y lanzamiento del cóctel en red."
     },
     {
       "id": "B03",
       "section": "4. Coctelería y efectos",
       "requirement": "Volcánico: tequila/picante/Tabasco, fuego de boca y onda expansiva sobre NPC próximos.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/bar/rules.json",
+        "Evidence/effects/actors/summary.json"
+      ],
+      "remaining": "Combinación original definida; efecto físico y fuego replicado probados con receta aplicada por fixture. Onda derriba NPC próximo visible y deja jugadores próximos de pie. Faltan preparación, vaso, lanzamiento, situaciones variadas y aceptación humana."
     },
     {
       "id": "B04",
       "section": "4. Coctelería y efectos",
       "requirement": "Mezcla Inestable: absenta/energética/cerveza, velocidad 150% 5 s y caída hacia atrás.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/bar/rules.json",
+        "Evidence/effects/actors/summary.json"
+      ],
+      "remaining": "Combinación definida y velocidad real de cápsula 150 % medida; caída a los 5 s libera asiento de pulseadas sin abandonar participación. Falta adquirir/aplicar el vaso por flujo real de barra y ampliar interrupciones/red física."
     },
     {
       "id": "B05",
       "section": "4. Coctelería y efectos",
       "requirement": "Helio: ginebra/carbonatada misterio, gravedad 20% durante 15 s y restauración correcta.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/bar/rules.json",
+        "Evidence/effects/actors/summary.json",
+        "Evidence/effects/gravity-investigation.json"
+      ],
+      "remaining": "Gravedad de cápsula y compensación de ragdoll conectadas, con aceleraciones medidas sin contactos y sin alterar Physics.gravity global. Expiración pura y limpieza al cerrar probadas. Falta vaso/preparación/lanzamiento y expiración física natural de 15 s en más situaciones de red."
     },
     {
       "id": "B06",
       "section": "4. Coctelería y efectos",
       "requirement": "Cuatro licores fuertes: K.O. inmediato 10 s con humo.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/bar/rules.json",
+        "Evidence/effects/actors/summary.json"
+      ],
+      "remaining": "Cuatro licores fuertes a cualquier proporción no nula detectados en catálogo. K.O. sobre actor caído mantiene incapacidad 10 s y humo replica. Faltan adquisición del vaso real, consumo/lanzamiento y más casos físicos/humanos."
     },
     {
       "id": "B07",
       "section": "4. Coctelería y efectos",
       "requirement": "Bebida consumida o lanzada aplica efecto una sola vez; también sobre sentados y derribo cuando proceda.",
-      "status": "pending",
-      "evidence": []
+      "status": "partial",
+      "evidence": [
+        "Evidence/bar/rules.json",
+        "Evidence/effects/actors/summary.json"
+      ],
+      "remaining": "Dominio de vaso consume o impacta una sola vez; efectos aplicados por fixture sobre actores y caída desde asiento real verificada. Faltan vaso físico, selección/impacto de objetivos, consumo/oferta/lanzamiento y pruebas completas por transporte."
     },
     {
       "id": "B08",
@@ -258,9 +281,9 @@
       "status": "partial",
       "evidence": [
         "Evidence/bar/rules.json",
-        "Evidence/pool-lan/regression/player-tests.json"
+        "Evidence/effects/actors/summary.json"
       ],
-      "remaining": "Modelo puro con tipo/origen/inicio/duración, renovación, coexistencia, cancelación selectiva y vencimiento pendiente de inestabilidad probado. Aún sin conectar a TavernActor, física, snapshots y presentación. El player conserva el efecto azul anterior; faltan integración y verificación física de los cinco efectos."
+      "remaining": "Modelo y TavernActor conectados: tipo/origen/inicio/duración replicados; renovación y coexistencia puras, cinco efectos en cliente, caída selectiva y limpieza al cerrar/salir verificadas. Falta flujo de vaso real, más expiraciones naturales/combinaciones y validación entre equipos."
     },
     {
       "id": "B10",

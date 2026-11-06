@@ -1,14 +1,16 @@
 # Tavern & Chaos · Primera ronda
 
-Proyecto de trabajo **0.7.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La demo descargable actual para Mac es la 0.7.0; las releases anteriores conservan su alcance histórico.
+Proyecto de trabajo **0.8.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La demo descargable actual para Mac es la 0.8.0; las releases anteriores conservan su alcance histórico.
 
-Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual añade pulseadas de 15 segundos con ritmo/resistencia, apuestas y cierre compartido junto a la bola 8; el estado, los límites y siguientes pasos están en [Docs/ESTADO_ACTUAL.md](Docs/ESTADO_ACTUAL.md), y la revisión de cada iteración en [Docs/ITERACIONES.md](Docs/ITERACIONES.md).
+Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual integra la base física y réplica de los cinco efectos de cóctel y añade un documento de hitos; conserva bola 8, pulseadas y cierre compartido; el estado, los límites y siguientes pasos están en [Docs/ESTADO_ACTUAL.md](Docs/ESTADO_ACTUAL.md), y la revisión de cada iteración en [Docs/ITERACIONES.md](Docs/ITERACIONES.md).
 
 ## Descargar la demo
 
-El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP para Mac se descarga en [la versión 0.7.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.7.0). La copia local está en `Builds/Tavern-and-Chaos-0.7.0-macOS-Universal.zip`. Es una demo en desarrollo; los otros cuatro juegos, la coctelería completa y la validación entre equipos siguen pendientes.
+El repositorio contiene el código, la escena y la configuración de Unity. Las cachés y los ejecutables no forman parte del historial de código. El ZIP para Mac se descarga en [la versión 0.8.0](https://github.com/IIrola/tavern-and-chaos/releases/tag/v0.8.0). La copia local está en `Builds/Tavern-and-Chaos-0.8.0-macOS-Universal.zip`. Es una demo en desarrollo; los otros cuatro juegos, la coctelería completa y la validación entre equipos siguen pendientes.
 
 Para jugar desde una copia descargada del repositorio, compila el proyecto o descomprime el ZIP de la release dentro de `Builds/macOS/`, de modo que exista `Builds/macOS/Tavern and Chaos.app`.
+
+El [documento de hitos y plan de entrega](Docs/HITOS_Y_PLAN_DE_ENTREGA.md) conserva los hitos originales 0–6, dependencias y criterios de aceptación. La estación completa de coctelería continúa pendiente; los efectos nuevos se validan con aplicación controlada de recetas y no mediante un flujo de preparación terminado.
 
 El diseño completo está en [GDD_y_plan_de_desarrollo.md](GDD_y_plan_de_desarrollo.md) y se sigue mediante [85 criterios](Docs/REQUISITOS.md). La aceptación anterior de la 0.3.1 se conserva en [Docs/LAN_HITO1.md](Docs/LAN_HITO1.md). La nueva bola 8 todavía necesita sesiones humanas y pruebas entre equipos; el resto del GDD sigue en desarrollo.
 
@@ -18,19 +20,19 @@ Acércate a un asiento de pulseadas y pulsa **E/A**. Dos personas confirman su t
 
 **Espacio/RT** mantiene el esfuerzo; **M/Y** alterna el ritmo manual, una pulsación por señal. **← → / D-pad** elige fuerza suave, normal o fuerte. Ambos modos comparten fuerza, coste y recuperación. Descansa al bajar la resistencia. La ebriedad duplica el coste y se avisa antes de confirmar. **H/X** abre reglas y **E/B** permite levantarse y volver; el reloj sigue. Desconectarse antes del resultado concede el duelo al rival conectado. La pantalla distingue bote, devolución y resultado neto. [Variante y reglas](Docs/REGLAS_PULSEADAS.md).
 
-La ebriedad de base es independiente de Laguna Azul: una bebida de prueba añade un nivel; recupera uno cada 30 s. Esta base no completa las cinco recetas. Los valores de esfuerzo necesitan sesiones humanas; las pruebas actuales usan procesos de Mac en el mismo equipo.
+La intensidad visual se puede reducir hasta cero en Ajustes; no cambia las reglas del servidor. La ebriedad de base es independiente de Laguna Azul: una bebida de prueba añade un nivel; recupera uno cada 30 s. Esta base no completa las cinco recetas. Los valores de esfuerzo necesitan sesiones humanas; las pruebas actuales usan procesos de Mac en el mismo equipo.
 
 ## Bola 8 en LAN
 
 Junto al billar pulsa **E/A** para sentarte. Con dos personas sentadas, el organizador elige apuesta (cero permite jugar sin apostar). Ambos confirman su desglose con **Enter/A** y, después, el organizador inicia con **Enter/A**. Se cobran **10 fichas** de apertura solo al organizador, además de la apuesta de cada lado. Cambiar apuesta o asientos cancela las confirmaciones. El primer turno es aleatorio. **Tab/RB** elige bola y **C/LB** tronera; apunta, ajusta potencia y tira con **clic/RT**. Las troneras están numeradas y la línea limita la blanca cuando corresponde. **H/X** abre las reglas de la mesa; **E/B** permite levantarse y volver.
 
-Una caída libera el asiento pero conserva la participación y el tiro iniciado. El minuto de ausencia solo corre durante tu turno; sentado no hay reloj. Quien llega a una partida iniciada espera a la siguiente. Esta versión es para dos lados individuales. El ganador cobra el bote una sola vez; la pantalla separa premio total y beneficio. En pausa puedes abrir estadísticas, incluidos quienes salieron. La práctica local mantiene sus cuatro ejercicios separados. Ejecuta `python3 run-pool-room-checks.py --visual-host` para la integración Mac; los informes actuales están en `Evidence/armwrestling/`.
+Una caída libera el asiento pero conserva la participación y el tiro iniciado. El minuto de ausencia solo corre durante tu turno; sentado no hay reloj. Quien llega a una partida iniciada espera a la siguiente. Esta versión es para dos lados individuales. El ganador cobra el bote una sola vez; la pantalla separa premio total y beneficio. En pausa puedes abrir estadísticas, incluidos quienes salieron. La práctica local mantiene sus cuatro ejercicios separados. Ejecuta `python3 run-pool-room-checks.py --visual-host` para la integración Mac; los informes actuales están en `Evidence/effects/`.
 
 ## Terminar una sala
 
 Puedes elegir 20, 30, 45 o 60 minutos. Al agotarse el tiempo se bloquean nuevas entradas y acciones; lo ya lanzado termina. Se paga una partida terminada y se devuelve la apuesta de una inconclusa; la apertura permanece en el bar. Si nadie puede pagar y no quedan partidas o pagos pendientes, el personal del bar os echa en una secuencia compartida de seis segundos. La opción de movimiento reducido evita giros/rebotes de los personajes.
 
-Los resultados incluyen a quienes salieron, se consultan por páginas y conservan el saldo anterior al borrado. Las páginas recibidas siguen disponibles si sale el anfitrión. Puedes crear otra sala con fichas e historial nuevos, o volver al inicio con Escape/B. Consulta la [política de cierre](Docs/CIERRE_DE_SESION.md) y [las pruebas y límites](Evidence/armwrestling/VALIDACION.md).
+Los resultados incluyen a quienes salieron, se consultan por páginas y conservan el saldo anterior al borrado. Las páginas recibidas siguen disponibles si sale el anfitrión. Puedes crear otra sala con fichas e historial nuevos, o volver al inicio con Escape/B. Consulta la [política de cierre](Docs/CIERRE_DE_SESION.md) y [las pruebas y límites](Evidence/effects/VALIDACION.md).
 
 El umbral económico conserva los precios del GDD (mínimo 5); las actividades de 5 fichas aún no están implementadas. Con 5–9 fichas quedan las interacciones libres de esta demo. El alcance completo sigue pendiente.
 
@@ -40,7 +42,7 @@ Fuera de Play, usa **Tavern → Build Windows LAN demo** en Unity. Después abre
 
 La sala integra movimiento, golpe, botella, Laguna Azul, bola 8 y pulseadas. **R recoloca solo a quien lo solicita** si está de pie, fuera de una mesa y no está resolviendo un golpe; no reinicia la sala. La pausa es local. Para dos equipos de la misma red usa el código del anfitrión; las pruebas entre máquinas siguen pendientes.
 
-El invitado recibe las posturas de las seis partes del cuerpo y las caídas simuladas por el anfitrión. La interpolación de red controla esos cuerpos cinemáticos sin una segunda interpolación de PhysX. Los impactos tienen eventos identificados para reproducirse una sola vez. Todas las copias de esta iteración deben mostrar **0.7.0**; el protocolo cambió y rechaza versiones anteriores.
+El invitado recibe las posturas de las seis partes del cuerpo y las caídas simuladas por el anfitrión. La interpolación de red controla esos cuerpos cinemáticos sin una segunda interpolación de PhysX. Los impactos tienen eventos identificados para reproducirse una sola vez. Todas las copias de esta iteración deben mostrar **0.8.0**; el protocolo cambió y rechaza versiones anteriores.
 
 ## Jugar
 
@@ -97,8 +99,8 @@ El [informe de validación Windows](Evidence/pre-hito1/VALIDACION.md) reúne la 
 
 ```sh
 "Builds/macOS/Tavern and Chaos.app/Contents/MacOS/Tavern and Chaos" \
-  -demo-smoke-tests -evidencePath "$PWD/Evidence/armwrestling/regression" \
-  -logFile "$PWD/Evidence/armwrestling/regression/player-tests.log"
+  -demo-smoke-tests -evidencePath "$PWD/Evidence/effects/regression" \
+  -logFile "$PWD/Evidence/effects/regression/player-tests.log"
 ```
 
 Las pruebas optativas recorren golpe válido, golpe fallido, recuperación, agarre/lanzamiento, impacto único, bebida y caducidad, pausa, tiro y salida del billar, límites de objetos y reinicio. También prueban transferencia de velocidad, conservación de energía, rebotes, reposo, troneras, apertura máxima, consistencia a 30/120 FPS de render y entrada a través de dispositivos virtuales de ratón/teclado. Escriben `player-tests.json`, `pool-physics.json`, capturas y código de salida distinto de cero ante fallos. No sustituyen una sesión con personas ni pruebas en otro hardware.
@@ -109,7 +111,7 @@ Esta entrega incluye práctica local, sala LAN de autoridad en el anfitrión, bo
 
 Quedan pendientes LAN entre máquinas y condiciones de latencia/pérdida, aceptación humana de bola 8 y pulseadas, integración económica y de cierre de las otras mesas, validación actual con seis personas, los otros cuatro juegos, coctelería completa, mando físico, reasignación y juego cruzado. El arte final sigue diferido. La instalación disponible es Unity 6.6; no se afirma que sea la 6.3 LTS indicada como referencia en la skill. No es una distribución pública firmada.
 
-El módulo Session incorpora RoomLifecycle, SessionEndPresentation y el contrato IRoomTable. El cierre consulta las dos mesas antes de liquidar. La evidencia actual está en Evidence/armwrestling/VALIDACION.md; las anteriores conservan su alcance histórico.
+El módulo Session incorpora RoomLifecycle, SessionEndPresentation y el contrato IRoomTable. El cierre consulta las dos mesas antes de liquidar. La evidencia actual está en Evidence/effects/VALIDACION.md; las anteriores conservan su alcance histórico.
 
 ## Código principal
 

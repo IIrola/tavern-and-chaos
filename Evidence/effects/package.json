@@ -1,0 +1,12 @@
+{
+  "version": "0.8.0",
+  "file": "Tavern-and-Chaos-0.8.0-macOS-Universal.zip",
+  "bytes": 44935107,
+  "sha256": "93600116ccac8544e5f5182de3395bf6006a7eab06b22052f8113fa5f51d8f3e",
+  "architectures": [
+    "x86_64",
+    "arm64"
+  ],
+  "zip_integrity": "passed",
+  "tested_assembly_and_info_plist_match_archive": true
+}

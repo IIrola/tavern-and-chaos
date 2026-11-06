@@ -10,8 +10,9 @@ namespace TavernChaos
     [Serializable] public sealed class LanActorState
     {
         public ulong id; public string name; public Vector3 position, focus,eye; public float yaw, recovery, effect; public bool fallen; public float charge=-1; public int held=-1,resetRevision; public long chips;
-        public LanBodyPose[] body; public bool seated; public string table; public int ebriety;
+        public LanBodyPose[] body; public bool seated; public string table; public int ebriety; public CocktailEffectView[] effects;
     }
+    [Serializable] public sealed class CocktailEffectView { public CocktailKind kind; public string origin; public double start,duration; public float remaining; }
     [Serializable] public sealed class LanBodyPose { public Vector3 position; public Quaternion rotation; }
     public enum LanFeedbackKind { PunchHit, Miss, BottleHit, Drink, Grab, Throw, Slip, PoolContact, PoolPot, PoolShot }
     [Serializable] public sealed class LanFeedback { public ulong id; public LanFeedbackKind kind; public Vector3 position; }
@@ -28,7 +29,7 @@ namespace TavernChaos
         public SessionEndingView ending;
         public ArmRoomView arm;
     }
-    [Serializable] public sealed class LanHello { public int protocol=7; public string name; }
+    [Serializable] public sealed class LanHello { public int protocol=8; public string name; }
     [Serializable] public sealed class SessionEndingView { public RoomPhase phase; public RoomEndReason reason; public double phaseStarted; public string reportId; public int pages,participants; }
     [Serializable] public sealed class PoolBallView { public int number; public bool active; public Vector3 position; public Quaternion rotation; }
     [Serializable] public sealed class PoolRoomView

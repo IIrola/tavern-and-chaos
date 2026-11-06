@@ -41,7 +41,7 @@ namespace TavernChaos
         private readonly List<(GameObject obj,float end)> sparks=new();
         private void Awake()
         {
-            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"||x=="-session-end-check"||x=="-arm-room-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
+            Instance=this; SmokeMode=System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-demo-smoke-tests"||x=="-lan-check"||x=="-pool-room-check"||x=="-session-end-check"||x=="-arm-room-check"||x=="-cocktail-effects-check"); Application.runInBackground=SmokeMode; Application.targetFrameRate=60; QualitySettings.vSyncCount=1; Time.fixedDeltaTime=.01f; Time.maximumDeltaTime=.1f;
             Physics.defaultSolverIterations=10; Physics.defaultSolverVelocityIterations=4;
             TavernWorld.Build();
             Player=CreateActor("You | Mica",true,new(0,.08f,-4)); Rival=CreateActor("Rival | Bruno",false,new(0,.08f,-.1f));
@@ -53,7 +53,7 @@ namespace TavernChaos
             var cam=new GameObject("Tavern camera"); cam.tag="MainCamera"; var c=cam.AddComponent<Camera>(); c.fieldOfView=60; c.nearClipPlane=.03f; c.farClipPlane=70; c.backgroundColor=new(.06f,.065f,.09f); cam.AddComponent<AudioListener>(); Rig=cam.AddComponent<TavernCamera>();
             Audio=gameObject.AddComponent<DemoAudio>(); Input=new DemoInput(); hud=gameObject.AddComponent<DemoHUD>();
             Pool.Changed+=OnPoolChanged;
-            Rig.ReduceMotion=PlayerPrefs.GetInt("reduceMotion",0)==1; Rig.Sensitivity=PlayerPrefs.GetFloat("sensitivity",.13f); Audio.Volume=PlayerPrefs.GetFloat("volume",.6f);
+            Rig.EffectIntensity=Mathf.Clamp01(PlayerPrefs.GetFloat("effectIntensity",1)); Rig.ReduceMotion=PlayerPrefs.GetInt("reduceMotion",0)==1; Rig.Sensitivity=PlayerPrefs.GetFloat("sensitivity",.13f); Audio.Volume=PlayerPrefs.GetFloat("volume",.6f);
             SetCursor(false);
             Economy=Resources.Load<EconomySettings>("EconomySettings");
             if(!Economy||!Economy.Valid) { Economy=ScriptableObject.CreateInstance<EconomySettings>(); ownsEconomySettings=true; }
@@ -64,6 +64,7 @@ namespace TavernChaos
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-pool-room-check")) gameObject.AddComponent<PoolRoomChecks>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-session-end-check")) gameObject.AddComponent<SessionEndChecks>();
             if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-arm-room-check")) gameObject.AddComponent<ArmRoomChecks>();
+            if(System.Array.Exists(System.Environment.GetCommandLineArgs(),x=>x=="-cocktail-effects-check")) gameObject.AddComponent<CocktailActorChecks>();
         }
         internal TavernActor CreateRoomActor(string name,Vector3 home)=>CreateActor(name,true,home);
         internal void SetRoomHeld(ThrowableBottle bottle) { Held=bottle; }
@@ -110,11 +111,11 @@ namespace TavernChaos
             if(Lan) Lan.Leave();
             if(Lan) Lan.ClearEnding();
             Time.timeScale=1; Started=false; Paused=false; Settings=false; Pool.Exit(); Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; move=Vector2.zero;
-            if(Held) { Held.ResetToRack(); Held=null; } Player.ClearEffect(); SetCursor(false); Rig.Snap(); RefreshInputContext();
+            if(Held) { Held.ResetToRack(); Held=null; } Player.ClearAllEffects(); Rival.ClearAllEffects(); SetCursor(false); Rig.Snap(); RefreshInputContext();
         }
         public void SaveSettings()
         {
-            PlayerPrefs.SetInt("reduceMotion",Rig.ReduceMotion?1:0); PlayerPrefs.SetFloat("sensitivity",Rig.Sensitivity); PlayerPrefs.SetFloat("volume",Audio.Volume); PlayerPrefs.Save();
+            PlayerPrefs.SetFloat("effectIntensity",Rig.EffectIntensity); PlayerPrefs.SetInt("reduceMotion",Rig.ReduceMotion?1:0); PlayerPrefs.SetFloat("sensitivity",Rig.Sensitivity); PlayerPrefs.SetFloat("volume",Audio.Volume); PlayerPrefs.Save();
         }
         private static void SetCursor(bool capture)
         {
@@ -370,7 +371,7 @@ namespace TavernChaos
             foreach(var spark in sparks) Destroy(spark.obj); sparks.Clear();
             Charging=false; Charge=0; pendingPower=-1; attackUntil=-1; cooldown=0; move=Vector2.zero; run=false; interactRequest=dropRequest=false;
             if(Held) { Held.ResetToRack(); Held=null; } foreach(var b in Bottles) b.ResetToRack();
-            Pool.Exit(); Player.ClearEffect(); Player.ClearIntoxication();Rival.ClearIntoxication(); Player.Teleport(Player.Home,Quaternion.identity); Rival.Teleport(Rival.Home,Quaternion.Euler(0,180,0)); Pool.Reset();
+            Pool.Exit(); Player.ClearAllEffects(); Rival.ClearAllEffects(); Player.ClearIntoxication();Rival.ClearIntoxication(); Player.Teleport(Player.Home,Quaternion.identity); Rival.Teleport(Rival.Home,Quaternion.Euler(0,180,0)); Pool.Reset();
             Hits=Misses=Throws=0; Goals=new bool[4]; Rig.Yaw=0; Rig.Pitch=0; Rig.Snap(); RefreshInputContext();
         }
         private void OnApplicationFocus(bool focus) { if(!focus&&Started&&!Paused&&!SmokeMode) SetPause(true); }

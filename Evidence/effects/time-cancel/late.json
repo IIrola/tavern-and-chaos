@@ -1,0 +1,14 @@
+{
+    "role": "late",
+    "scenario": "time-cancel",
+    "version": "0.8.0",
+    "passed": true,
+    "checks": [
+        "Late entrant waits for actual closing phase",
+        "Late entry request reaches the transport",
+        "Late entrant sees explicit room-ending rejection and usable menu",
+        "No runtime errors in late"
+    ],
+    "failures": [],
+    "errors": []
+}

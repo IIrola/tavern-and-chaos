@@ -1,0 +1,19 @@
+{
+  "attempt": "Initial actor integration run",
+  "passed": false,
+  "failures": [
+    "Mass-weighted ragdoll acceleration measures full versus twenty-percent gravity"
+  ],
+  "normalGravity": -9.810012817382812,
+  "heliumGravity": -2.9634149074554443,
+  "finding": "Initial probes were close to ceiling beams. Repeat with lower probes and explicit environment contact recording. No force or tolerance was changed to fit the failed value.",
+  "follow_up": {
+    "normalGravity": -9.810003280639648,
+    "heliumGravity": -1.9619969129562378,
+    "gravityContacts": [],
+    "highProbeGravity": -2.965095043182373,
+    "highProbeContacts": [
+      "Ceiling beam"
+    ]
+  }
+}

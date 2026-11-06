@@ -12,7 +12,7 @@ parser.add_argument('case', choices=['draw', 'drunk', 'closing', 'disconnect'], 
 parser.add_argument('--visual-host', action='store_true')
 args = parser.parse_args()
 root = pathlib.Path(__file__).resolve().parent
-out = root / 'Evidence/armwrestling' / args.case
+out = root / 'Evidence/effects' / args.case
 out.mkdir(parents=True, exist_ok=True)
 for path in [*out.glob('*.json'), *out.glob('*.png'), *out.glob('*.ready')]:
     path.unlink()

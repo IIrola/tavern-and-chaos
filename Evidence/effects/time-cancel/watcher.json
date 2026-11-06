@@ -1,0 +1,22 @@
+{
+    "role": "watcher",
+    "scenario": "time-cancel",
+    "version": "0.8.0",
+    "passed": true,
+    "checks": [
+        "Peer starts actual loopback connection",
+        "Watcher returns without stale room state 1",
+        "Watcher returns without stale room state 2",
+        "Watcher returns without stale room state 3",
+        "Watcher returns without stale room state 4",
+        "Watcher returns without stale room state 5",
+        "Closing peer cannot drive gameplay action maps",
+        "Peer receives authoritative final balanced report",
+        "Second final page is cached on the remote peer",
+        "Host loss preserves complete received final history and usable result screen",
+        "Peer completes closure and remains usable until explicit exit",
+        "No runtime errors in watcher"
+    ],
+    "failures": [],
+    "errors": []
+}

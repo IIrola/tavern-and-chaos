@@ -10,14 +10,32 @@ namespace TavernChaos
         public bool Seated { get; private set; }
         public void SetSeated(bool value)
         {
-            Seated=value; momentum=Vector3.zero;
+            Seated=value; momentum=Vector3.zero;verticalSpeed=0;
             if(replica||Fallen) return;
             model.localPosition=value?Vector3.down*.28f:Vector3.zero;
             parts[2].transform.localRotation=parts[3].transform.localRotation=Quaternion.Euler(value?-80:0,0,0);
         }
         public float RecoverAt { get; private set; }
         public float EffectUntil { get; private set; }
-        public float EffectRemaining => Mathf.Max(0, EffectUntil-Time.time);
+        public float EffectRemaining => CocktailRemaining(CocktailKind.Blue);
+        private readonly CocktailEffects cocktailEffects=new();
+        private CocktailEffectView[] replicaEffects=System.Array.Empty<CocktailEffectView>();
+        private float replicaEffectsAt,verticalSpeed;
+        private ulong practiceDrinkSerial;
+        private static readonly CocktailRecipe PracticeBlue=CocktailRecipes.Default().Entries[0];
+        public bool HasCocktail(CocktailKind kind)=>CocktailRemaining(kind)>0;
+        public float CocktailRemaining(CocktailKind kind)
+        {
+            if(!replica)return (float)cocktailEffects.Remaining(kind);
+            foreach(var effect in replicaEffects)if(effect.kind==kind)return Mathf.Max(0,effect.remaining-(Time.unscaledTime-replicaEffectsAt));
+            return kind==CocktailKind.Blue?Mathf.Max(0,EffectUntil-Time.time):0;
+        }
+        public CocktailEffectView[] CaptureEffects()
+        {
+            var active=cocktailEffects.Capture();var result=new CocktailEffectView[active.Length];
+            for(int i=0;i<active.Length;i++)result[i]=new CocktailEffectView{kind=active[i].Kind,origin=active[i].Origin,start=active[i].Start,duration=active[i].End-active[i].Start,remaining=(float)cocktailEffects.Remaining(active[i].Kind)};
+            return result;
+        }
         private readonly IntoxicationState intoxication=new();
         private int replicaEbriety;
         public int Ebriety=>replica?replicaEbriety:intoxication.Level;
@@ -52,7 +70,7 @@ namespace TavernChaos
             if(replica==value) return;
             replica=value; replicaReady=false; ReplicaCharge=-1; ToggleRagdoll(false); Fallen=Seated=false;
             model.localRotation=Quaternion.identity; model.localPosition=Vector3.zero; controller.enabled=!value;
-            momentum=Vector3.zero; EffectUntil=0; ClearIntoxication(); replicaEyeOffset=Vector3.up*1.81f; replicaFocusOffset=Vector3.up*1.1f; replicaTarget=null;
+            momentum=Vector3.zero; ClearAllEffects(); ClearIntoxication(); replicaEyeOffset=Vector3.up*1.81f; replicaFocusOffset=Vector3.up*1.1f; replicaTarget=null;
             for(int i=0;i<parts.Count;i++) { parts[i].transform.localPosition=poses[i]; parts[i].transform.localRotation=rotations[i]; }
         }
         public void ApplyReplica(LanActorState state,bool snap=false)
@@ -64,6 +82,7 @@ namespace TavernChaos
             fromBody.Clear(); fromBody.AddRange(CaptureBodyPose());
             Fallen=state.fallen; Seated=state.seated; RecoverAt=Time.time+state.recovery; EffectUntil=Time.time+state.effect;
             replicaEbriety=Mathf.Clamp(state.ebriety,0,5);
+            replicaEffects=state.effects??System.Array.Empty<CocktailEffectView>();replicaEffectsAt=Time.unscaledTime;
             replicaTarget=state; blendTime=snap?.05f:0;
             replicaReady=true; ReplicaCharge=state.charge;
             if(snap) RenderReplica(1);
@@ -129,6 +148,7 @@ namespace TavernChaos
             Hand=new GameObject("Carry socket").transform; Hand.SetParent(transform,false); Hand.localPosition=new(.55f,1.25f,.65f);
             foreach(var c in colliders) foreach(var other in colliders) if(c!=other) Physics.IgnoreCollision(c,other);
             ToggleRagdoll(false);
+            gameObject.AddComponent<CocktailPresentation>();
         }
         public void SetFirstPersonView(bool value)
         {
@@ -157,12 +177,15 @@ namespace TavernChaos
             if(replica || Fallen || Seated || !controller.enabled) return;
             direction=Vector3.ClampMagnitude(direction,1);
             if(intoxication.ShouldTrip(Time.time,direction.sqrMagnitude>.05f)){Fall(-direction*2);return;}
-            float speed=run?5.6f:3.5f;
-            // Laguna Azul: low friction, with a readable expiry and no permanent parameter changes.
-            float response=EffectRemaining>0?1.5f:Ebriety>=3?10f:14f;
-            momentum=Vector3.Lerp(momentum,direction*speed,1-Mathf.Exp(-response*Time.fixedDeltaTime));
+            float speed=Mathf.Min(8.4f,(run?5.6f:3.5f)*(float)cocktailEffects.SpeedMultiplier);
+            // Zero friction: releasing movement preserves horizontal momentum until contact or expiry.
+            if(cocktailEffects.Frictionless)momentum=Vector3.ClampMagnitude(momentum+direction*(speed*2.5f*Time.fixedDeltaTime),Mathf.Min(8.4f,Mathf.Max(speed,momentum.magnitude)));
+            else momentum=Vector3.Lerp(momentum,direction*speed,1-Mathf.Exp(-(Ebriety>=3?10:14)*Time.fixedDeltaTime));
+            if(controller.isGrounded&&verticalSpeed<0)verticalSpeed=-3;
+            verticalSpeed=Mathf.Max(-20,verticalSpeed+Physics.gravity.y*(float)cocktailEffects.GravityMultiplier*Time.fixedDeltaTime);
             slipCollision=false;
-            controller.Move((momentum+Vector3.down*3)*Time.fixedDeltaTime);
+            var flags=controller.Move((momentum+Vector3.up*verticalSpeed)*Time.fixedDeltaTime);
+            if((flags&CollisionFlags.Above)!=0&&verticalSpeed>0)verticalSpeed=0;
             // Defer disabling the controller until its Move/collision callbacks have completed.
             if(slipCollision) {
                 Fall(slipImpulse);
@@ -202,12 +225,30 @@ namespace TavernChaos
         public void Swing() { punchUntil=Time.time+.3f; }
         public void Fall(Vector3 impulse)
         {
-            if(replica||Fallen) return; Seated=false; Fallen=true; RecoverAt=Time.time+3; EffectUntil=0; momentum=Vector3.zero;
+            FallFor(impulse,3);
+        }
+        public void FallFor(Vector3 impulse,float seconds)
+        {
+            if(replica||!float.IsFinite(seconds))return;
+            cocktailEffects.OnFall(Time.timeAsDouble);EffectUntil=0;
+            if(Fallen){RecoverAt=Mathf.Max(RecoverAt,Time.time+Mathf.Clamp(seconds,3,10));return;}
+            Seated=false; Fallen=true; RecoverAt=Time.time+Mathf.Clamp(seconds,3,10);momentum=Vector3.zero;verticalSpeed=0;
             controller.enabled=false; ToggleRagdoll(true);
             foreach(var r in parts) { r.linearVelocity=impulse+Vector3.up*1.5f; r.angularVelocity=new Vector3(2,.4f,1.2f); }
             DemoGame.Instance?.ActorFell(this);
         }
-        public void TickRecovery() { if(!replica)intoxication.Tick(Time.time); if(Fallen && Time.time>=RecoverAt) Recover(); }
+        private void TickCocktails()
+        {
+            cocktailEffects.Tick(Time.timeAsDouble);
+            if(cocktailEffects.TakeUnstableFall()&&!Fallen)Fall(-transform.forward*3);
+        }
+        public void TickRecovery() { if(replica)return;intoxication.Tick(Time.time);TickCocktails();if(Fallen&&Time.time>=RecoverAt)Recover(); }
+        private void FixedUpdate()
+        {
+            if(replica||!Fallen)return;
+            float factor=(float)cocktailEffects.GravityMultiplier;
+            if(factor<1)foreach(var body in parts)if(!body.isKinematic&&body.useGravity)body.AddForce(-Physics.gravity*(1-factor),ForceMode.Acceleration);
+        }
         public void Recover()
         {
             if(replica) return;
@@ -234,12 +275,28 @@ namespace TavernChaos
         {
             if(Fallen) { ToggleRagdoll(false); Fallen=false; }
             controller.enabled=false; transform.SetPositionAndRotation(p,facing);
-            model.localPosition=Vector3.zero; model.localRotation=Quaternion.identity; gait=punchUntil=0; momentum=Vector3.zero; slipCollision=false;
+            model.localPosition=Vector3.zero; model.localRotation=Quaternion.identity; gait=punchUntil=0; momentum=Vector3.zero;verticalSpeed=0; slipCollision=false;
             for(int i=0;i<parts.Count;i++) { parts[i].transform.localPosition=poses[i]; parts[i].transform.localRotation=rotations[i]; }
             // The controller must see the new pose before held movement can call Move again.
             Physics.SyncTransforms(); controller.enabled=!replica;
         }
-        public void Drink() { EffectUntil=Time.time+8; intoxication.Add(1,Time.time); }
-        public void ClearEffect() { EffectUntil=0; }
+        public bool ApplyCocktail(CocktailRecipe recipe,string origin,int freeMixIntoxication=0)
+        {
+            if(replica)return false;TickCocktails();
+            if(recipe!=null&&!cocktailEffects.Apply(recipe,origin,Time.timeAsDouble))return false;
+            intoxication.Add(recipe?.Intoxication??Mathf.Clamp(freeMixIntoxication,0,1),Time.time);
+            if(recipe?.Kind==CocktailKind.Blue)EffectUntil=Time.time+(float)recipe.Duration;
+            if(recipe?.Kind==CocktailKind.Helium&&!Seated){if(Fallen)foreach(var body in parts)body.AddForce(Vector3.up*2,ForceMode.VelocityChange);else verticalSpeed=Mathf.Max(verticalSpeed,2);}
+            if(recipe?.Kind==CocktailKind.Poison)FallFor(Vector3.zero,10);
+            if(recipe?.Kind==CocktailKind.Volcano) {
+                var game=DemoGame.Instance;if(game)foreach(var target in game.CombatTargets())if(target!=this&&!target.IsPlayer&&Vector3.Distance(Focus,target.Focus)<=3.5f&&!Physics.Linecast(Focus,target.Focus,1<<0,QueryTriggerInteraction.Ignore)) {
+                    Vector3 away=Vector3.ProjectOnPlane(target.Focus-Focus,Vector3.up);target.Fall(away.sqrMagnitude>.01f?away.normalized*4:transform.forward*4);
+                }
+            }
+            return true;
+        }
+        public void Drink() { ApplyCocktail(PracticeBlue,"practice/"+(++practiceDrinkSerial)); }
+        public void ClearEffect() { cocktailEffects.Remove(CocktailKind.Blue,Time.timeAsDouble);EffectUntil=0; }
+        public void ClearAllEffects() { cocktailEffects.Clear(Time.timeAsDouble);EffectUntil=0;replicaEffects=System.Array.Empty<CocktailEffectView>(); }
     }
 }

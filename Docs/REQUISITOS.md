@@ -41,11 +41,11 @@
 |---|---|---|
 | B01 | Estación exclusiva, recipiente, hasta cuatro ingredientes con proporciones, agitar, servir, consumir/ofrecer/lanzar. | Parcial |
 | B02 | Laguna Azul: vodka/curazao/hielo, fricción cero y luz azul. | Parcial |
-| B03 | Volcánico: tequila/picante/Tabasco, fuego de boca y onda expansiva sobre NPC próximos. | Pendiente |
-| B04 | Mezcla Inestable: absenta/energética/cerveza, velocidad 150% 5 s y caída hacia atrás. | Pendiente |
-| B05 | Helio: ginebra/carbonatada misterio, gravedad 20% durante 15 s y restauración correcta. | Pendiente |
-| B06 | Cuatro licores fuertes: K.O. inmediato 10 s con humo. | Pendiente |
-| B07 | Bebida consumida o lanzada aplica efecto una sola vez; también sobre sentados y derribo cuando proceda. | Pendiente |
+| B03 | Volcánico: tequila/picante/Tabasco, fuego de boca y onda expansiva sobre NPC próximos. | Parcial |
+| B04 | Mezcla Inestable: absenta/energética/cerveza, velocidad 150% 5 s y caída hacia atrás. | Parcial |
+| B05 | Helio: ginebra/carbonatada misterio, gravedad 20% durante 15 s y restauración correcta. | Parcial |
+| B06 | Cuatro licores fuertes: K.O. inmediato 10 s con humo. | Parcial |
+| B07 | Bebida consumida o lanzada aplica efecto una sola vez; también sobre sentados y derribo cuando proceda. | Parcial |
 | B08 | Ebriedad entera 0–5, balanceo y estabilidad por niveles; tropiezos nivel 5 separados al menos 15 s. | Parcial |
 | B09 | Efectos con identificador/origen/inicio/duración: renovar mismo, combinar distintos con orden y límites. | Parcial |
 | B10 | Restaurar modificadores al caducar/caer/salir/desconectarse; no desplazar voluntariamente a sentados. | Parcial |

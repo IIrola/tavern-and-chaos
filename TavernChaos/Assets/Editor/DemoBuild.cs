@@ -51,7 +51,7 @@ namespace TavernChaos.Editor
         {
             if(!File.Exists(ScenePath)) throw new FileNotFoundException("The saved demo scene is missing.",ScenePath);
             if(EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Save scene changes before building the demo.");
-            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.7.0";
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.8.0";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);
@@ -83,6 +83,7 @@ namespace TavernChaos.Editor
         public static void BuildMac()
         {
             RejectDuplicateTypeMetadata();
+            BarValidation.Run();
             ArmValidation.Run();
             SessionValidation.Run();
             EconomyValidation.Run();
@@ -90,8 +91,8 @@ namespace TavernChaos.Editor
             ConfigureMacArchitecture(); Configure(); Directory.CreateDirectory("../Builds/macOS");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/macOS/Tavern and Chaos.app",target=BuildTarget.StandaloneOSX,options=BuildOptions.CleanBuildCache });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence/armwrestling");
-            File.WriteAllText("../Evidence/armwrestling/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            Directory.CreateDirectory("../Evidence/effects");
+            File.WriteAllText("../Evidence/effects/build-macos.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="macOS Universal (Intel x64 + Apple Silicon arm64)",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
             InspectSteps(report,"macos");
             if(summary.result!=BuildResult.Succeeded||summary.totalErrors>0) throw new Exception($"Build failed validation: {summary.totalErrors} errors.");
             Debug.Log($"DEMO_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
@@ -108,6 +109,7 @@ namespace TavernChaos.Editor
         public static void BuildWindows()
         {
             RejectDuplicateTypeMetadata();
+            BarValidation.Run();
             ArmValidation.Run();
             SessionValidation.Run();
             EconomyValidation.Run();
@@ -115,8 +117,8 @@ namespace TavernChaos.Editor
             Configure(); Directory.CreateDirectory("../Builds/Windows");
             var report=BuildPipeline.BuildPlayer(new BuildPlayerOptions { scenes=new[]{ScenePath},locationPathName="../Builds/Windows/Tavern and Chaos.exe",target=BuildTarget.StandaloneWindows64,options=BuildOptions.CleanBuildCache });
             var summary=report.summary;
-            Directory.CreateDirectory("../Evidence/armwrestling");
-            File.WriteAllText("../Evidence/armwrestling/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
+            Directory.CreateDirectory("../Evidence/effects");
+            File.WriteAllText("../Evidence/effects/build-windows.json",JsonUtility.ToJson(new BuildEvidence { result=summary.result.ToString(),unity=Application.unityVersion,platform="Windows x64",backend="Mono",version=PlayerSettings.bundleVersion,bytes=summary.totalSize,seconds=summary.totalTime.TotalSeconds,errors=summary.totalErrors,warnings=summary.totalWarnings },true));
             InspectSteps(report,"windows");
             if(summary.result!=BuildResult.Succeeded||summary.totalErrors>0) throw new Exception($"Build failed validation: {summary.totalErrors} errors.");
             Debug.Log($"WINDOWS_LAN_BUILD_OK: {summary.totalSize} bytes, {summary.totalTime}");
@@ -137,7 +139,7 @@ namespace TavernChaos.Editor
                 if(message.type==LogType.Warning) evidence.warnings.Add(step.name+": "+message.content);
                 evidence.messages++;
             }
-            File.WriteAllText("../Evidence/armwrestling/build-"+platform+"-steps.json",JsonUtility.ToJson(evidence,true));
+            File.WriteAllText("../Evidence/effects/build-"+platform+"-steps.json",JsonUtility.ToJson(evidence,true));
             if(evidence.errors.Count>0) throw new Exception("Build steps contain "+evidence.errors.Count+" errors; inspect build evidence.");
         }
         [Serializable] private sealed class StepEvidence { public int messages; public List<string> errors=new(),warnings=new(); }
