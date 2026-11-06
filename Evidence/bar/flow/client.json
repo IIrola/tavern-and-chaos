@@ -1,0 +1,14 @@
+{
+    "role": "client",
+    "version": "0.9.0",
+    "passed": true,
+    "checks": [
+        "Peer starts real connection",
+        "Bar snapshot arrives over UDP",
+        "Client prepares and serves through the intent protocol",
+        "Client serves a Poison cocktail",
+        "No runtime errors in client"
+    ],
+    "failures": [],
+    "errors": []
+}

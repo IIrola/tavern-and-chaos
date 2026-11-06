@@ -51,7 +51,7 @@ namespace TavernChaos.Editor
         {
             if(!File.Exists(ScenePath)) throw new FileNotFoundException("The saved demo scene is missing.",ScenePath);
             if(EditorSceneManager.GetActiveScene().isDirty) throw new InvalidOperationException("Save scene changes before building the demo.");
-            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.8.0";
+            PlayerSettings.companyName="Tavern Workshop"; PlayerSettings.productName="Tavern and Chaos"; PlayerSettings.bundleVersion="0.9.0";
             PlayerSettings.SetApplicationIdentifier(NamedBuildTarget.Standalone,"com.tavernworkshop.tavernchaos");
             PlayerSettings.SetScriptingBackend(NamedBuildTarget.Standalone,ScriptingImplementation.Mono2x);
             PlayerSettings.SetManagedStrippingLevel(NamedBuildTarget.Standalone,ManagedStrippingLevel.Disabled);

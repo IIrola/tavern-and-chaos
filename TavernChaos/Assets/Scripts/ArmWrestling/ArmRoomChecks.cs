@@ -140,7 +140,7 @@ namespace TavernChaos
             while(Now<until&&!Has("finish")){
                 string stage=Stage;
                 if(stage!=acted){bool done=true;
-                    if(stage=="drink"&&!spectator)g.Lan.Send(LanAction.Interact);
+                    if(stage=="drink"&&!spectator)yield return BarFlowChecks.ServeAndDrink(g,0);
                     else if(stage=="sit"&&!spectator)g.Lan.Send(LanAction.ArmSit);
                     else if(stage.StartsWith("ready-")&&!spectator){done=stage=="ready-"+View.proposal&&View.IsSeated(g.Lan.LocalId);if(done){g.Lan.Send(LanAction.ArmMode,choice:scenario=="draw"?1:0);g.Lan.Send(LanAction.ArmReady,proposal:View.proposal);}}
                     else if(stage=="queue"&&spectator)g.Lan.Send(LanAction.ArmSit);

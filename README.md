@@ -1,6 +1,6 @@
 # Tavern & Chaos · Primera ronda
 
-Proyecto de trabajo **0.8.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La demo descargable actual para Mac es la 0.8.0; las releases anteriores conservan su alcance histórico.
+Proyecto de trabajo **0.9.0, local + LAN**, con **Unity 6000.6.8f1**. Proyecto: `TavernChaos/`. Aplicación actual para Mac: `Builds/macOS/Tavern and Chaos.app`. El menú de Unity también permite compilar Windows; falta repetir allí la validación de esta iteración. La demo descargable actual para Mac es la 0.9.0 (barra jugable); las releases anteriores conservan su alcance histórico.
 
 Se conservan las mejoras recibidas en `main` de la 0.3.1. El trabajo actual integra la base física y réplica de los cinco efectos de cóctel y añade un documento de hitos; conserva bola 8, pulseadas y cierre compartido; el estado, los límites y siguientes pasos están en [Docs/ESTADO_ACTUAL.md](Docs/ESTADO_ACTUAL.md), y la revisión de cada iteración en [Docs/ITERACIONES.md](Docs/ITERACIONES.md).
 

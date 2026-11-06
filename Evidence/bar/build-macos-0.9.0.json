@@ -1,0 +1,11 @@
+{
+    "result": "Succeeded",
+    "unity": "6000.6.8f1",
+    "platform": "macOS Universal (Intel x64 + Apple Silicon arm64)",
+    "backend": "Mono",
+    "version": "0.9.0",
+    "bytes": 115061465,
+    "seconds": 14.981631,
+    "errors": 0,
+    "warnings": 1
+}

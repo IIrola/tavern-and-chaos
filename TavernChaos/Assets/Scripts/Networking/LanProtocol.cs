@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 namespace TavernChaos
 {
-    public enum LanAction { Move, Charge, Release, Interact, Drop, Stop, ProposeKick, VoteYes, Reset, StatsRequest, PoolSit, PoolLeave, PoolStart, PoolCall, PoolShoot, PoolPlace, PoolAccept, PoolRerack, PoolClose, PoolWager, PoolReady, ArmSit,ArmLeave,ArmWager,ArmReady,ArmStart,ArmMode,ArmEffort,ArmHold,ArmTap,ArmClose }
+    public enum LanAction { Move, Charge, Release, Interact, Drop, Stop, ProposeKick, VoteYes, Reset, StatsRequest, PoolSit, PoolLeave, PoolStart, PoolCall, PoolShoot, PoolPlace, PoolAccept, PoolRerack, PoolClose, PoolWager, PoolReady, ArmSit,ArmLeave,ArmWager,ArmReady,ArmStart,ArmMode,ArmEffort,ArmHold,ArmTap,ArmClose,BarOffer,BarContainer,BarAdjust,BarRecipe,BarShake,BarServe,BarCancel,BarPutDown,BarGrab,BarAccept }
     [Serializable] public sealed class LanIntent
     {
         public ulong sequence, target; public LanAction action; public Vector3 move; public float yaw,pitch,power; public bool run,hasLook; public int ball,pocket,page,choice; public long wager; public uint proposal;
@@ -28,8 +28,16 @@ namespace TavernChaos
         public long drinkPrice;
         public SessionEndingView ending;
         public ArmRoomView arm;
+        public BarView bar;
     }
-    [Serializable] public sealed class LanHello { public int protocol=8; public string name; }
+    [Serializable] public sealed class BarVesselView { public ulong id,holder,offeredTo; public bool hasHolder,hasOffer; public CocktailVesselPhase phase; public CocktailKind kind; public string name; public int intoxication,container; public float remaining; public Vector3 position; }
+    [Serializable] public sealed class BarView
+    {
+        public bool hasOwner; public ulong owner; public BarPhase phase; public uint revision; public int container; public int[] measures; public string match; public double readyAt; public long price; public BarVesselView[] vessels;
+        public BarVesselView HeldBy(ulong id){if(vessels!=null)foreach(var v in vessels)if(v.phase==CocktailVesselPhase.Held&&v.hasHolder&&v.holder==id)return v;return null;}
+        public BarVesselView OfferedTo(ulong id){if(vessels!=null)foreach(var v in vessels)if(v.phase==CocktailVesselPhase.Held&&v.hasOffer&&v.offeredTo==id)return v;return null;}
+    }
+    [Serializable] public sealed class LanHello { public int protocol=9; public string name; }
     [Serializable] public sealed class SessionEndingView { public RoomPhase phase; public RoomEndReason reason; public double phaseStarted; public string reportId; public int pages,participants; }
     [Serializable] public sealed class PoolBallView { public int number; public bool active; public Vector3 position; public Quaternion rotation; }
     [Serializable] public sealed class PoolRoomView

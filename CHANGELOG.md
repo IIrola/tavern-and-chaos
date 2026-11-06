@@ -1,5 +1,12 @@
 # Cambios
 
+## 0.9.0 · Barra jugable en sala LAN
+
+- Estación de coctelería integrada en la sala: recipiente, hasta cuatro ingredientes con proporciones, atajos de receta, agitar y servir (20 fichas solo al servir). Panel con ratón; Esc / B cancela sin cobrar.
+- Vasos físicos replicados: beber (E), ofrecer (F) y aceptar (E) sin coste, dejar (Q), recoger (E) y lanzar (clic mantenido) contra personas o Bruno. Efectos de las cinco recetas aplicados por el anfitrión.
+- Estación exclusiva; caer, salir, resetear o alejarse la liberan sin cobro. Protocolo de sala 9.
+- Prueba nueva `run-bar-room-checks.py` (dos procesos en loopback). Alcance y límites en Evidence/bar/flow y Docs/ESTADO_ACTUAL.md.
+
 ## 0.8.0 · Base física de cócteles y plan de hitos
 
 - Efectos conectados a personajes y réplica: inercia sin fricción, velocidad ×1,5, gravedad ×0,2, caída a los 5 s, onda sobre NPC y K.O. de 10 s.

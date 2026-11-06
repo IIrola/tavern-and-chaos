@@ -34,6 +34,12 @@ namespace TavernChaos
         public RoomRoster Roster { get; private set; }
         public PoolRoomController PoolTable { get; private set; }
         public ArmRoomController ArmTable {get;private set;}
+        public BarRoomController BarTable {get;private set;}
+        private readonly BarVesselVisuals barVisuals=new();
+        public bool LocalBarOpen=>View?.bar!=null&&View.bar.hasOwner&&View.bar.owner==LocalId;
+        public int BarVesselVisualCount=>barVisuals.Count;
+        private IEnumerable<KeyValuePair<ulong,TavernActor>> BarPeople(){foreach(var p in controlled)yield return new(p.Key,p.Value.actor);yield return new(ulong.MaxValue,g.Rival);}
+        private void PresentBar(BarView bar){barVisuals.Apply(bar);}
         private readonly List<IRoomTable> tables=new();
         private readonly HashSet<IRoomTable> drainedTables=new();
         public bool LocalArmSeated=>IsHost?ArmTable?.Table.SeatOf(LocalId)>=0:View?.arm?.IsSeated(LocalId)==true;
@@ -96,6 +102,9 @@ namespace TavernChaos
             PoolTable=new PoolRoomController(g.Pool,Roster,ActorFor,ChangePoolSeat,g.Economy);
             ArmTable=new ArmRoomController(Roster,ActorFor,ChangeArmSeat,g.Economy);tables.Add(PoolTable);tables.Add(ArmTable);
             drinkPrice=g.Economy.Drink;
+            BarTable=new BarRoomController(Roster.Ledger,CocktailRecipes.Default(),drinkPrice,id=>id==ulong.MaxValue?g.Rival:ActorFor(id),BarPeople);
+            BarTable.Notice+=(text,id)=>serverNotice=text;
+            BarTable.Used+=(use,actor)=>{if(actor)EmitFeedback(use.Consumed?LanFeedbackKind.Drink:LanFeedbackKind.BottleHit,actor.Focus);};
             minimumPurchase=g.Economy.MinimumPurchase;
             Status="Abriendo sala…";
             if(!manager.StartHost()) { Fail("No se pudo abrir el puerto de la sala."); return false; }
@@ -135,7 +144,7 @@ namespace TavernChaos
             string reason=""; LanHello hello=null;
             if(request.Payload==null||request.Payload.Length>256) reason="Solicitud de entrada inválida.";
             else { try { hello=JsonUtility.FromJson<LanHello>(Encoding.UTF8.GetString(request.Payload)); } catch { reason="Solicitud de entrada inválida."; } }
-            if(hello==null||hello.protocol!=8) reason="Las versiones del juego no coinciden.";
+            if(hello==null||hello.protocol!=9) reason="Las versiones del juego no coinciden.";
             if(Roster!=null&&Roster.Members.Count+approvedNames.Count>=RoomRoster.Capacity) reason="Sala llena: máximo seis personas.";
             if(Lifecycle!=null&&!Lifecycle.Accepting(Time.realtimeSinceStartupAsDouble)) reason="La sala está terminando; no admite nuevas entradas.";
             response.Approved=reason.Length==0; response.CreatePlayerObject=false; response.Pending=false; response.Reason=reason;
@@ -167,6 +176,7 @@ namespace TavernChaos
             if(leaving||!manager) return;
             if(manager.IsServer) {
                 foreach(var table in tables)table.Disconnect(id,Time.realtimeSinceStartupAsDouble);
+                BarTable?.Remove(id);
                 approvedNames.Remove(id);
                 if(controlled.TryGetValue(id,out var c)) { if(c.held) c.held.ResetToRack(); if(c.actor!=g.Player) Destroy(c.actor.gameObject); controlled.Remove(id); }
                 Roster?.Remove(id); serverNotice="Una persona ha salido de la sala.";
@@ -183,7 +193,7 @@ namespace TavernChaos
         public void Leave()
         {
             if(!manager) return; leaving=true;
-            foreach(var table in tables)table.Dispose();tables.Clear();PoolTable=null;ArmTable=null; Roster?.Ledger.Close(); g.Pool.EndMatch();
+            foreach(var table in tables)table.Dispose();tables.Clear();PoolTable=null;ArmTable=null;BarTable?.Dispose();BarTable=null;barVisuals.Clear(); Roster?.Ledger.Close(); g.Pool.EndMatch();
             foreach(var c in controlled.Values) c.actor.SetSeated(false);
             if(manager.IsServer) foreach(var c in controlled.Values) { if(c.held) c.held.ResetToRack(); if(c.actor!=g.Player) Destroy(c.actor.gameObject); }
             controlled.Clear(); approvedNames.Clear(); pending.Clear();
@@ -198,6 +208,7 @@ namespace TavernChaos
         }
         private void Update()
         {
+            barVisuals.Tick(Time.deltaTime);
             if(ResultsDisconnected&&Ending?.phase==RoomPhase.Ejecting&&EstimatedServerTime-Ending.phaseStarted>=RoomLifecycle.EjectionSeconds) Ending.phase=RoomPhase.Results;
             if(!Running) return;
             double now=Time.realtimeSinceStartupAsDouble;
@@ -373,6 +384,8 @@ namespace TavernChaos
             ResolveAttacks(now);
             ulong? kick=Roster.ResolveVote(now); if(kick.HasValue) { if(kick==0) { Fail("La votación cerró la sala del anfitrión."); return; } OnDisconnected(kick.Value); manager.DisconnectClient(kick.Value,"Expulsado por votación de la sala."); }
             g.Pool.FixedTick();
+            if(Lifecycle.Phase!=RoomPhase.Open) BarTable.BeginClosing(now);
+            BarTable.Tick(now);
             foreach(var table in tables)table.Tick(now);
             if(Lifecycle.Phase==RoomPhase.Draining&&!tableDrained) tableDrained=FinishTables(now);
             AdvanceLifecycle(now);
@@ -383,7 +396,7 @@ namespace TavernChaos
             if(g.Pool.Moving) return true;
             foreach(var c in controlled.Values) if(c.attackEnd>=0) return true;
             foreach(var bottle in g.Bottles) if(bottle.Flying) return true;
-            return false;
+            return BarTable?.HasFlights==true;
         }
         private void AdvanceLifecycle(double now)
         {
@@ -416,16 +429,23 @@ namespace TavernChaos
             if(c.actor.Fallen) { RejectedActions++; return; }
             if(c.actor.Seated) { if(intent.action==LanAction.Interact) {if(c.table=="arm-1")ArmTable.Leave(sender,now);else PoolTable.Leave(sender,now);} else RejectedActions++; return; }
             if(intent.hasLook) { c.yaw=intent.yaw; c.pitch=intent.pitch; }
+            if(intent.action>=LanAction.BarOffer&&intent.action<=LanAction.BarAccept) {
+                if(!BarTable.Handle(sender,intent,c.actor,Quaternion.Euler(c.pitch,c.yaw,0)*Vector3.forward,now)) RejectedActions++; return;
+            }
             switch(intent.action) {
                 case LanAction.Charge:
                     if(c.chargeAt<0&&c.attackEnd<0&&now>=c.cooldown) c.chargeAt=now; else RejectedActions++; break;
                 case LanAction.Release:
                     if(c.chargeAt<0||now<c.cooldown) { RejectedActions++; return; }
+                    if(BarTable.Service.HeldBy(sender)!=null) {
+                        c.chargeAt=-1; c.cooldown=now+.6; c.actor.Aim(Yaw(c.yaw));
+                        if(BarTable.Launch(sender,c.actor,Quaternion.Euler(c.pitch,c.yaw,0)*Vector3.forward,now)) EmitFeedback(LanFeedbackKind.Throw,c.actor.Focus); else RejectedActions++; return;
+                    }
                     c.power=Mathf.Clamp01((float)(now-c.chargeAt)); c.chargeAt=-1; c.cooldown=now+.6; c.actor.Aim(Yaw(c.yaw));
                     c.attackDirection=Quaternion.Euler(c.pitch,c.yaw,0)*Vector3.forward;
                     if(c.held) { c.held.Release(InteractionRules.LaunchVelocity(c.attackDirection,c.power)); c.held=null; EmitFeedback(LanFeedbackKind.Throw,c.actor.Focus); }
                     else { c.attackEnd=now+.25; c.actor.Swing(); } break;
-                case LanAction.Drop: c.chargeAt=-1; if(c.held) { c.held.Release(Yaw(c.yaw)*1.5f); c.held=null; } break;
+                case LanAction.Drop: c.chargeAt=-1; if(BarTable.PutDown(sender,c.actor,now)) break; if(c.held) { c.held.Release(Yaw(c.yaw)*1.5f); c.held=null; } break;
                 case LanAction.Interact: Interact(c,sender,intent.sequence); break;
                 default: RejectedActions++; break;
             }
@@ -435,9 +455,7 @@ namespace TavernChaos
             if(ArmRoomController.Near(c.actor.transform.position)){ArmTable.Sit(sender,CanSit(ArmTable,sender,c),Time.realtimeSinceStartupAsDouble);return;}
             if(PoolRoomController.Near(c.actor.transform.position)){PoolTable.Sit(sender,CanSit(PoolTable,sender,c),Time.realtimeSinceStartupAsDouble);return;}
             if(!InteractionRules.CanInteract(c.actor,c.held,c.chargeAt>=0,c.attackEnd>=0)) return;
-            if(Vector3.Distance(c.actor.transform.position,TavernWorld.BarPoint)<2.2f) {
-                if(Roster.Spend(sender,drinkPrice,"drink/"+sender+"/"+sequence,"drink")) { c.actor.Drink(); EmitFeedback(LanFeedbackKind.Drink,c.actor.Focus); } else serverNotice="No tienes fichas suficientes para esa bebida."; return;
-            }
+            if(BarTable.TryInteract(sender,c.actor,Time.realtimeSinceStartupAsDouble)) { c.move=Vector3.zero; return; }
             var best=InteractionRules.SelectBottle(c.actor,Quaternion.Euler(c.pitch,c.yaw,0)*Vector3.forward,g.Bottles);
             if(best&&best.Grab(c.actor)) { c.held=best; EmitFeedback(LanFeedbackKind.Grab,c.actor.Focus); }
         }
@@ -447,7 +465,7 @@ namespace TavernChaos
             foreach(var pair in controlled) if(pair.Value.actor==actor) {
                 var c=pair.Value; foreach(var table in tables)table.Leave(pair.Key,Time.realtimeSinceStartupAsDouble);
                 Roster.Ledger.RecordFall("fall/"+(++fallSerial),pair.Key);
-                c.chargeAt=c.attackEnd=-1;
+                c.chargeAt=c.attackEnd=-1; BarTable?.Fell(pair.Key,Time.realtimeSinceStartupAsDouble);
                 if(c.held) { c.held.Release(Yaw(c.yaw)*1.5f); c.held=null; }
                 if(actor==g.Player) g.SetRoomHeld(null);
                 break;
@@ -460,7 +478,7 @@ namespace TavernChaos
             if(!TavernActor.TryFindStandingPosition(SpawnPoint(Roster.Members[sender].Slot),c.actor,out var free)) { serverNotice="No hay un punto libre para recolocarte."; return; }
             if(c.held) { c.held.ResetToRack(); c.held=null; }
             c.move=Vector3.zero; c.run=false; c.yaw=c.pitch=0; c.chargeAt=-1; c.inputAt=now; c.resetRevision++;
-            c.actor.ClearEffect(); c.actor.Teleport(free,Quaternion.identity);
+            BarTable?.Service.Station.Cancel(sender); c.actor.ClearEffect(); c.actor.Teleport(free,Quaternion.identity);
             if(sender==LocalId) { g.SetRoomHeld(null); g.ResetLocalView(); }
         }
         public static Vector3 SpawnPoint(int slot)=>new((slot%3-1)*1.4f,.08f,-6.1f-(slot/3)*1.3f);
@@ -530,7 +548,7 @@ namespace TavernChaos
             var snapshot=new LanSnapshot { revision=++nextRevision,serverTime=now,actors=actors.ToArray(),rival=State(ulong.MaxValue,"Bruno",g.Rival,0),bottles=bottles,notice=serverNotice,secondsRemaining=Mathf.Max(0,(float)(Lifecycle.Deadline-now)),voteActive=Roster.VoteTarget.HasValue,voteTarget=Roster.VoteTarget??0,votes=Roster.Votes,votesNeeded=Roster.VotesNeeded };
             snapshot.ending=new SessionEndingView{phase=Lifecycle.Phase,reason=Lifecycle.Reason,phaseStarted=Lifecycle.PhaseStarted,reportId=reportId,pages=finalPages.Count,participants=finalParticipants};
             Ending=snapshot.ending;
-            snapshot.pool=PoolTable.Capture(now);snapshot.arm=ArmTable.Capture();
+            snapshot.pool=PoolTable.Capture(now);snapshot.arm=ArmTable.Capture();snapshot.bar=BarTable.Capture(now);PresentBar(snapshot.bar);
             snapshot.drinkPrice=drinkPrice; PresentReceipt(snapshot.pool.receipt);PresentReceipt(snapshot.arm?.receipt);
             View=snapshot; g.SetRoomHeld(controlled.TryGetValue(0,out var local)?local.held:null);
             g.RefreshInputContext();
@@ -553,6 +571,7 @@ namespace TavernChaos
             }
             var removed=new List<ulong>(); foreach(var p in replicas) if(!alive.Contains(p.Key)) removed.Add(p.Key);
             foreach(ulong id in removed) { if(replicas[id]!=g.Player) Destroy(replicas[id].gameObject); replicas.Remove(id); }
+            PresentBar(snapshot.bar);
             if(snapshot.rival!=null) g.Rival.ApplyReplica(snapshot.rival);
             if(snapshot.bottles!=null) for(int i=0;i<Math.Min(snapshot.bottles.Length,g.Bottles.Count);i++) g.Bottles[i].ApplyReplica(snapshot.bottles[i]);
             foreach(var bottle in g.Bottles) bottle.SetReplicaOwner(null);

@@ -2,6 +2,12 @@
 
 Rama de trabajo: main. La base recibida fue b89a6d1 (0.3.1); se conservaron primera persona, reinicio personal, puntos libres, cuerpos replicados y efectos. La 0.4 añadió bola 8 compartida, la 0.5 apuestas y libro, y la 0.6 cierre de sesión y resultados. Las evidencias anteriores conservan su alcance histórico.
 
+## Iteración 0.9.0: barra jugable
+
+La barra deja de ser un fixture. `BarRoomController` (anfitrión) valida cercanía, aptitud (de pie, no sentado) y puntería, y delega dinero y posesión en `BarService`. Intenciones nuevas: `BarContainer/Adjust/Recipe/Shake/Serve/Cancel/PutDown/Grab/Offer/Accept`; E sobre la barra abre la estación, E con vaso bebe, E con oferta acepta, E junto a un vaso apoyado lo recoge, F ofrece al más alineado a menos de 3 m, Q deja, clic mantenido lanza (cono de 20°, hasta 9 m, incluye a Bruno). El snapshot incluye `BarView` (estación y vasos con posición); todas las copias dibujan los vasos. Caer, salir, resetear o alejarse cancelan la preparación sin cobro; un vaso en mano al caer se apoya. La bebida de prueba antigua en la sala se retira: las comprobaciones que la usaban ahora sirven un Laguna Azul real (`BarFlowChecks`).
+
+Validación: `python3 run-bar-room-checks.py` (14 comprobaciones del anfitrión y 5 del cliente, dos procesos Mac en loopback), más `run-arm-room-checks.py drunk` y `run-cocktail-effects-checks.py` en verde tras el cambio. `-lan-check` (LanProcessChecks, Hito 1) se adaptó pero no se repitió en esta iteración. Pendiente: sesiones humanas entre equipos, seis personas, mando, calibración del lanzamiento y arte definitivo de vasos.
+
 ## Iteración 0.8.0: efectos físicos y planificación
 
 El dominio de coctelería conserva 76 comprobaciones y las 38 del libro: recetas/proporciones, estación exclusiva, catálogo congelado, vasos con uso único y servicio/pago separados del consumo. Esta entrega conecta los efectos al personaje y a la réplica: fricción cero con inercia, velocidad 150 %, caída de inestabilidad a los 5 s, gravedad 20 % sobre cápsula y ragdoll, onda sobre NPC y K.O. de 10 s. Efectos distintos coexisten y se restauran selectivamente; la salida y el cierre eliminan todos. Luces, fuego/humo provisionales, información de duración e intensidad visual hasta cero forman parte de la presentación.
@@ -24,7 +30,7 @@ La apertura de 5 ya permite jugar con saldos entre 5 y 9. Cuatro actividades del
 
 ## Lo que sigue, en orden
 
-1. Cócteles: estación exclusiva, hasta cuatro ingredientes y proporciones, servir/consumir/ofrecer/lanzar; cinco recetas y coexistencia/restauración de efectos, incluidos sentados. Mantener las pruebas de cierre y pago único.
+1. Cócteles: hecho en 0.9.0 salvo validación humana entre equipos y calibración. Seguir con la entrega B (recorrido completo con personas nuevas).
 2. Blackjack, Hold'em con botes laterales, dominó y Ve a Pescar; fijar fuente/variante antes de implementar y conservar manos privadas.
 3. Sesiones humanas de billar y pulseadas entre 2–4 equipos; medir comprensión, diversión, latencia/jitter/pérdida, esfuerzo/descanso y resultado. Validar seis participantes, Windows actual y juego cruzado; caída/expulsión durante pulseadas y pérdida del anfitrión durante cierre.
 4. Accesibilidad y configuración completas: texto ampliable, contraste, reasignación, inversión, intensidad de ebriedad, audio por canales y ajustes versionados. Medir cuatro/seis personas y decidir LTS/URP.

@@ -1,0 +1,46 @@
+{
+  "passed": true,
+  "case": "flow",
+  "scope": "Two independent macOS players on loopback. Real station intents, payment, offer, consumption, throw and snapshots. Only positioning is controlled. Not a human or multi-machine acceptance test.",
+  "results": [
+    {
+      "role": "host",
+      "version": "0.9.0",
+      "passed": true,
+      "checks": [
+        "Host opens an actual UDP room",
+        "Two independent processes connect",
+        "Serving charges twenty once and the vessel is held by exactly one person",
+        "The vessel is presented in the world",
+        "Offer reaches the intended target with its name and effect",
+        "Accepting transfers the vessel without a second charge",
+        "Drinking applies Laguna Azul and one intoxication level",
+        "A consumed vessel cannot be used again",
+        "The host opens the exclusive station",
+        "A second person cannot take an occupied station",
+        "Cancelling preparation never charges",
+        "A thrown vessel hits and applies its effect to the target",
+        "Thrown vessel is spent once; economy stays balanced with 40 bar revenue",
+        "No runtime errors in host"
+      ],
+      "failures": [],
+      "errors": [],
+      "exit": 0
+    },
+    {
+      "role": "client",
+      "version": "0.9.0",
+      "passed": true,
+      "checks": [
+        "Peer starts real connection",
+        "Bar snapshot arrives over UDP",
+        "Client prepares and serves through the intent protocol",
+        "Client serves a Poison cocktail",
+        "No runtime errors in client"
+      ],
+      "failures": [],
+      "errors": [],
+      "exit": 0
+    }
+  ]
+}

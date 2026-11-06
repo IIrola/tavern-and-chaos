@@ -273,8 +273,8 @@ namespace TavernChaos
             Check(Self()?.resetRevision==1&&Self().held==-1&&Vector3.Distance(Self().position,LanSession.SpawnPoint(1))<.1f,"Pre-Hito: reset clears held state and returns only this client to spawn");
             Check(g.Rig.Yaw==0&&g.Rig.Pitch==0,"Pre-Hito: camera resets on authoritative acknowledgement"); Signal("reset");
             yield return WaitSignal("bar"); long chips=Self().chips;
-            g.Lan.Send(LanAction.Interact,yaw:270,pitch:0); yield return new WaitForSecondsRealtime(.3f);
-            Check(Self().effect>7&&Self().chips==chips-20,"Pre-Hito: authority charges once and starts Laguna Azul"); Signal("drink");
+            yield return BarFlowChecks.ServeAndDrink(g,0);
+            Check(Self().effect>6&&Self().chips==chips-20,"Pre-Hito: authority charges once and starts Laguna Azul"); Signal("drink");
             yield return WaitSignal("run"); double began=Now;
             while(Now-began<.65) { g.Lan.LocalMove(Vector3.forward,true,0); yield return null; }
             Check(!Self().fallen,"Pre-Hito: floor contacts and speed alone do not cause a network fall");

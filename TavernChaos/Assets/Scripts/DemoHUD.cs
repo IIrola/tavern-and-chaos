@@ -125,7 +125,8 @@ namespace TavernChaos
             Box(new(32,28,1376,62),ink); Label(new(52,43,350,35),"TAVERN <color=#FF7947>& CHAOS</color>",22,ivory,FontStyle.Bold);
             Label(new(480,49,520,30),g.Lan&&g.Lan.Running?(g.Lan.LocalArmSeated?"PULSEADAS EN SALA":g.Pool.Active?"BOLA 8 EN SALA":"SALA LAN · PRIMERA PERSONA"):g.Pool.Active?"02  /  BILLAR LIBRE":"01  /  LA PRIMERA RONDA",15,mint,FontStyle.Bold,TextAnchor.UpperCenter);
             Label(new(1110,49,270,30),g.Pool.Active?"ESC  Pausa     E  Volver":"ESC  Pausa y ajustes",15,muted,FontStyle.Normal,TextAnchor.UpperRight);
-            if(g.Lan&&g.Lan.Running) { if(g.Lan.LocalArmSeated)ArmHUD();else if(g.Pool.Active) PoolRoomHUD(); else RoomHUD(); }
+            if(g.Lan&&g.Lan.Running&&g.Lan.LocalBarOpen) { RoomHUD(); BarPanel(); }
+            else if(g.Lan&&g.Lan.Running) { if(g.Lan.LocalArmSeated)ArmHUD();else if(g.Pool.Active) PoolRoomHUD(); else RoomHUD(); }
             else if(!g.Pool.Active) {
                 Box(new(32,114,312,258),ink); Tag(52,137,g.Complete?"RONDA COMPLETADA":"TU PRIMERA RONDA",g.Complete?orange:mint);
                 string[] goals={"Conecta un golpe a Bruno","Falla un golpe y vuelve a pie","Prueba Laguna Azul en la barra","Derriba a Bruno con una botella"};
@@ -191,7 +192,7 @@ namespace TavernChaos
             Box(new(W/2-3,H/2-3,6,6),new Color(1,.94f,.8f,.8f));
             float effectY=view?.voteActive==true?285:114;
             Box(new(1032,effectY,376,160),ink);
-            Label(new(1052,effectY+18,332,130),g.Player.EffectRemaining>0?"LAGUNA AZUL · "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!":"BOLA 8 · E junto a un asiento\nDos personas · apertura "+(view?.pool?.openingFee??10)+"\nBARRA · Laguna Azul "+(view?.drinkPrice??20)+" fichas\nPULSEADAS · E junto a un asiento · apertura 5\nEBRIEDAD "+g.Player.Ebriety+" / 5",16,g.Player.EffectRemaining>0?mint:muted,FontStyle.Bold);
+            Label(new(1052,effectY+18,332,130),g.Player.EffectRemaining>0?"LAGUNA AZUL · "+g.Player.EffectRemaining.ToString("0.0")+" s\n¡Chocar fuerte te derriba!":"BOLA 8 · E junto a un asiento\nDos personas · apertura "+(view?.pool?.openingFee??10)+"\nBARRA · E para preparar cócteles · "+(view?.drinkPrice??20)+" fichas al servir\nPULSEADAS · E junto a un asiento · apertura 5\nEBRIEDAD "+g.Player.Ebriety+" / 5",16,g.Player.EffectRemaining>0?mint:muted,FontStyle.Bold);
             Box(new(32,114,330,390),ink); Tag(52,138,room.IsHost?"SALA LAN · ANFITRIÓN":room.Connected?"SALA LAN · CONECTADO":"SALA LAN · CONECTANDO",mint);
             Label(new(52,175,290,32),"CÓDIGO  "+room.RoomCode,19,ivory,FontStyle.Bold);
             Label(new(52,216,290,30),(view?.actors?.Length??0)+" / 6 personas",18,mint,FontStyle.Bold);
@@ -224,6 +225,42 @@ namespace TavernChaos
         {
             if(g.Lan.View?.actors!=null) foreach(var a in g.Lan.View.actors) if(a.id==id) return a.name;
             return "Persona desconectada";
+        }
+        private static readonly string[] ingredientNames={"Vodka","Curaçao","Hielo","Tequila","Salsa picante","Tabasco","Absenta","Bebida energética","Cerveza","Ginebra","Refresco misterioso"};
+        private static readonly string[] recipeNames={"Laguna Azul","El Volcánico","Mezcla Inestable","Helio","Veneno / K.O."};
+        private void BarPanel()
+        {
+            var room=g.Lan;var bar=room.View?.bar;if(bar==null||!bar.hasOwner||bar.owner!=room.LocalId)return;
+            Box(new(330,120,780,640),new Color(.04f,.06f,.07f,.96f));Box(new(330,120,780,4),orange);
+            Tag(356,148,"BARRA · PREPARAR CÓCTEL",mint);
+            Label(new(356,178,728,30),"Esc / B cierra sin pagar · el cobro de "+bar.price+" fichas ocurre solo al servir",15,muted);
+            if(bar.phase==BarPhase.Container){
+                Label(new(356,240,728,34),"Elige el recipiente",24,ivory,FontStyle.Bold);
+                if(Button(new(356,300,350,70),"VASO CORTO",true))room.Send(LanAction.BarContainer,choice:0,proposal:bar.revision);
+                if(Button(new(734,300,350,70),"COPA",true))room.Send(LanAction.BarContainer,choice:1,proposal:bar.revision);
+            } else {
+                int distinct=0;for(int i=0;i<bar.measures.Length;i++)if(bar.measures[i]>0)distinct++;
+                bool shaking=bar.phase==BarPhase.Shaking,ready=bar.phase==BarPhase.Ready;
+                Label(new(356,218,728,28),"Hasta 4 ingredientes distintos y 10 medidas cada uno ("+distinct+"/4)",16,muted);
+                bool enabled=GUI.enabled;GUI.enabled=enabled&&!shaking;
+                for(int i=0;i<ingredientNames.Length;i++){
+                    int col=i/6,row=i%6;float x=356+col*372,y=256+row*52;int m=bar.measures[i];
+                    Label(new(x,y+8,170,30),ingredientNames[i],16,m>0?ivory:muted,m>0?FontStyle.Bold:FontStyle.Normal);
+                    if(Button(new(x+178,y,46,40),"−"))room.Send(LanAction.BarAdjust,choice:i,page:-1,proposal:bar.revision);
+                    Label(new(x+226,y+8,44,30),m.ToString(),18,orange,FontStyle.Bold,TextAnchor.UpperCenter);
+                    if(Button(new(x+272,y,46,40),"+"))room.Send(LanAction.BarAdjust,choice:i,page:1,proposal:bar.revision);
+                }
+                Label(new(356,578,728,26),"ATAJOS DE RECETA",13,mint,FontStyle.Bold);
+                for(int r=0;r<recipeNames.Length;r++)if(Button(new(356+r*146,606,140,38),recipeNames[r].Split(' ')[0]))room.Send(LanAction.BarRecipe,choice:r,proposal:bar.revision);
+                GUI.enabled=enabled;
+                Label(new(356,658,500,30),shaking?"Agitando…":bar.match.Length>0?"Resultado: "+bar.match:"Añade ingredientes",19,shaking?mint:ready?orange:ivory,FontStyle.Bold);
+                GUI.enabled=enabled&&!shaking&&distinct>0&&!ready;
+                if(Button(new(356,694,230,48),"AGITAR",true))room.Send(LanAction.BarShake,proposal:bar.revision);
+                GUI.enabled=enabled&&ready;
+                if(Button(new(602,694,300,48),"SERVIR · "+bar.price+" FICHAS",true))room.Send(LanAction.BarServe,proposal:bar.revision);
+                GUI.enabled=enabled;
+            }
+            if(Button(new(924,694,160,48),"CANCELAR"))room.Send(LanAction.BarCancel);
         }
         private void ArmHUD()
         {
